@@ -45,7 +45,18 @@ body::before {
   pointer-events: none;
 }
 
-/* Starfield layer: two dot grids at different scales, kept faint */
+/* Animated sky canvas (JS). Sits above the static dot layer, below content. */
+#sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+/* When the canvas is live, retire the static dot layer so stars don't double up */
+html.sky-on body::after { display: none; }
+
+/* Starfield layer: two dot grids at different scales, kept faint.
+   This is the no-JS / fallback sky. */
 body::after {
   content: "";
   position: fixed;
