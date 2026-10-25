@@ -1,0 +1,202 @@
+/* Adam Laloge — portfolio
+   Theme: Mission Control in a Nebula (as rendered in Adam's Canva draft)
+   Base: near-black navy, never pure black. Nebula glow frames content, never sits behind body text.
+   Accents: teal = primary (labels, links). Gold = status and proof markers only. */
+
+:root {
+  --base: #070b16;
+  --panel: rgba(255, 255, 255, 0.03);
+  --panel-border: rgba(255, 255, 255, 0.09);
+  --heading: #f4f7fb;
+  --body: #a7b3c7;
+  --dim: #77839a;
+  --teal: #5eead4;
+  --gold: #d9b36a;
+  --hairline: rgba(255, 255, 255, 0.08);
+  --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, "Liberation Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--base);
+  color: var(--body);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.65;
+  position: relative;
+}
+
+/* Nebula glow layer */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(640px 420px at 12% -4%, rgba(45, 212, 191, 0.13), transparent 62%),
+    radial-gradient(760px 520px at 92% 2%, rgba(124, 93, 250, 0.12), transparent 62%),
+    radial-gradient(820px 620px at 88% 86%, rgba(190, 80, 140, 0.06), transparent 62%),
+    radial-gradient(600px 500px at 4% 70%, rgba(45, 212, 191, 0.05), transparent 60%);
+  pointer-events: none;
+}
+
+/* Starfield layer: two dot grids at different scales, kept faint */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    radial-gradient(1px 1px at 24px 36px, rgba(255, 255, 255, 0.55), transparent 100%),
+    radial-gradient(1px 1px at 120px 140px, rgba(255, 255, 255, 0.35), transparent 100%),
+    radial-gradient(1.5px 1.5px at 210px 70px, rgba(255, 255, 255, 0.4), transparent 100%),
+    radial-gradient(1px 1px at 60px 200px, rgba(255, 255, 255, 0.3), transparent 100%),
+    radial-gradient(1px 1px at 300px 240px, rgba(255, 255, 255, 0.45), transparent 100%);
+  background-size: 340px 280px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+/* Header */
+.site-header {
+  background: rgba(255, 255, 255, 0.025);
+  border-bottom: 1px solid var(--hairline);
+}
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+.brand {
+  color: var(--heading);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.01em;
+}
+.site-header nav a {
+  color: var(--body);
+  text-decoration: none;
+  margin-left: 26px;
+  font-size: 15px;
+}
+.site-header nav a:hover { color: var(--teal); }
+
+/* Type */
+h1, h2, h3 { color: var(--heading); font-weight: 600; line-height: 1.25; }
+h1 { font-size: 40px; margin: 10px 0 18px; }
+h2 { font-size: 28px; margin: 6px 0 12px; }
+h3 { font-size: 20px; margin: 30px 0 8px; }
+
+.label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin: 0;
+}
+
+a { color: var(--teal); }
+a:hover { text-decoration: underline; }
+
+section {
+  padding: 56px 0 8px;
+  border-top: 1px solid var(--hairline);
+  margin-top: 56px;
+}
+section:first-of-type { border-top: none; margin-top: 0; }
+
+/* Hero */
+.hero { padding-top: 72px; }
+.hero .intro { max-width: 720px; font-size: 18px; }
+.hero-links { margin-top: 26px; display: flex; gap: 14px; flex-wrap: wrap; }
+
+.pill {
+  display: inline-block;
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: var(--heading);
+  text-decoration: none;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.pill:hover { text-decoration: none; border-color: var(--teal); }
+.pill-teal { background: rgba(45, 212, 191, 0.10); }
+.pill-violet { background: rgba(124, 93, 250, 0.12); }
+
+/* Work cards */
+.section-note { color: var(--dim); max-width: 640px; }
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 24px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 24px 26px;
+}
+.card:hover { border-color: rgba(94, 234, 212, 0.45); }
+.card p { margin: 8px 0; }
+.card-label { font-size: 13px; }
+.status {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* Resume */
+.resume-meta { color: var(--body); }
+.job-head { margin: 18px 0 6px; color: var(--body); }
+.job-head strong { color: var(--heading); }
+ul { margin: 6px 0 10px; padding-left: 22px; }
+li { margin: 4px 0; }
+ul.plain { list-style: none; padding-left: 0; }
+.skills-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 36px;
+}
+
+/* Footer */
+.site-footer {
+  border-top: 1px solid var(--hairline);
+  margin-top: 72px;
+  padding: 26px 0 34px;
+}
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: var(--dim);
+  font-size: 15px;
+}
+.footer-inner strong { color: var(--heading); }
+.footer-links a { color: var(--body); text-decoration: none; }
+.footer-links a:hover { color: var(--teal); }
+
+@media (max-width: 760px) {
+  h1 { font-size: 30px; }
+  .cards, .skills-grid { grid-template-columns: 1fr; }
+  .site-header nav a { margin-left: 16px; }
+  section { padding-top: 40px; margin-top: 40px; }
+}
