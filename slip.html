@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slip — Adam Laloge</title>
+<meta name="description" content="Portfolio of Adam Laloge: UI/UX software engineer building human-centered AI systems and test software in a regulated medical-device environment.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <span class="brand">Adam Laloge</span>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
+    <nav id="site-nav">
+      <a href="index.html">Home</a>
+      <a href="work.html" class="active">Work</a>
+      <a href="about.html">About</a>
+      <a href="photography.html">Photography</a>
+      <a href="resume.html">Resume</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section>
+    <p class="label">Work</p>
+    <h2>Slip</h2>
+    <p class="status">Status: Planned</p>
+    <p>A pause before small purchases. Enter a price and how often it recurs, and Slip translates it into days of delay on your savings targets: not what it costs, but what it pushes back.</p>
+    <p>Local data only. No bank connection, no account.</p>
+    <h3>What it does</h3>
+    <ul>
+      <li>Price and frequency in, days of delay out</li>
+      <li>A 48-hour park-it hold list for undecided purchases</li>
+      <li>A running total of delay avoided</li>
+    </ul>
+    <p><a href="work.html">&#8592; All work</a></p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span><strong>Adam Laloge</strong> — West Harrison, Indiana</span>
+    <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a></span>
+  </div>
+</footer>
+<script>
+(function () {
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('site-nav');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+
+</body>
+</html>

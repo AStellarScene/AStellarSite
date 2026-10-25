@@ -8,30 +8,29 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
 <header class="site-header">
   <div class="wrap header-inner">
     <span class="brand">Adam Laloge</span>
-    <nav>
-      <a href="#work">Work</a>
-      <a href="#about">About</a>
-      <a href="#photography">Photography</a>
-      <a href="#resume">Resume</a>
-      <a href="#contact">Contact</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
+    <nav id="site-nav">
+      <a href="index.html" class="active">Home</a>
+      <a href="work.html">Work</a>
+      <a href="about.html">About</a>
+      <a href="photography.html">Photography</a>
+      <a href="resume.html">Resume</a>
     </nav>
   </div>
 </header>
 
 <main class="wrap">
-
   <section class="hero">
     <canvas id="sky" aria-hidden="true"></canvas>
     <p class="label">Adam Laloge — Portfolio</p>
     <h1>UI/UX Software Engineer | Human-Centered AI Systems</h1>
     <p class="intro">Engineering test technician and software developer at Baxter International. I build test software and AI agent systems in a regulated medical-device lab, and I am completing a B.S. in UX Design at WGU. My strongest work is internal and cannot be shown, so this site holds the public versions: working software, built in the open.</p>
     <div class="hero-links">
-      <a class="pill pill-teal" href="#work">See the work &#8599;</a>
-      <a class="pill pill-violet" href="#resume">Resume &#8599;</a>
+      <a class="pill pill-teal" href="work.html">See the work &#8599;</a>
+      <a class="pill pill-violet" href="resume.html">Resume &#8599;</a>
     </div>
   </section>
 
@@ -39,30 +38,30 @@
     <p class="label">Work</p>
     <h2>Projects</h2>
     <p class="section-note">Each project is listed with its current status. Nothing here is described as finished before it is.</p>
-
     <div class="cards">
       <article class="card">
         <p class="label card-label">BenchLab</p>
         <p class="status">Status: Prototype and usability test in progress</p>
-        <p>A testing simulator that runs in the browser. Compose a test in a visual builder, run it against a simulated device, and receive a traceability report. An agent layer turns plain-English test protocols into executable steps. Built as coursework for WGU's prototyping sequence, from the test-platform work I do at Baxter, rebuilt in public with nothing proprietary.</p>
+        <p>A testing simulator that runs in the browser. Compose a test in a visual builder, run it against a simulated device, and receive a traceability report.</p>
+        <p><a class="card-link" href="benchlab.html">View project &#8599;</a></p>
       </article>
-
       <article class="card">
         <p class="label card-label">Pace</p>
         <p class="status">Status: In development</p>
-        <p>A planner for self-paced degree programs. Enter your courses and a target finish date and get a week-by-week plan with an honest ahead-or-behind readout. Generalized from the system I use to run my own degree.</p>
+        <p>A planner for self-paced degree programs. Enter your courses and a target finish date and get a week-by-week plan with an honest ahead-or-behind readout.</p>
+        <p><a class="card-link" href="pace.html">View project &#8599;</a></p>
       </article>
-
       <article class="card">
         <p class="label card-label">Rotation</p>
         <p class="status">Status: In development</p>
         <p>My five-day packed-lunch rotation turned into a tool anyone can use. Pick the week's rotation and get the grocery list, checked against what you already have at home.</p>
+        <p><a class="card-link" href="rotation.html">View project &#8599;</a></p>
       </article>
-
       <article class="card">
         <p class="label card-label">Slip</p>
         <p class="status">Status: Planned</p>
-        <p>A pause before small purchases. Enter a price and how often it recurs, and see the cost as days of delay on a savings target, with a 48-hour hold list for items you are deciding on. Local data only, no bank connection.</p>
+        <p>A pause before small purchases. Enter a price and how often it recurs, and see the cost as days of delay on a savings target, with a 48-hour hold list.</p>
+        <p><a class="card-link" href="slip.html">View project &#8599;</a></p>
       </article>
     </div>
   </section>
@@ -71,141 +70,14 @@
     <p class="label">About</p>
     <h2>How I work</h2>
     <p>I test medical devices for a living. That work teaches one habit fast: a claim without a measurement behind it is a hope. I build software the same way. Every system I ship gets tested against the people who will actually use it, and the results decide what changes next.</p>
-    <p>I work full stack: the interface, the backend, the AI agent workspaces, and the embedded hardware the software drives. The research comes first, because the interface is only ever as good as my understanding of the operator standing in front of it.</p>
-    <p>The software on this site is built with AI agents under my direction. I specify, review, and verify; the agents type.</p>
-    <p>Off the clock, I photograph sunsets and landscapes. The sky on this page is not a stock choice. <a href="#photography">See the photography &#8599;</a></p>
+    <p><a href="about.html">More about how I work &#8599;</a></p>
   </section>
 
   <section id="photography">
     <p class="label">Photography</p>
     <h2>Off the clock</h2>
-    <p class="section-note">Landscapes and sunsets. All of these are my own photographs.</p>
-
-    <div class="gal-chips" role="group" aria-label="Filter photos">
-      <button class="chip active" data-filter="all" type="button">All</button>
-      <button class="chip" data-filter="sunsets" type="button">Sunsets</button>
-      <button class="chip" data-filter="shoreline" type="button">Shoreline</button>
-      <button class="chip" data-filter="details" type="button">Details</button>
-    </div>
-
-    <div class="gal-stage">
-      <img id="gal-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass">
-      <button class="gal-btn gal-prev" id="gal-prev" type="button" aria-label="Previous photo">&#8249;</button>
-      <button class="gal-btn gal-next" id="gal-next" type="button" aria-label="Next photo">&#8250;</button>
-      <div class="gal-cap">
-        <span id="gal-title">Sunset Through the Grass</span>
-        <span class="gal-count" id="gal-count">1 / 8</span>
-      </div>
-    </div>
-
-    <div class="gal-thumbs" id="gal-thumbs"></div>
-  </section>
-
-  <section id="resume">
-    <p class="label">Resume</p>
-    <h2>Adam Joseph Laloge</h2>
-    <p class="resume-meta">UI/UX Engineer | Human-Centered AI Systems<br>
-    West Harrison, Indiana | <a href="https://github.com/AStellarScene">github.com/AStellarScene</a></p>
-    <p><a class="pill pill-teal" href="resume.pdf" download>Download PDF &#8599;</a></p>
-
-    <h3>Profile</h3>
-    <p>Engineering Test Technician and software developer combining medical-device verification and validation, automated test equipment, embedded systems design, and agentic AI workflows with user-centered UX/UI design. Builds and validates reliable test systems, develops software from interface through backend implementation, and applies structured problem-solving across regulated technical environments.</p>
-
-    <h3>Experience</h3>
-    <p class="job-head"><strong>Baxter International, Inc.</strong> | Batesville, IN | 2025 – Present<br>
-    <em>Engineering Test Technician</em></p>
-    <ul>
-      <li><strong>Medical-device verification:</strong> Perform verification testing of medical devices in accordance with rigorous compliance standards.</li>
-      <li><strong>PLM and issue management:</strong> Manage document control and validation data in enterprise PLM systems. Document and escalate product issues to Engineering.</li>
-      <li><strong>Software development:</strong> Deliver end-to-end software development spanning user-interface design through backend implementation.</li>
-      <li><strong>AI agent workflows:</strong> Build specialized AI agent workspaces that support automated testing and software development.</li>
-      <li><strong>Automated test equipment:</strong> Design and build automated test equipment for medical-device testing. Design, build, test, and validate test equipment with embedded controllers.</li>
-      <li><strong>Electrical and mechanical assembly:</strong> Perform electrical and mechanical assembly of projects according to engineering documentation.</li>
-      <li><strong>Innovation and hackathons:</strong> Contribute to invention disclosures, evaluate emerging technologies, and participate in hackathons exploring practical solutions.</li>
-    </ul>
-
-    <p class="job-head"><strong>Computer Solutions and Innovations, LLC</strong> | Versailles, IN | 2023 – 2024<br>
-    <em>On-Site IT Support</em></p>
-    <ul>
-      <li>Delivered in-person and remote support for hardware and software issues.</li>
-      <li>Assisted with infrastructure planning, hardware asset management, purchasing, and system upgrades.</li>
-    </ul>
-
-    <h3>Education</h3>
-    <ul class="plain">
-      <li><strong>WGU School of Business</strong> | B.S. User Experience Design, in progress (expected January 2027)</li>
-      <li><strong>Ivy Tech Community College</strong> | A.A.S. Software Development, May 2024, Magna Cum Laude, 3.9 GPA</li>
-    </ul>
-
-    <h3>Certifications</h3>
-    <ul class="plain">
-      <li>AWS Certified Cloud Practitioner (2023)</li>
-      <li>CompTIA Project+ (2024)</li>
-    </ul>
-
-    <h3>Skills</h3>
-    <div class="skills-grid">
-      <div>
-        <p class="label card-label">UX &amp; Human Factors</p>
-        <ul class="plain">
-          <li>HMI design for test equipment</li>
-          <li>Usability testing, moderated sessions with end users</li>
-          <li>Heuristic evaluation (Nielsen's 10)</li>
-          <li>Wireframing and user flows</li>
-          <li>UI prototyping: Figma, Adobe Illustrator, Affinity Designer, Miro</li>
-          <li>User needs gathering and requirements definition</li>
-          <li>Personas and journey maps</li>
-          <li>Calibration procedure UX/UI design</li>
-          <li>User training and support for internal tools</li>
-          <li>Systems analysis and design</li>
-          <li>Design guideline familiarity: W3C/WCAG, Material Design, Apple Human Interface Guidelines</li>
-        </ul>
-      </div>
-      <div>
-        <p class="label card-label">Test, V&amp;V &amp; Reliability</p>
-        <ul class="plain">
-          <li>Medical device verification and validation</li>
-          <li>Lifecycle testing (hospital beds, patient support systems)</li>
-          <li>Requirements traceability</li>
-          <li>Failure investigation: reproduction, documentation, escalation</li>
-          <li>Automated regression and unit testing</li>
-          <li>Automated test equipment (ATE) engineering</li>
-          <li>Modular test action libraries</li>
-          <li>Safety system design</li>
-          <li>Calibration methods</li>
-          <li>Test data recording and analysis</li>
-          <li>Technical documentation, spec writing, and validation documentation</li>
-          <li>PLM document control</li>
-        </ul>
-      </div>
-      <div>
-        <p class="label card-label">Software &amp; Embedded</p>
-        <ul class="plain">
-          <li>Python, C#/.NET, C++, JavaScript, HTML/CSS, Rust</li>
-          <li>SQL and database design</li>
-          <li>Linux and Bash</li>
-          <li>Docker, WebSockets, Git/GitHub</li>
-          <li>Code review and branching workflows</li>
-          <li>Embedded microcontrollers</li>
-          <li>Sensor integration</li>
-          <li>OpenCV</li>
-          <li>Agile/Scrum</li>
-        </ul>
-      </div>
-      <div>
-        <p class="label card-label">AI &amp; Agentic Work</p>
-        <ul class="plain">
-          <li>GitHub Copilot agent architectures</li>
-          <li>AI agent workspaces</li>
-          <li>Retrieval-Augmented Generation (RAG)</li>
-          <li>Model Context Protocol (MCP) and tool integrations</li>
-          <li>AI output evaluation, testing, and validation</li>
-          <li>Natural language protocol ingestion</li>
-          <li>Structured iterative prompting</li>
-          <li>AI assisted refactoring and debugging</li>
-        </ul>
-      </div>
-    </div>
+    <p><a href="photography.html"><img class="teaser-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass"></a></p>
+    <p><a href="photography.html">See the photography &#8599;</a></p>
   </section>
 
   <section id="contact">
@@ -213,7 +85,6 @@
     <h2>Get in touch</h2>
     <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>.</p>
   </section>
-
 </main>
 
 <footer class="site-footer">
@@ -222,7 +93,6 @@
     <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a></span>
   </div>
 </footer>
-
 <script>
 (function () {
   var canvas = document.getElementById('sky');
@@ -334,84 +204,15 @@
   if (reduced) { frame(0); } else { requestAnimationFrame(frame); }
 })();
 </script>
-
 <script>
 (function () {
-  var PHOTOS = [
-    { src: 'photos/sunset-grass.jpg',    title: 'Sunset Through the Grass', group: 'sunsets',   alt: 'Sunset over calm water, seen through silhouetted beach grass' },
-    { src: 'photos/sunset-water.jpg',    title: 'Sun Over Open Water',      group: 'sunsets',   alt: 'Sun low over open water, its reflection running down the frame' },
-    { src: 'photos/pier-lighthouse.jpg', title: 'The Pier',                 group: 'shoreline', alt: 'A long pier to a lighthouse, people walking out over the water' },
-    { src: 'photos/shoreline-bluff.jpg', title: 'From the Bluff',           group: 'shoreline', alt: 'The shoreline from a bluff, blue water over a narrow beach' },
-    { src: 'photos/gull-beach.jpg',      title: 'Waterline',                group: 'shoreline', alt: 'A gull walking the waterline on a sandy beach' },
-    { src: 'photos/juniper-berries.jpg', title: 'Juniper Berries',          group: 'details',   alt: 'Juniper branch with blue berries, close up' },
-    { src: 'photos/red-berries.jpg',     title: 'Red Berries',              group: 'details',   alt: 'Red berries on a branch, close up' },
-    { src: 'photos/acorn.jpg',           title: 'Acorn',                    group: 'details',   alt: 'An acorn on sandy ground among fallen leaves, close up' }
-  ];
-  var img = document.getElementById('gal-img');
-  if (!img) return;
-  var titleEl = document.getElementById('gal-title');
-  var countEl = document.getElementById('gal-count');
-  var thumbsEl = document.getElementById('gal-thumbs');
-  var stage = img.parentElement;
-  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  var visible = PHOTOS.map(function (_, i) { return i; });
-  var pos = 0; // position within `visible`
-  var timer = null;
-
-  PHOTOS.forEach(function (p, i) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'gal-thumb';
-    b.setAttribute('aria-label', p.title);
-    var t = document.createElement('img');
-    t.src = p.src; t.alt = ''; t.loading = 'lazy';
-    b.appendChild(t);
-    b.addEventListener('click', function () { show(visible.indexOf(i)); restart(); });
-    thumbsEl.appendChild(b);
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('site-nav');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  var thumbBtns = Array.prototype.slice.call(thumbsEl.children);
-
-  function render() {
-    var idx = visible[pos];
-    var p = PHOTOS[idx];
-    img.classList.add('gal-fade');
-    setTimeout(function () {
-      img.src = p.src; img.alt = p.alt;
-      img.onload = function () { img.classList.remove('gal-fade'); };
-      setTimeout(function () { img.classList.remove('gal-fade'); }, 60);
-    }, reduced ? 0 : 180);
-    titleEl.textContent = p.title;
-    countEl.textContent = (pos + 1) + ' / ' + visible.length;
-    thumbBtns.forEach(function (b, i) {
-      b.classList.toggle('active', i === idx);
-      b.style.display = visible.indexOf(i) === -1 ? 'none' : '';
-    });
-  }
-  function show(n) { pos = (n + visible.length) % visible.length; render(); }
-  function next() { show(pos + 1); }
-  function restart() {
-    if (timer) clearInterval(timer);
-    if (!reduced) timer = setInterval(next, 6000);
-  }
-  document.getElementById('gal-next').addEventListener('click', function () { next(); restart(); });
-  document.getElementById('gal-prev').addEventListener('click', function () { show(pos - 1); restart(); });
-  stage.addEventListener('mouseenter', function () { if (timer) clearInterval(timer); });
-  stage.addEventListener('mouseleave', restart);
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'ArrowRight') { next(); restart(); }
-    if (e.key === 'ArrowLeft') { show(pos - 1); restart(); }
-  });
-  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (chip) {
-    chip.addEventListener('click', function () {
-      document.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
-      chip.classList.add('active');
-      var f = chip.getAttribute('data-filter');
-      visible = PHOTOS.map(function (p, i) { return i; }).filter(function (i) { return f === 'all' || PHOTOS[i].group === f; });
-      pos = 0; render(); restart();
-    });
-  });
-  render(); restart();
 })();
 </script>
 

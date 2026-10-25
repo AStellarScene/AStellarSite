@@ -88,6 +88,27 @@ html.sky-on .hero::before { display: none; }
   font-size: 15px;
 }
 .site-header nav a:hover { color: var(--teal); }
+.site-header nav a.active { color: var(--teal); }
+.nav-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  color: var(--heading);
+  font-size: 19px;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+}
+img { max-width: 100%; }
+.card-link { font-size: 15px; }
+.teaser-img {
+  width: 100%;
+  display: block;
+  border-radius: 14px;
+  border: 1px solid var(--panel-border);
+}
 
 /* Type */
 h1, h2, h3 { color: var(--heading); font-weight: 600; line-height: 1.25; }
@@ -186,7 +207,7 @@ section:first-of-type { border-top: none; margin-top: 0; }
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: 999px;
-  padding: 7px 14px;
+  padding: 10px 16px;
   cursor: pointer;
 }
 .chip:hover { color: var(--heading); border-color: var(--teal); }
@@ -212,8 +233,8 @@ section:first-of-type { border-top: none; margin-top: 0; }
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid var(--panel-border);
   background: rgba(7, 11, 22, 0.72);
@@ -284,9 +305,24 @@ ul.plain { list-style: none; padding-left: 0; }
 
 @media (max-width: 760px) {
   h1 { font-size: 30px; }
+  h2 { font-size: 24px; }
+  .wrap { padding: 0 20px; }
   .cards, .skills-grid { grid-template-columns: 1fr; }
   .gal-thumbs { grid-template-columns: repeat(4, 1fr); }
   .gal-stage { aspect-ratio: 4 / 3; }
-  .site-header nav a { margin-left: 16px; }
   section { padding-top: 40px; margin-top: 40px; }
+  .hero { padding-top: 48px; }
+  .hero .intro { font-size: 17px; }
+  /* Hamburger nav: menu becomes a full-width panel under the header bar */
+  .header-inner { flex-wrap: wrap; }
+  .nav-toggle { display: block; }
+  .site-header nav { display: none; width: 100%; flex-direction: column; padding-top: 8px; }
+  .site-header nav.open { display: flex; }
+  .site-header nav a {
+    margin-left: 0;
+    padding: 12px 2px;
+    font-size: 16px;
+    border-top: 1px solid var(--hairline);
+  }
+  .footer-inner { flex-direction: column; gap: 6px; }
 }

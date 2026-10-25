@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photography — Adam Laloge</title>
+<meta name="description" content="Photographs by Adam Laloge: landscapes and sunsets.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <span class="brand">Adam Laloge</span>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
+    <nav id="site-nav">
+      <a href="index.html">Home</a>
+      <a href="work.html">Work</a>
+      <a href="about.html">About</a>
+      <a href="photography.html" class="active">Photography</a>
+      <a href="resume.html">Resume</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="photography">
+      <p class="label">Photography</p>
+      <h2>Off the clock</h2>
+      <p class="section-note">Landscapes and sunsets. All of these are my own photographs.</p>
+  
+      <div class="gal-chips" role="group" aria-label="Filter photos">
+        <button class="chip active" data-filter="all" type="button">All</button>
+        <button class="chip" data-filter="sunsets" type="button">Sunsets</button>
+        <button class="chip" data-filter="shoreline" type="button">Shoreline</button>
+        <button class="chip" data-filter="details" type="button">Details</button>
+      </div>
+  
+      <div class="gal-stage">
+        <img id="gal-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass">
+        <button class="gal-btn gal-prev" id="gal-prev" type="button" aria-label="Previous photo">&#8249;</button>
+        <button class="gal-btn gal-next" id="gal-next" type="button" aria-label="Next photo">&#8250;</button>
+        <div class="gal-cap">
+          <span id="gal-title">Sunset Through the Grass</span>
+          <span class="gal-count" id="gal-count">1 / 8</span>
+        </div>
+      </div>
+  
+      <div class="gal-thumbs" id="gal-thumbs"></div>
+    </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span><strong>Adam Laloge</strong> — West Harrison, Indiana</span>
+    <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a></span>
+  </div>
+</footer>
+<script>
+(function () {
+  var PHOTOS = [
+    { src: 'photos/sunset-grass.jpg',    title: 'Sunset Through the Grass', group: 'sunsets',   alt: 'Sunset over calm water, seen through silhouetted beach grass' },
+    { src: 'photos/sunset-water.jpg',    title: 'Sun Over Open Water',      group: 'sunsets',   alt: 'Sun low over open water, its reflection running down the frame' },
+    { src: 'photos/pier-lighthouse.jpg', title: 'The Pier',                 group: 'shoreline', alt: 'A long pier to a lighthouse, people walking out over the water' },
+    { src: 'photos/shoreline-bluff.jpg', title: 'From the Bluff',           group: 'shoreline', alt: 'The shoreline from a bluff, blue water over a narrow beach' },
+    { src: 'photos/gull-beach.jpg',      title: 'Waterline',                group: 'shoreline', alt: 'A gull walking the waterline on a sandy beach' },
+    { src: 'photos/juniper-berries.jpg', title: 'Juniper Berries',          group: 'details',   alt: 'Juniper branch with blue berries, close up' },
+    { src: 'photos/red-berries.jpg',     title: 'Red Berries',              group: 'details',   alt: 'Red berries on a branch, close up' },
+    { src: 'photos/acorn.jpg',           title: 'Acorn',                    group: 'details',   alt: 'An acorn on sandy ground among fallen leaves, close up' }
+  ];
+  var img = document.getElementById('gal-img');
+  if (!img) return;
+  var titleEl = document.getElementById('gal-title');
+  var countEl = document.getElementById('gal-count');
+  var thumbsEl = document.getElementById('gal-thumbs');
+  var stage = img.parentElement;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var visible = PHOTOS.map(function (_, i) { return i; });
+  var pos = 0; // position within `visible`
+  var timer = null;
+
+  PHOTOS.forEach(function (p, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'gal-thumb';
+    b.setAttribute('aria-label', p.title);
+    var t = document.createElement('img');
+    t.src = p.src; t.alt = ''; t.loading = 'lazy';
+    b.appendChild(t);
+    b.addEventListener('click', function () { show(visible.indexOf(i)); restart(); });
+    thumbsEl.appendChild(b);
+  });
+  var thumbBtns = Array.prototype.slice.call(thumbsEl.children);
+
+  function render() {
+    var idx = visible[pos];
+    var p = PHOTOS[idx];
+    img.classList.add('gal-fade');
+    setTimeout(function () {
+      img.src = p.src; img.alt = p.alt;
+      img.onload = function () { img.classList.remove('gal-fade'); };
+      setTimeout(function () { img.classList.remove('gal-fade'); }, 60);
+    }, reduced ? 0 : 180);
+    titleEl.textContent = p.title;
+    countEl.textContent = (pos + 1) + ' / ' + visible.length;
+    thumbBtns.forEach(function (b, i) {
+      b.classList.toggle('active', i === idx);
+      b.style.display = visible.indexOf(i) === -1 ? 'none' : '';
+    });
+  }
+  function show(n) { pos = (n + visible.length) % visible.length; render(); }
+  function next() { show(pos + 1); }
+  function restart() {
+    if (timer) clearInterval(timer);
+    if (!reduced) timer = setInterval(next, 6000);
+  }
+  document.getElementById('gal-next').addEventListener('click', function () { next(); restart(); });
+  document.getElementById('gal-prev').addEventListener('click', function () { show(pos - 1); restart(); });
+  stage.addEventListener('mouseenter', function () { if (timer) clearInterval(timer); });
+  stage.addEventListener('mouseleave', restart);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { next(); restart(); }
+    if (e.key === 'ArrowLeft') { show(pos - 1); restart(); }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (chip) {
+    chip.addEventListener('click', function () {
+      document.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
+      chip.classList.add('active');
+      var f = chip.getAttribute('data-filter');
+      visible = PHOTOS.map(function (p, i) { return i; }).filter(function (i) { return f === 'all' || PHOTOS[i].group === f; });
+      pos = 0; render(); restart();
+    });
+  });
+  render(); restart();
+})();
+</script>
+<script>
+(function () {
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('site-nav');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+
+</body>
+</html>

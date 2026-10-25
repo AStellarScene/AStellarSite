@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — Adam Laloge</title>
+<meta name="description" content="Portfolio of Adam Laloge: UI/UX software engineer building human-centered AI systems and test software in a regulated medical-device environment.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <span class="brand">Adam Laloge</span>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
+    <nav id="site-nav">
+      <a href="index.html">Home</a>
+      <a href="work.html">Work</a>
+      <a href="about.html" class="active">About</a>
+      <a href="photography.html">Photography</a>
+      <a href="resume.html">Resume</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="about">
+    <p class="label">About</p>
+    <h2>How I work</h2>
+    <p>I test medical devices for a living. That work teaches one habit fast: a claim without a measurement behind it is a hope. I build software the same way. Every system I ship gets tested against the people who will actually use it, and the results decide what changes next.</p>
+    <p>I work full stack: the interface, the backend, the AI agent workspaces, and the embedded hardware the software drives. The research comes first, because the interface is only ever as good as my understanding of the operator standing in front of it.</p>
+    <p>The software on this site is built with AI agents under my direction. I specify, review, and verify; the agents type.</p>
+    <p>Off the clock, I photograph sunsets and landscapes. The sky on this page is not a stock choice. <a href="photography.html">See the photography &#8599;</a></p>
+  </section>
+
+  <section id="contact">
+    <p class="label">Contact</p>
+    <h2>Get in touch</h2>
+    <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>.</p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span><strong>Adam Laloge</strong> — West Harrison, Indiana</span>
+    <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a></span>
+  </div>
+</footer>
+<script>
+(function () {
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('site-nav');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+
+</body>
+</html>
