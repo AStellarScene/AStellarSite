@@ -15,6 +15,7 @@
     <nav>
       <a href="#work">Work</a>
       <a href="#about">About</a>
+      <a href="#photography">Photography</a>
       <a href="#resume">Resume</a>
       <a href="#contact">Contact</a>
     </nav>
@@ -72,17 +73,32 @@
     <p>I test medical devices for a living. That work teaches one habit fast: a claim without a measurement behind it is a hope. I build software the same way. Every system I ship gets tested against the people who will actually use it, and the results decide what changes next.</p>
     <p>I work full stack: the interface, the backend, the AI agent workspaces, and the embedded hardware the software drives. The research comes first, because the interface is only ever as good as my understanding of the operator standing in front of it.</p>
     <p>The software on this site is built with AI agents under my direction. I specify, review, and verify; the agents type.</p>
-    <p>Off the clock, I photograph sunsets and landscapes. The sky on this page is not a stock choice.</p>
-    <div class="photo-grid">
-      <img src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass" loading="lazy">
-      <img class="ph-tall" src="photos/sunset-water.jpg" alt="Sun low over open water, its reflection running down the frame" loading="lazy">
-      <img src="photos/pier-lighthouse.jpg" alt="A long pier to a lighthouse, people walking out over the water" loading="lazy">
-      <img src="photos/shoreline-bluff.jpg" alt="The shoreline from a bluff, blue water over a narrow beach" loading="lazy">
-      <img src="photos/gull-beach.jpg" alt="A gull walking the waterline on a sandy beach" loading="lazy">
-      <img src="photos/juniper-berries.jpg" alt="Juniper branch with blue berries, close up" loading="lazy">
-      <img src="photos/red-berries.jpg" alt="Red berries on a branch, close up" loading="lazy">
-      <img src="photos/acorn.jpg" alt="An acorn on sandy ground among fallen leaves, close up" loading="lazy">
+    <p>Off the clock, I photograph sunsets and landscapes. The sky on this page is not a stock choice. <a href="#photography">See the photography &#8599;</a></p>
+  </section>
+
+  <section id="photography">
+    <p class="label">Photography</p>
+    <h2>Off the clock</h2>
+    <p class="section-note">Sunsets and shorelines, mostly. Shot on the same principle as the lab work: go where the light is doing something, and measure it honestly.</p>
+
+    <div class="gal-chips" role="group" aria-label="Filter photos">
+      <button class="chip active" data-filter="all" type="button">All</button>
+      <button class="chip" data-filter="sunsets" type="button">Sunsets</button>
+      <button class="chip" data-filter="shoreline" type="button">Shoreline</button>
+      <button class="chip" data-filter="details" type="button">Details</button>
     </div>
+
+    <div class="gal-stage">
+      <img id="gal-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass">
+      <button class="gal-btn gal-prev" id="gal-prev" type="button" aria-label="Previous photo">&#8249;</button>
+      <button class="gal-btn gal-next" id="gal-next" type="button" aria-label="Next photo">&#8250;</button>
+      <div class="gal-cap">
+        <span id="gal-title">Sunset Through the Grass</span>
+        <span class="gal-count" id="gal-count">1 / 8</span>
+      </div>
+    </div>
+
+    <div class="gal-thumbs" id="gal-thumbs"></div>
   </section>
 
   <section id="resume">
@@ -316,6 +332,86 @@
 
   build();
   if (reduced) { frame(0); } else { requestAnimationFrame(frame); }
+})();
+</script>
+
+<script>
+(function () {
+  var PHOTOS = [
+    { src: 'photos/sunset-grass.jpg',    title: 'Sunset Through the Grass', group: 'sunsets',   alt: 'Sunset over calm water, seen through silhouetted beach grass' },
+    { src: 'photos/sunset-water.jpg',    title: 'Sun Over Open Water',      group: 'sunsets',   alt: 'Sun low over open water, its reflection running down the frame' },
+    { src: 'photos/pier-lighthouse.jpg', title: 'The Pier',                 group: 'shoreline', alt: 'A long pier to a lighthouse, people walking out over the water' },
+    { src: 'photos/shoreline-bluff.jpg', title: 'From the Bluff',           group: 'shoreline', alt: 'The shoreline from a bluff, blue water over a narrow beach' },
+    { src: 'photos/gull-beach.jpg',      title: 'Waterline',                group: 'shoreline', alt: 'A gull walking the waterline on a sandy beach' },
+    { src: 'photos/juniper-berries.jpg', title: 'Juniper Berries',          group: 'details',   alt: 'Juniper branch with blue berries, close up' },
+    { src: 'photos/red-berries.jpg',     title: 'Red Berries',              group: 'details',   alt: 'Red berries on a branch, close up' },
+    { src: 'photos/acorn.jpg',           title: 'Acorn',                    group: 'details',   alt: 'An acorn on sandy ground among fallen leaves, close up' }
+  ];
+  var img = document.getElementById('gal-img');
+  if (!img) return;
+  var titleEl = document.getElementById('gal-title');
+  var countEl = document.getElementById('gal-count');
+  var thumbsEl = document.getElementById('gal-thumbs');
+  var stage = img.parentElement;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var visible = PHOTOS.map(function (_, i) { return i; });
+  var pos = 0; // position within `visible`
+  var timer = null;
+
+  PHOTOS.forEach(function (p, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'gal-thumb';
+    b.setAttribute('aria-label', p.title);
+    var t = document.createElement('img');
+    t.src = p.src; t.alt = ''; t.loading = 'lazy';
+    b.appendChild(t);
+    b.addEventListener('click', function () { show(visible.indexOf(i)); restart(); });
+    thumbsEl.appendChild(b);
+  });
+  var thumbBtns = Array.prototype.slice.call(thumbsEl.children);
+
+  function render() {
+    var idx = visible[pos];
+    var p = PHOTOS[idx];
+    img.classList.add('gal-fade');
+    setTimeout(function () {
+      img.src = p.src; img.alt = p.alt;
+      img.onload = function () { img.classList.remove('gal-fade'); };
+      setTimeout(function () { img.classList.remove('gal-fade'); }, 60);
+    }, reduced ? 0 : 180);
+    titleEl.textContent = p.title;
+    countEl.textContent = (pos + 1) + ' / ' + visible.length;
+    thumbBtns.forEach(function (b, i) {
+      b.classList.toggle('active', i === idx);
+      b.style.display = visible.indexOf(i) === -1 ? 'none' : '';
+    });
+  }
+  function show(n) { pos = (n + visible.length) % visible.length; render(); }
+  function next() { show(pos + 1); }
+  function restart() {
+    if (timer) clearInterval(timer);
+    if (!reduced) timer = setInterval(next, 6000);
+  }
+  document.getElementById('gal-next').addEventListener('click', function () { next(); restart(); });
+  document.getElementById('gal-prev').addEventListener('click', function () { show(pos - 1); restart(); });
+  stage.addEventListener('mouseenter', function () { if (timer) clearInterval(timer); });
+  stage.addEventListener('mouseleave', restart);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { next(); restart(); }
+    if (e.key === 'ArrowLeft') { show(pos - 1); restart(); }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (chip) {
+    chip.addEventListener('click', function () {
+      document.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
+      chip.classList.add('active');
+      var f = chip.getAttribute('data-filter');
+      visible = PHOTOS.map(function (p, i) { return i; }).filter(function (i) { return f === 'all' || PHOTOS[i].group === f; });
+      pos = 0; render(); restart();
+    });
+  });
+  render(); restart();
 })();
 </script>
 
