@@ -175,6 +175,26 @@ section:first-of-type { border-top: none; margin-top: 0; }
   color: var(--gold);
 }
 
+/* Photography grid (About) */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 112px;
+  grid-auto-flow: dense;
+  gap: 12px;
+  margin-top: 22px;
+}
+.photo-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  grid-row: span 2;
+}
+.photo-grid img.ph-tall { grid-row: span 4; }
+
 /* Resume */
 .resume-meta { color: var(--body); }
 .job-head { margin: 18px 0 6px; color: var(--body); }
@@ -209,6 +229,7 @@ ul.plain { list-style: none; padding-left: 0; }
 @media (max-width: 760px) {
   h1 { font-size: 30px; }
   .cards, .skills-grid { grid-template-columns: 1fr; }
+  .photo-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 84px; }
   .site-header nav a { margin-left: 16px; }
   section { padding-top: 40px; margin-top: 40px; }
 }
