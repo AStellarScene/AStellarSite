@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reading — Adam Laloge</title>
+<meta name="description" content="What Adam Laloge reads: adult fantasy, the bar, and the shortlist he's picking from.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <span class="brand">Adam Laloge</span>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
+    <nav id="site-nav">
+      <a href="index.html">Home</a>
+      <a href="work.html">Projects</a>
+      <a href="about.html">About</a>
+      <a href="photography.html">Photography</a>
+      <a href="reading.html" class="active">Reading</a>
+      <a href="resume.html">Resume</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="reading">
+    <p class="label">Reading</p>
+    <h2>The reading shelf</h2>
+    <p>I read adult fantasy, the dark end of it: magic, dragons, and worlds that don't pull punches. Not YA, and not romance wearing a fantasy costume.</p>
+    <h3>The bar</h3>
+    <div class="cards">
+      <article class="card">
+        <p class="label card-label">Christopher Buehlman</p>
+        <p><strong>Between Two Fires</strong></p>
+        <p>The standard. Plague-era France, a disgraced knight, and a war between heaven and hell fought at ground level. Everything else on this shelf gets measured against it.</p>
+      </article>
+    </div>
+    <h3>Up next, undecided</h3>
+    <p class="section-note">Six books I'm picking between. I haven't started one yet; the shelf moves when I do.</p>
+    <div class="cards">
+      <article class="card">
+        <p class="label card-label">John Gwynne</p>
+        <p><strong>The Shadow of the Gods</strong></p>
+        <p>Grimdark with dragons, and the one that asks the least homework up front. Current front-runner.</p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Evan Winter</p>
+        <p><strong>The Rage of Dragons</strong></p>
+        <p>The fast one. A dragon war and a nobody fighting his way up through it.</p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Jenn Lyons</p>
+        <p><strong>The Ruin of Kings</strong></p>
+        <p>First of A Chorus of Dragons. Prophecy, a stolen identity, and dragons at the center of it.</p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Ryan Cahill</p>
+        <p><strong>Of Blood and Fire</strong></p>
+        <p>Classic-shape epic with dragon riders, written for adults.</p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Steven Erikson</p>
+        <p><strong>Gardens of the Moon</strong></p>
+        <p>Malazan, book one. The deep end: a huge world that explains nothing and trusts you to keep up.</p>
+      </article>
+      <article class="card">
+        <p class="label card-label">R. Scott Bakker</p>
+        <p><strong>The Darkness That Comes Before</strong></p>
+        <p>The darkest of the six. Fair warning I gave myself: the dragons here are ancient history, mostly backstory.</p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span><strong>Adam Laloge</strong> — West Harrison, Indiana</span>
+    <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a></span>
+  </div>
+</footer>
+<script>
+(function () {
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('site-nav');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+
+</body>
+</html>
