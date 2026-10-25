@@ -9,8 +9,6 @@
 </head>
 <body>
 
-<canvas id="sky" aria-hidden="true"></canvas>
-
 <header class="site-header">
   <div class="wrap header-inner">
     <span class="brand">Adam Laloge</span>
@@ -26,6 +24,7 @@
 <main class="wrap">
 
   <section class="hero">
+    <canvas id="sky" aria-hidden="true"></canvas>
     <p class="label">Adam Laloge — Portfolio</p>
     <h1>UI/UX Software Engineer | Human-Centered AI Systems</h1>
     <p class="intro">Engineering test technician and software developer at Baxter International. I build test software and AI agent systems in a regulated medical-device lab, and I am completing a B.S. in UX Design at WGU. My strongest work is internal and cannot be shown, so this site holds the public versions: working software, built in the open.</p>
@@ -209,9 +208,9 @@
   var W = 0, H = 0, stars = [], sparkles = [], meteor = null, lastMeteor = 0;
 
   function build() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-    var count = Math.min(200, Math.floor(W * H / 11000));
+    W = canvas.width = canvas.clientWidth || window.innerWidth;
+    H = canvas.height = canvas.clientHeight || 480;
+    var count = Math.min(170, Math.floor(W * H / 5500));
     stars = [];
     for (var i = 0; i < count; i++) {
       stars.push({

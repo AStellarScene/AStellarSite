@@ -45,33 +45,17 @@ body::before {
   pointer-events: none;
 }
 
-/* Animated sky canvas (JS). Sits above the static dot layer, below content. */
+/* Animated sky canvas (JS): a backdrop for the hero only, not the whole page. */
 #sky {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: -1;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
   pointer-events: none;
 }
-/* When the canvas is live, retire the static dot layer so stars don't double up */
-html.sky-on body::after { display: none; }
-
-/* Starfield layer: two dot grids at different scales, kept faint.
-   This is the no-JS / fallback sky. */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    radial-gradient(1px 1px at 24px 36px, rgba(255, 255, 255, 0.55), transparent 100%),
-    radial-gradient(1px 1px at 120px 140px, rgba(255, 255, 255, 0.35), transparent 100%),
-    radial-gradient(1.5px 1.5px at 210px 70px, rgba(255, 255, 255, 0.4), transparent 100%),
-    radial-gradient(1px 1px at 60px 200px, rgba(255, 255, 255, 0.3), transparent 100%),
-    radial-gradient(1px 1px at 300px 240px, rgba(255, 255, 255, 0.45), transparent 100%);
-  background-size: 340px 280px;
-  opacity: 0.5;
-  pointer-events: none;
-}
+/* When the canvas is live, retire the hero's static dot layer so stars don't double up */
+html.sky-on .hero::before { display: none; }
 
 .wrap {
   max-width: 1100px;
@@ -130,8 +114,25 @@ section {
 }
 section:first-of-type { border-top: none; margin-top: 0; }
 
-/* Hero */
-.hero { padding-top: 72px; }
+/* Hero: the starfield lives here, as a backdrop. The rest of the page is plain dark. */
+.hero { padding-top: 72px; position: relative; overflow: hidden; }
+.hero > *:not(#sky) { position: relative; z-index: 1; }
+/* Static fallback sky (no-JS), scoped to the hero like the canvas */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 24px 36px, rgba(255, 255, 255, 0.55), transparent 100%),
+    radial-gradient(1px 1px at 120px 140px, rgba(255, 255, 255, 0.35), transparent 100%),
+    radial-gradient(1.5px 1.5px at 210px 70px, rgba(255, 255, 255, 0.4), transparent 100%),
+    radial-gradient(1px 1px at 60px 200px, rgba(255, 255, 255, 0.3), transparent 100%),
+    radial-gradient(1px 1px at 300px 240px, rgba(255, 255, 255, 0.45), transparent 100%);
+  background-size: 340px 280px;
+  opacity: 0.5;
+  pointer-events: none;
+}
 .hero .intro { max-width: 720px; font-size: 18px; }
 .hero-links { margin-top: 26px; display: flex; gap: 14px; flex-wrap: wrap; }
 
