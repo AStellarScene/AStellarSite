@@ -29,7 +29,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title}</title>
 <meta name="description" content="{desc}">
-<link rel="stylesheet" href="styles.css?v=50">
+<link rel="stylesheet" href="styles.css?v=51">
 </head>
 <body>
 """
@@ -674,7 +674,7 @@ def latent_map_data():
         ang = math.radians(group_angle.get(group, 0) + _jitter(title, 26))
         rad = 0.052 + (zlib.crc32(title.encode()) % 100) / 100.0 * 0.075
         items.append({"kind": "photo", "title": title, "sub": group,
-                      "rgb": _vibrant_color(os.path.join(SITE, src)), "size": 17,
+                      "rgb": _vibrant_color(os.path.join(SITE, src)), "size": 19,
                       "dx": round(math.cos(ang) * rad, 4), "dy": round(math.sin(ang) * rad * 0.78, 4),
                       "region": "photography", "href": "photography.html#photo-" + _slug(title)})
     for i, b in enumerate(BOOKS):
@@ -685,11 +685,11 @@ def latent_map_data():
             ang = math.radians(-160 + i * 42)
             dx, dy = math.cos(ang) * 0.075, math.sin(ang) * 0.055
         items.append({"kind": "book", "title": b["t"], "sub": b["s"] + " · " + b["a"],
-                      "rgb": rgb, "size": 16, "dx": round(dx, 4), "dy": round(dy, 4),
+                      "rgb": rgb, "size": 18, "dx": round(dx, 4), "dy": round(dy, 4),
                       "region": "bookshelf", "href": "bookshelf.html#book-" + _slug(b["t"])})
     for fname, title in [("golden-city.jpg", "The Golden City"), ("obsidian-dragon.jpg", "Obsidian Dragon")]:
         items.append({"kind": "world", "title": title, "sub": "Dreamscape",
-                      "rgb": _vibrant_color(os.path.join(SITE, "art", fname)), "size": 30,
+                      "rgb": _vibrant_color(os.path.join(SITE, "art", fname)), "size": 33,
                       "dx": -0.045 if "golden" in fname else 0.045, "dy": 0.0,
                       "region": "worlds", "href": "dreams.html"})
     src_text = open(os.path.abspath(__file__)).read()
@@ -698,14 +698,18 @@ def latent_map_data():
         h = zlib.crc32(name.encode())
         ang = math.radians(h % 360)
         items.append({"kind": "project", "title": name, "sub": status,
-                      "rgb": _lighten([94, 234, 212], 0.1 + (h % 40) / 100.0), "size": 20,
+                      "rgb": _lighten([94, 234, 212], 0.1 + (h % 40) / 100.0), "size": 22,
                       "dx": round(math.cos(ang) * 0.07, 4), "dy": round(math.sin(ang) * 0.05, 4),
                       "region": "projects", "href": slug + ".html"})
     regions = {
-        "photography": {"label": "PHOTOGRAPHY", "fx": 0.30, "fy": 0.44},
-        "bookshelf": {"label": "BOOKSHELF", "fx": 0.76, "fy": 0.40},
-        "worlds": {"label": "DREAMSCAPE", "fx": 0.24, "fy": 0.80},
-        "projects": {"label": "PROJECTS", "fx": 0.74, "fy": 0.79},
+        # Fog hues are fixed saturated anchors, not averages of the
+        # items' colors -- averaging a dozen hues lands on brown-gray.
+        # Composed like a nebula: teal upper-left, rose upper-right,
+        # ember lower-left, gold lower-right.
+        "photography": {"label": "PHOTOGRAPHY", "fx": 0.30, "fy": 0.44, "rgb": [34, 190, 205]},
+        "bookshelf": {"label": "BOOKSHELF", "fx": 0.76, "fy": 0.40, "rgb": [216, 96, 158]},
+        "worlds": {"label": "DREAMSCAPE", "fx": 0.24, "fy": 0.80, "rgb": [228, 96, 52]},
+        "projects": {"label": "PROJECTS", "fx": 0.74, "fy": 0.79, "rgb": [226, 182, 92]},
     }
     return {"regions": regions, "items": items}
 
@@ -722,7 +726,7 @@ def _map_group(heading, page_href, region):
 
 sitemap_body = """  <canvas id="latent-map" aria-hidden="true"></canvas>
   <div id="latent-hit"></div>
-  <div class="latent-glass-layer" aria-hidden="true" style="background: radial-gradient(60% 50% at 30% 44%, rgba(224, 170, 80, 0.17), rgba(224, 170, 80, 0) 70%), radial-gradient(55% 45% at 76% 40%, rgba(150, 110, 200, 0.15), rgba(150, 110, 200, 0) 70%), radial-gradient(60% 50% at 24% 80%, rgba(220, 90, 50, 0.16), rgba(220, 90, 50, 0) 70%), radial-gradient(55% 45% at 74% 79%, rgba(45, 190, 175, 0.15), rgba(45, 190, 175, 0) 70%), rgba(6, 8, 16, 0.55);"></div>
+  <div class="latent-glass-layer" aria-hidden="true" style="background: radial-gradient(60% 50% at 30% 44%, rgba(34, 190, 205, 0.27), rgba(34, 190, 205, 0) 70%), radial-gradient(55% 45% at 76% 40%, rgba(216, 96, 158, 0.25), rgba(216, 96, 158, 0) 70%), radial-gradient(60% 50% at 24% 80%, rgba(228, 96, 52, 0.27), rgba(228, 96, 52, 0) 70%), radial-gradient(55% 45% at 74% 79%, rgba(226, 182, 92, 0.23), rgba(226, 182, 92, 0) 70%), rgba(6, 8, 16, 0.47);"></div>
   <script>document.body.classList.add('sitemap-body');</script>
   <div class="sitemap-flow">
   <section class="latent-intro">
@@ -848,7 +852,9 @@ LATENT_MAP_JS = r"""<script>
   var regionKeys = Object.keys(DATA.regions);
   regionKeys.forEach(function (k, i) {
     var r = DATA.regions[k];
-    r.key = k; r.seed = i * 1.73 + 0.6; r.cx = 0; r.cy = 0; r.rgb = [120, 120, 160];
+    r.key = k; r.seed = i * 1.73 + 0.6; r.cx = 0; r.cy = 0;
+    r.anchor = !!r.rgb; // baked-in saturated fog hue beats the average
+    if (!r.rgb) r.rgb = [120, 120, 160];
   });
 
   var items = DATA.items.map(function (d) {
@@ -862,6 +868,7 @@ LATENT_MAP_JS = r"""<script>
     };
   });
   regionKeys.forEach(function (k) {
+    if (DATA.regions[k].anchor) return; // anchored fog hue stands
     var list = items.filter(function (p) { return p.region === k; });
     if (!list.length) return;
     var r = [0, 0, 0];
@@ -871,8 +878,9 @@ LATENT_MAP_JS = r"""<script>
   var fogs = [];
   regionKeys.forEach(function (k, i) {
     var spr = makeFog(DATA.regions[k].rgb);
-    fogs.push({ sprite: spr, ph: i * 2.1 + 0.7, sp: 0.05 + i * 0.013, region: k, ox: -0.06, oy: 0.02, sc: 0.56 });
-    fogs.push({ sprite: spr, ph: i * 2.1 + 2.6, sp: 0.041 + i * 0.011, region: k, ox: 0.07, oy: -0.03, sc: 0.4 });
+    fogs.push({ sprite: spr, ph: i * 2.1 + 0.7, sp: 0.05 + i * 0.013, region: k, ox: -0.1, oy: 0.03, sc: 0.8 });
+    fogs.push({ sprite: spr, ph: i * 2.1 + 2.6, sp: 0.041 + i * 0.011, region: k, ox: 0.09, oy: -0.04, sc: 0.58 });
+    fogs.push({ sprite: spr, ph: i * 2.1 + 4.4, sp: 0.033 + i * 0.009, region: k, ox: 0.01, oy: 0.09, sc: 0.42 });
   });
 
   var filler = [];
@@ -889,7 +897,7 @@ LATENT_MAP_JS = r"""<script>
   var stars = [];
   function buildStars() {
     stars = [];
-    var n = Math.round(Math.min(420, Math.max(180, W * H / 4500)));
+    var n = Math.round(Math.min(560, Math.max(220, W * H / 3400)));
     for (var i = 0; i < n; i++) {
       var r = rnd();
       var tintRoll = rnd();
@@ -906,6 +914,26 @@ LATENT_MAP_JS = r"""<script>
     sparks = [];
     for (var i = 0; i < 48; i++) { var sit = items[Math.floor(Math.random() * items.length)]; sparks.push({ x: Math.random() * W, y: Math.random() * H, s: 10 + Math.random() * 24, ph: Math.random() * Math.PI * 2, sp: 0.4 + Math.random() * 1.0, sprite: makeSpark(sit.rgb) }); }
   }
+
+  // The constellation web: each point keeps faint permanent threads
+  // to its two nearest neighbors in its own region, so the map reads
+  // as a connected space even when the probe is somewhere else. The
+  // probe's bright threads layer on top of these.
+  var webPairs = [];
+  (function () {
+    var seen = {};
+    items.forEach(function (p, i) {
+      var near = items.map(function (q, j) {
+        if (j === i || q.region !== p.region) return null;
+        var ddx = q.dx - p.dx, ddy = q.dy - p.dy;
+        return { j: j, d: ddx * ddx + ddy * ddy };
+      }).filter(Boolean).sort(function (a, b) { return a.d - b.d; }).slice(0, 2);
+      near.forEach(function (nb) {
+        var key = Math.min(i, nb.j) + '-' + Math.max(i, nb.j);
+        if (!seen[key]) { seen[key] = 1; webPairs.push([items[i], items[nb.j]]); }
+      });
+    });
+  })();
 
   var probe = { x: 0, y: 0, tx: 0, ty: 0, active: false, last: 0 };
   var trail = [];
@@ -1154,7 +1182,7 @@ LATENT_MAP_JS = r"""<script>
       var wx = r.cx + w.ox * W + Math.sin(t * w.sp * 2 + w.ph) * W * 0.03;
       var wy = r.cy + w.oy * H + Math.cos(t * w.sp * 1.6 + w.ph) * H * 0.03;
       var ws = Math.max(W, H) * w.sc * (1 + 0.07 * Math.sin(t * 0.13 + w.ph));
-      ctx.globalAlpha = 0.55;
+      ctx.globalAlpha = 0.62;
       ctx.drawImage(w.sprite, wx - ws / 2, wy - ws / 2, ws, ws);
     });
     ctx.globalAlpha = 1;
@@ -1166,7 +1194,7 @@ LATENT_MAP_JS = r"""<script>
       physics(p, p.hx * W + Math.sin(t * 0.4 + p.ph) * 10, p.hy * H + Math.cos(t * 0.34 + p.ph) * 9, t);
       var tw = 0.72 + 0.28 * Math.sin(t * 2.0 + p.ph);
       var size = p.s * tw * (0.75 + p.lit * 1.0 + p.flash * 0.7);
-      ctx.globalAlpha = Math.min(1, 0.08 + p.lit * 0.6 + p.flash * 0.55);
+      ctx.globalAlpha = Math.min(1, 0.13 + p.lit * 0.6 + p.flash * 0.55);
       ctx.drawImage(p.sprite, p.x - size / 2, p.y - size / 2, size, size);
     }
     ctx.globalAlpha = 1;
@@ -1188,12 +1216,12 @@ LATENT_MAP_JS = r"""<script>
         var isFix = fixate && fixate.item === p;
         var tw2 = 0.82 + 0.18 * Math.sin(t * 2.1 + p.ph);
         var sz = p.size * tw2 * (1 + p.lit * 1.25 + p.flash * 0.7 + (isFix ? 0.55 : 0));
-        ctx.globalAlpha = Math.min(1, 0.5 + p.lit * 0.35 + p.flash * 0.35) * cf;
+        ctx.globalAlpha = Math.min(1, 0.64 + p.lit * 0.3 + p.flash * 0.35) * cf;
         ctx.drawImage(p.sprite, p.x - sz * 0.72, p.y - sz * 0.72, sz * 1.44, sz * 1.44);
         ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = Math.min(1, 0.55 + p.lit * 0.45 + p.flash * 0.4) * cf;
+        ctx.globalAlpha = Math.min(1, 0.72 + p.lit * 0.35 + p.flash * 0.4) * cf;
         ctx.fillStyle = p.css;
-        ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1.6, sz * 0.16), 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1.9, sz * 0.185), 0, Math.PI * 2); ctx.fill();
         ctx.globalCompositeOperation = 'lighter';
         if (isFix) {
           ctx.globalCompositeOperation = 'source-over';
@@ -1214,6 +1242,16 @@ LATENT_MAP_JS = r"""<script>
           ctx.globalCompositeOperation = 'lighter';
         }
       }
+
+      // The web first, under everything: faint, in the point's color.
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.lineWidth = 1;
+      for (var wpi = 0; wpi < webPairs.length; wpi++) {
+        var wp = webPairs[wpi];
+        ctx.strokeStyle = 'rgba(' + wp[0].rgb[0] + ',' + wp[0].rgb[1] + ',' + wp[0].rgb[2] + ',' + (0.13 * cf).toFixed(3) + ')';
+        ctx.beginPath(); ctx.moveTo(wp[0].x, wp[0].y); ctx.lineTo(wp[1].x, wp[1].y); ctx.stroke();
+      }
+      ctx.globalCompositeOperation = 'lighter';
 
       ctx.lineWidth = 1.5;
       for (var j = 0; j < links.length; j++) {
