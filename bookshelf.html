@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bookshelf — Adam Laloge</title>
 <meta name="description" content="Adam Laloge's bookshelf: historical horror, dark fantasy, and sci-fi — what he's reading and what's next.">
-<link rel="stylesheet" href="styles.css?v=23">
+<link rel="stylesheet" href="styles.css?v=24">
 </head>
 <body>
 <header class="site-header">
@@ -173,9 +173,21 @@
       select(best);
     }
 
-    var ticking = false;
+    var ticking = false, settleTimer = null;
     track.addEventListener('scroll', function () {
       if (!ticking) { ticking = true; requestAnimationFrame(function () { layout(); ticking = false; }); }
+      // Settle: once scrolling rests, glide the nearest book the last bit
+      // into center. CSS scroll-snap used to do this, but snap fought the
+      // scripted wheel glide (the gallery had the same bug and the same
+      // fix), so JS owns centering here too. Skipped while a wheel glide
+      // or a click glide is still moving the track.
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(function () {
+        if (wheelTarget !== null || centered < 0) return;
+        var it = items[centered];
+        var off = (it.offsetLeft + it.offsetWidth / 2) - (track.scrollLeft + track.clientWidth / 2);
+        if (Math.abs(off) > 3) centerItem(centered, true);
+      }, 150);
     }, { passive: true });
         // Desktop wheel: vertical deltas drive the track sideways through a
     // clamped target that the scroll position eases toward, so repeated

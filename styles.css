@@ -364,7 +364,6 @@ html, body { overflow-x: clip; }
   overflow-x: auto;
   padding: 34px calc(50% - 84px) 26px;
   perspective: 1200px;
-  scroll-snap-type: x proximity;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -379,7 +378,6 @@ html, body { overflow-x: clip; }
   background: none;
   cursor: pointer;
   transform-style: preserve-3d;
-  scroll-snap-align: center;
   -webkit-tap-highlight-color: transparent;
 }
 .cov:focus-visible { outline: 2px solid var(--teal); outline-offset: 6px; }
