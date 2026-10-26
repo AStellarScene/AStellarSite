@@ -252,7 +252,7 @@ html, body { overflow-x: clip; }
 .pflow-track:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; border-radius: 10px; }
 .pcov {
   flex: 0 0 auto;
-  height: 340px;
+  height: 396px;
   aspect-ratio: var(--ar);
   padding: 0;
   border: 1px solid var(--panel-border);
@@ -914,6 +914,10 @@ body.sitemap-body .site-header {
    it is click-through everywhere except its actual links/buttons. */
 .sitemap-flow { position: relative; z-index: 2; pointer-events: none; }
 .sitemap-flow a, .sitemap-flow button { pointer-events: auto; }
+/* Once the turn is underway (body.past-map, set by the engine), the
+   content takes its touches back: anywhere in the list region drags
+   scroll the page, instead of falling through to the inert canvas. */
+body.past-map .sitemap-flow { pointer-events: auto; }
 /* The Latent Dreams glass: tinted translucency, backdrop blur, a lit rim. */
 .latent-glass {
   background: rgba(8, 11, 22, 0.44);
