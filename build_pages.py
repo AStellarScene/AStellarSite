@@ -37,12 +37,12 @@ HEAD = """<!DOCTYPE html>
 NAV_ITEMS = [
     ("index.html", "Home"),
     ("work.html", "Projects"),
+    ("resume.html", "Resume"),
     ("about.html", "About"),
     ("photography.html", "Photography"),
     ("bookshelf.html", "Bookshelf"),
     ("dreams.html", "Dreamscape"),
     ("latent-sitemap.html", "Atlas"),
-    ("resume.html", "Resume"),
 ]
 
 def header(active):
