@@ -879,7 +879,12 @@ html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.3
    reaches the map through window-level listeners instead. One gesture
    contract for the whole page: vertical drags scroll (browser-owned),
    everything else is the map's. */
-body.sitemap-body { touch-action: pan-y; }
+/* The contract is stamped on every element of this page, not just the
+   root: WebKit reads touch-action from the exact element touched and
+   does not walk up to ancestors, so a root-only rule left every drag
+   on iOS treated as a browser-owned gesture and the light never
+   followed a finger. */
+body.sitemap-body, body.sitemap-body * { touch-action: pan-y; }
 #latent-map {
   position: fixed;
   inset: 0;
