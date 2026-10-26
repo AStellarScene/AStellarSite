@@ -654,6 +654,10 @@ ul.plain { list-style: none; padding-left: 0; }
 .latent-band.open .slice.active .slice-cap { opacity: 1; transform: none; }
 .slice:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
 
+/* While a world is open the page does not move: scroll is locked at
+   whatever size the display is, and the image fills it */
+html.world-lock, html.world-lock body { overflow: hidden; }
+
 /* Over an opened world: header and title block float above the image */
 html.latent-live .site-header { position: relative; z-index: 50; }
 html.latent-live .latent-head { position: relative; z-index: 45; }
