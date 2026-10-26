@@ -712,3 +712,40 @@ html.latent-live[data-world="ember"] .world-ambient {
   .latent-band.open { height: 82vh; }
   .slice-cap strong { font-size: 21px; }
 }
+
+/* Latent Dreams in portrait: the split turns vertical — worlds stack,
+   wavy edges run horizontally, seams ride the horizontal boundaries */
+@media (orientation: portrait) {
+  .latent-band { flex-direction: column; height: 68vh; }
+  .latent-band.open { height: 88vh; }
+  .slice + .slice { margin-left: 0; margin-top: -16px; }
+  .slice:not(:first-child) {
+    clip-path: polygon(0 7px, 5% 6px, 17% 15px, 31% 4px, 45% 14px, 59% 5px, 73% 15px, 87% 4px, 100% 13px, 100% 100%, 0 100%);
+  }
+  .slice:nth-child(even):not(:first-child) {
+    clip-path: polygon(0 13px, 13% 4px, 27% 15px, 42% 5px, 56% 14px, 71% 4px, 85% 15px, 100% 6px, 100% 100%, 0 100%);
+  }
+  .latent-band.open .slice.active { margin-top: 0; }
+  .seam {
+    left: 0;
+    right: 0;
+    top: -19px;
+    bottom: auto;
+    width: auto;
+    height: 38px;
+    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    animation-name: seamSwayY;
+  }
+  @keyframes seamSwayY {
+    from { transform: translateY(-5px); }
+    to { transform: translateY(5px); }
+  }
+  .slice-title {
+    writing-mode: horizontal-tb;
+    left: 18px;
+    bottom: 14px;
+    transform: none;
+  }
+}
