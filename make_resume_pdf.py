@@ -22,7 +22,7 @@ def headline():
     pdf.set_text_color(70, 80, 100)
     pdf.cell(0, 6, "UI/UX Engineer | Human-Centered AI Systems", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("helvetica", "", 10)
-    pdf.cell(0, 5, "West Harrison, Indiana | github.com/AStellarScene", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 5, "West Harrison, Indiana | github.com/AStellarScene | hello@adamlaloge.com", new_x="LMARGIN", new_y="NEXT")
     pdf.ln(3)
 
 def section(title):

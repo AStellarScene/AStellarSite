@@ -64,7 +64,7 @@ FOOTER = """
 <footer class="site-footer">
   <div class="wrap footer-inner">
     <span><strong>Adam Laloge</strong></span>
-    <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a></span>
+    <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a> &middot; <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a></span>
   </div>
 </footer>
 """
@@ -158,7 +158,7 @@ home_body = """  <section class="hero">
   <section id="contact">
     <p class="label">Contact</p>
     <h2>Get in touch</h2>
-    <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>.</p>
+    <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
   </section>"""
 page("index.html", "Adam Laloge", DESC, "index.html",
      home_body, "<script>" + sky_js + "</script>\n")
@@ -255,7 +255,7 @@ about_body = """  <section id="about">
   <section id="contact">
     <p class="label">Contact</p>
     <h2>Get in touch</h2>
-    <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>.</p>
+    <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
   </section>"""
 page("about.html", "About — Adam Laloge", DESC, "about.html", about_body)
 
