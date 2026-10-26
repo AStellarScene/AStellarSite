@@ -29,7 +29,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title}</title>
 <meta name="description" content="{desc}">
-<link rel="stylesheet" href="styles.css?v=47">
+<link rel="stylesheet" href="styles.css?v=48">
 </head>
 <body>
 """
@@ -953,6 +953,7 @@ LATENT_MAP_JS = r"""<script>
   // Client coordinates are canvas coordinates — the canvas is fixed
   // and fills the viewport.
   window.addEventListener('pointermove', function (e) {
+    if (e.pointerType === 'touch' && tState) return; // the touch layer below owns touch steering
     probe.tx = e.clientX; probe.ty = e.clientY; probe.active = true; probe.last = performance.now();
   }, { passive: true });
 
@@ -1011,12 +1012,50 @@ LATENT_MAP_JS = r"""<script>
     sample(e.clientX, e.clientY);
   }, { passive: true });
 
-  // Touch model: there are no zones. The page declares one gesture
-  // contract (body { touch-action: pan-y }): vertical drags scroll
-  // natively anywhere — margins, map, list — and the browser's own
-  // arbitration (pointercancel when a scroll claims the gesture)
-  // keeps the two apart. Sideways drags and taps reach the map
-  // through the window listeners above.
+  // Direction lock, in raw touch events — the layer that makes the
+  // touch model hold on WebKit. touch-action: pan-y is recent in
+  // Safari and ignored by older iOS, which left the browser to
+  // arbitrate drags on its own: the page would scroll mid-steer, or
+  // the probe would chase a scrolling finger. So the engine judges
+  // each touch itself, in its first ~10px of travel:
+  // - Mostly vertical: the page's. Never preventDefaulted; the
+  //   browser scrolls and the probe ignores the gesture entirely.
+  // - Mostly horizontal: the map's. preventDefaulted from the moment
+  //   it's claimed — before WebKit commits to a scroll of its own —
+  //   and the claim also cancels any tap the pointerup logic was
+  //   tracking, so a steer can never fire a link.
+  // - Shorter than the threshold: a tap, left to pointerup above.
+  // Over the glassed list (glassCur high) the layer stands down and
+  // every touch is native page behavior.
+  var tState = null;
+  window.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) { tState = null; return; }
+    var t = e.touches[0];
+    tState = { x: t.clientX, y: t.clientY, axis: null };
+  }, { passive: true });
+  window.addEventListener('touchmove', function (e) {
+    if (!tState || e.touches.length !== 1 || glassCur > 0.4) return;
+    var t = e.touches[0];
+    if (!tState.axis) {
+      var dx = Math.abs(t.clientX - tState.x), dy = Math.abs(t.clientY - tState.y);
+      if (Math.max(dx, dy) < 10) return; // not judged yet
+      tState.axis = dx > dy ? 'x' : 'y'; // ties go to the page
+      if (tState.axis === 'x') downPt = null; // a steer is never a tap
+    }
+    if (tState.axis === 'x') {
+      e.preventDefault();
+      probe.tx = t.clientX; probe.ty = t.clientY; probe.active = true; probe.last = performance.now();
+    }
+  }, { passive: false });
+  function touchDone() { tState = null; }
+  window.addEventListener('touchend', touchDone, { passive: true });
+  window.addEventListener('touchcancel', touchDone, { passive: true });
+
+  // Touch model: there are no zones. Vertical drags scroll natively
+  // anywhere — margins, map, list; sideways drags steer the map;
+  // taps select, then open. The CSS touch-action declaration backs
+  // this where it's honored (Chrome/Android), and the direction lock
+  // above enforces the same contract where it isn't (WebKit).
 
   var running = true, raf = null;
 
