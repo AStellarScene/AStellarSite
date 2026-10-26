@@ -660,6 +660,13 @@ html.world-lock, html.world-lock body { overflow: hidden; }
 html.latent-live .site-header { position: relative; z-index: 50; }
 html.latent-live .latent-head { position: relative; z-index: 45; }
 html.latent-live[data-world] .site-header {
+  /* Pinned over the opened world: the image runs full-bleed underneath
+     the bar to the top edge of the screen, and the bar is frosted glass
+     over it, so nothing is hard-cut at the bar's lower edge. */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   backdrop-filter: blur(14px) saturate(1.35);
   -webkit-backdrop-filter: blur(14px) saturate(1.35);
 }
@@ -793,6 +800,10 @@ html.latent-live[data-world="ember"] .world-ambient {
   max-width: none;
   height: 100vh;
   height: 100dvh;
+  /* Subject-safe framing: when the viewport is wider than the image and
+     cover has to crop vertically, take more from the bottom so the
+     subject near the top survives and sits below the frosted bar. */
+  object-position: 50% 32%;
 }
 @media (orientation: portrait) {
   .latent-band.open .slice.active img {
