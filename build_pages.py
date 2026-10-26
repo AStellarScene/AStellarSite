@@ -29,7 +29,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title}</title>
 <meta name="description" content="{desc}">
-<link rel="stylesheet" href="styles.css?v=46">
+<link rel="stylesheet" href="styles.css?v=47">
 </head>
 <body>
 """
@@ -501,19 +501,26 @@ BOOKSHELF_JS = """<script>
         if (Math.abs(off) > 3) centerItem(centered, true);
       }, 150);
     }, { passive: true });
-        // Desktop wheel: vertical deltas drive the track sideways through a
-    // clamped target that the scroll position eases toward, so repeated
-    // notches accumulate instead of fighting the animation. The wheel is
-    // only consumed while the track can still move in that direction;
-    // at either end the event is left alone and the page scrolls on.
+    // Wheel routing — each axis does its own job:
+    // - Trackpad sideways swipe: the flow glides on deltaX, and the events
+    //   are captured whole so the page never moves mid-gesture.
+    // - Trackpad vertical scroll: never intercepted. The page scrolls and
+    //   the flow is pinned, so diagonal drift can't wiggle it.
+    // - Mouse wheel (line/page mode, or a coarse full-size first step):
+    //   vertical notches convert to a sideways glide — a wheel has no
+    //   sideways to give.
+    // The axis is judged once per gesture from its first deltas and held
+    // until the stream goes quiet (~140ms); judging event-by-event
+    // flip-flopped on diagonal trackpad input.
     var wheelTarget = null, wheelRaf = null;
+    var gesture = null, gestureTimer = null;
     function stopWheel() {
       wheelTarget = null;
       if (wheelRaf) { cancelAnimationFrame(wheelRaf); wheelRaf = null; }
     }
     function stepWheel() {
       if (wheelTarget === null) { wheelRaf = null; return; }
-      var diff = wheelTarget - track.scrollLeft;
+        var diff = wheelTarget - track.scrollLeft;
       if (Math.abs(diff) < 0.6) {
         track.scrollLeft = wheelTarget;
         wheelTarget = null;
@@ -523,12 +530,34 @@ BOOKSHELF_JS = """<script>
       track.scrollLeft += diff * 0.22;
       wheelRaf = requestAnimationFrame(stepWheel);
     }
+    function armGesture() {
+      clearTimeout(gestureTimer);
+      gestureTimer = setTimeout(function () { gesture = null; }, 140);
+    }
     track.addEventListener('wheel', function (e) {
-      if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // horizontal deltas scroll natively
-      var d = e.deltaY;
-      if (e.deltaMode === 1) d *= 24; // lines to px
-      else if (e.deltaMode === 2) d *= track.clientWidth; // pages to px
+        if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
+      var dx = e.deltaX, dy = e.deltaY;
+      if (e.deltaMode === 1) { dx *= 24; dy *= 24; }              // lines to px
+      else if (e.deltaMode === 2) { dx *= track.clientWidth; dy *= track.clientWidth; }
+      armGesture();
+      if (!gesture) {
+        gesture = { ax: 0, ay: 0, bx: 0, by: 0, axis: null,
+                    mouse: e.deltaMode !== 0 || Math.abs(e.deltaY) >= 50 || Math.abs(e.deltaX) >= 50,
+                    left: track.scrollLeft };
+      }
+      var g = gesture;
+      g.ax += Math.abs(dx); g.ay += Math.abs(dy); g.bx += dx; g.by += dy;
+      if (!g.axis) {
+        if (!g.mouse && Math.max(g.ax, g.ay) < 8) return;  // too small to judge yet
+        g.axis = g.ax > g.ay ? 'x' : (g.mouse ? 'convert' : 'y');
+        if (g.axis === 'y') stopWheel();                   // a page scroll cancels any glide
+        dx = g.bx; dy = g.by;                              // spend the buffered deltas whole
+      }
+      if (g.axis === 'y') {
+        if (track.scrollLeft !== g.left) track.scrollLeft = g.left;
+        return;
+      }
+      var d = g.axis === 'x' ? dx : dy;
       if (!d) return;
       var max = track.scrollWidth - track.clientWidth;
       if (max <= 0) return;
@@ -536,7 +565,7 @@ BOOKSHELF_JS = """<script>
       var target = Math.max(0, Math.min(max, base + d));
       if (Math.abs(target - track.scrollLeft) < 1) { stopWheel(); return; }
       e.preventDefault();
-      wheelTarget = target;
+        wheelTarget = target;
       if (reduced) {
         track.scrollLeft = wheelTarget;
         wheelTarget = null;
@@ -563,6 +592,21 @@ BOOKSHELF_JS = """<script>
 
     centerItem(0, false);
     layout();
+    // Deep link (from Atlas): #book-<slug> brings that cover to the
+    // front of its shelf instead of just landing on the page.
+    (function () {
+      var m = /^#book-(.+)$/.exec(location.hash || '');
+      if (!m) return;
+      var slug = m[1], found = -1;
+      items.forEach(function (it, i) {
+        var t = (it.getAttribute('data-title') || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        if (t === slug) found = i;
+      });
+      if (found < 0) return;
+      centerItem(found, false);
+      layout();
+      block.scrollIntoView({ block: 'center' });
+    })();
   });
 })();
 </script>
@@ -617,6 +661,10 @@ def _jitter(title, span):
     h = zlib.crc32(title.encode("utf-8"))
     return ((h % 1000) / 1000.0 - 0.5) * 2 * span
 
+def _slug(title):
+    return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+
+
 def latent_map_data():
     items = []
     group_angle = {"sunsets": -90, "shoreline": 0, "landscapes": 90, "details": 180}
@@ -628,7 +676,7 @@ def latent_map_data():
         items.append({"kind": "photo", "title": title, "sub": group,
                       "rgb": _vibrant_color(os.path.join(SITE, src)), "size": 17,
                       "dx": round(math.cos(ang) * rad, 4), "dy": round(math.sin(ang) * rad * 0.78, 4),
-                      "region": "photography", "href": "photography.html"})
+                      "region": "photography", "href": "photography.html#photo-" + _slug(title)})
     for i, b in enumerate(BOOKS):
         rgb = _lighten(_hex_rgb(b["style"][0] if b.get("style") else "#3d2b18"), 0.34)
         if b["s"] == "The bar":
@@ -638,7 +686,7 @@ def latent_map_data():
             dx, dy = math.cos(ang) * 0.075, math.sin(ang) * 0.055
         items.append({"kind": "book", "title": b["t"], "sub": b["s"] + " · " + b["a"],
                       "rgb": rgb, "size": 16, "dx": round(dx, 4), "dy": round(dy, 4),
-                      "region": "bookshelf", "href": "bookshelf.html"})
+                      "region": "bookshelf", "href": "bookshelf.html#book-" + _slug(b["t"])})
     for fname, title in [("golden-city.jpg", "The Golden City"), ("obsidian-dragon.jpg", "Obsidian Dragon")]:
         items.append({"kind": "world", "title": title, "sub": "Dreamscape",
                       "rgb": _vibrant_color(os.path.join(SITE, "art", fname)), "size": 30,
