@@ -244,7 +244,6 @@ html, body { overflow-x: clip; }
   overflow-x: auto;
   padding: 26px calc(50% - 240px) 22px;
   perspective: 1300px;
-  scroll-snap-type: x proximity;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -261,7 +260,6 @@ html, body { overflow-x: clip; }
   background: #0a0f1e;
   cursor: pointer;
   transform-style: preserve-3d;
-  scroll-snap-align: center;
   box-shadow: 0 22px 30px rgba(0, 0, 0, 0.5);
   -webkit-tap-highlight-color: transparent;
 }
@@ -274,6 +272,52 @@ html, body { overflow-x: clip; }
   .pcov { height: 232px; }
   .pflow-track { gap: 18px; padding: 20px calc(50% - 150px) 16px; }
 }
+
+/* Full viewing pane: the tapped photo flies out of the flow, tap again to return */
+.pane {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: none;
+  background: rgba(4, 6, 12, 0.84);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.pane.open { opacity: 1; }
+.pane-img {
+  position: fixed;
+  border-radius: 10px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  object-fit: cover;
+  transition: left 0.34s cubic-bezier(0.22, 0.8, 0.3, 1), top 0.34s cubic-bezier(0.22, 0.8, 0.3, 1), width 0.34s cubic-bezier(0.22, 0.8, 0.3, 1), height 0.34s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.pane-cap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 26px;
+  text-align: center;
+  pointer-events: none;
+}
+.pane-title { color: var(--heading); font-weight: 600; font-size: 17px; }
+.pane-count { display: block; margin-top: 4px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; color: var(--gold); }
+.pane-close {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: rgba(10, 15, 30, 0.8);
+  color: var(--heading);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.pane-close:hover { border-color: var(--teal); color: var(--teal); }
 
 /* Bookshelf — Cover Flow */
 .flow-scene {
