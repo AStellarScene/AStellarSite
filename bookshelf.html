@@ -27,72 +27,81 @@
   <section id="bookshelf">
     <p class="label">Bookshelf</p>
     <h2>The bookshelf</h2>
-    <p>I read adult fantasy, the dark end of it: magic, dragons, and worlds that don't pull punches. Not YA, and not romance wearing a fantasy costume. Click a spine to pull it off the shelf.</p>
-    <div class="shelf-scene">
-      <p class="label shelf-label">The bar</p>
-      <div class="shelf-row">
-        <button type="button" class="book selected" style="--bw:52px;--bh:228px;--bd:34px;--spine:#4a1f1f" data-title="Between Two Fires" data-author="Christopher Buehlman" data-status="The bar" data-blurb="The standard. Plague-era France, a disgraced knight, and a war between heaven and hell fought at ground level. Everything else on this shelf gets measured against it." aria-pressed="true">
-          <span class="book-side"></span>
-          <span class="book-spine">
-            <span class="book-title">Between Two Fires</span>
-            <span class="book-author">Christopher Buehlman</span>
+    <p>I read adult fantasy, the dark end of it: magic, dragons, and worlds that don't pull punches. Not YA, and not romance wearing a fantasy costume. Flick through the covers; tap one to bring it to the front.</p>
+    <div class="flow-scene">
+      <div class="flow-track" id="flow-track">
+        <button type="button" class="cov selected" style="--bd:34px;--cov:#4a1f1f" data-title="Between Two Fires" data-author="Christopher Buehlman" data-status="The bar" data-blurb="The standard. Plague-era France, a disgraced knight, and a war between heaven and hell fought at ground level. Everything else on this shelf gets measured against it." aria-pressed="true" aria-label="Between Two Fires by Christopher Buehlman">
+          <span class="cov-edge cov-edge-left"></span>
+          <span class="cov-edge cov-edge-right"></span>
+          <span class="cov-front">
+            <span class="cov-status">The bar</span>
+            <span class="cov-title">Between Two Fires</span>
+            <span class="cov-author">Christopher Buehlman</span>
+          </span>
+        </button>
+        <button type="button" class="cov" style="--bd:36px;--cov:#1f2a44" data-title="The Shadow of the Gods" data-author="John Gwynne" data-status="Up next" data-blurb="Grimdark with dragons, and the one that asks the least homework up front. Current front-runner." aria-pressed="false" aria-label="The Shadow of the Gods by John Gwynne">
+          <span class="cov-edge cov-edge-left"></span>
+          <span class="cov-edge cov-edge-right"></span>
+          <span class="cov-front">
+            <span class="cov-status">Up next</span>
+            <span class="cov-title">The Shadow of the Gods</span>
+            <span class="cov-author">John Gwynne</span>
+          </span>
+        </button>
+        <button type="button" class="cov" style="--bd:28px;--cov:#5a2d16" data-title="The Rage of Dragons" data-author="Evan Winter" data-status="Up next" data-blurb="The fast one. A dragon war and a nobody fighting his way up through it." aria-pressed="false" aria-label="The Rage of Dragons by Evan Winter">
+          <span class="cov-edge cov-edge-left"></span>
+          <span class="cov-edge cov-edge-right"></span>
+          <span class="cov-front">
+            <span class="cov-status">Up next</span>
+            <span class="cov-title">The Rage of Dragons</span>
+            <span class="cov-author">Evan Winter</span>
+          </span>
+        </button>
+        <button type="button" class="cov" style="--bd:38px;--cov:#2e1f3d" data-title="The Ruin of Kings" data-author="Jenn Lyons" data-status="Up next" data-blurb="First of A Chorus of Dragons. Prophecy, a stolen identity, and dragons at the center of it." aria-pressed="false" aria-label="The Ruin of Kings by Jenn Lyons">
+          <span class="cov-edge cov-edge-left"></span>
+          <span class="cov-edge cov-edge-right"></span>
+          <span class="cov-front">
+            <span class="cov-status">Up next</span>
+            <span class="cov-title">The Ruin of Kings</span>
+            <span class="cov-author">Jenn Lyons</span>
+          </span>
+        </button>
+        <button type="button" class="cov" style="--bd:30px;--cov:#6b3410" data-title="Of Blood and Fire" data-author="Ryan Cahill" data-status="Up next" data-blurb="Classic-shape epic with dragon riders, written for adults." aria-pressed="false" aria-label="Of Blood and Fire by Ryan Cahill">
+          <span class="cov-edge cov-edge-left"></span>
+          <span class="cov-edge cov-edge-right"></span>
+          <span class="cov-front">
+            <span class="cov-status">Up next</span>
+            <span class="cov-title">Of Blood and Fire</span>
+            <span class="cov-author">Ryan Cahill</span>
+          </span>
+        </button>
+        <button type="button" class="cov" style="--bd:40px;--cov:#1c2b26" data-title="Gardens of the Moon" data-author="Steven Erikson" data-status="Up next" data-blurb="Malazan, book one. The deep end: a huge world that explains nothing and trusts you to keep up." aria-pressed="false" aria-label="Gardens of the Moon by Steven Erikson">
+          <span class="cov-edge cov-edge-left"></span>
+          <span class="cov-edge cov-edge-right"></span>
+          <span class="cov-front">
+            <span class="cov-status">Up next</span>
+            <span class="cov-title">Gardens of the Moon</span>
+            <span class="cov-author">Steven Erikson</span>
+          </span>
+        </button>
+        <button type="button" class="cov" style="--bd:36px;--cov:#171310" data-title="The Darkness That Comes Before" data-author="R. Scott Bakker" data-status="Up next" data-blurb="The darkest of the six. Fair warning I gave myself: the dragons here are ancient history, mostly backstory." aria-pressed="false" aria-label="The Darkness That Comes Before by R. Scott Bakker">
+          <span class="cov-edge cov-edge-left"></span>
+          <span class="cov-edge cov-edge-right"></span>
+          <span class="cov-front">
+            <span class="cov-status">Up next</span>
+            <span class="cov-title">The Darkness That Comes Before</span>
+            <span class="cov-author">R. Scott Bakker</span>
           </span>
         </button>
       </div>
-      <div class="shelf-plank"></div>
-      <p class="label shelf-label">Up next</p>
-      <div class="shelf-row">
-        <button type="button" class="book" style="--bw:56px;--bh:224px;--bd:36px;--spine:#1f2a44" data-title="The Shadow of the Gods" data-author="John Gwynne" data-status="Up next" data-blurb="Grimdark with dragons, and the one that asks the least homework up front. Current front-runner." aria-pressed="false">
-          <span class="book-side"></span>
-          <span class="book-spine">
-            <span class="book-title">The Shadow of the Gods</span>
-            <span class="book-author">John Gwynne</span>
-          </span>
-        </button>
-        <button type="button" class="book" style="--bw:44px;--bh:208px;--bd:28px;--spine:#5a2d16" data-title="The Rage of Dragons" data-author="Evan Winter" data-status="Up next" data-blurb="The fast one. A dragon war and a nobody fighting his way up through it." aria-pressed="false">
-          <span class="book-side"></span>
-          <span class="book-spine">
-            <span class="book-title">The Rage of Dragons</span>
-            <span class="book-author">Evan Winter</span>
-          </span>
-        </button>
-        <button type="button" class="book" style="--bw:58px;--bh:230px;--bd:38px;--spine:#2e1f3d" data-title="The Ruin of Kings" data-author="Jenn Lyons" data-status="Up next" data-blurb="First of A Chorus of Dragons. Prophecy, a stolen identity, and dragons at the center of it." aria-pressed="false">
-          <span class="book-side"></span>
-          <span class="book-spine">
-            <span class="book-title">The Ruin of Kings</span>
-            <span class="book-author">Jenn Lyons</span>
-          </span>
-        </button>
-        <button type="button" class="book" style="--bw:46px;--bh:212px;--bd:30px;--spine:#6b3410" data-title="Of Blood and Fire" data-author="Ryan Cahill" data-status="Up next" data-blurb="Classic-shape epic with dragon riders, written for adults." aria-pressed="false">
-          <span class="book-side"></span>
-          <span class="book-spine">
-            <span class="book-title">Of Blood and Fire</span>
-            <span class="book-author">Ryan Cahill</span>
-          </span>
-        </button>
-        <button type="button" class="book" style="--bw:60px;--bh:226px;--bd:40px;--spine:#1c2b26" data-title="Gardens of the Moon" data-author="Steven Erikson" data-status="Up next" data-blurb="Malazan, book one. The deep end: a huge world that explains nothing and trusts you to keep up." aria-pressed="false">
-          <span class="book-side"></span>
-          <span class="book-spine">
-            <span class="book-title">Gardens of the Moon</span>
-            <span class="book-author">Steven Erikson</span>
-          </span>
-        </button>
-        <button type="button" class="book" style="--bw:54px;--bh:222px;--bd:36px;--spine:#171310" data-title="The Darkness That Comes Before" data-author="R. Scott Bakker" data-status="Up next" data-blurb="The darkest of the six. Fair warning I gave myself: the dragons here are ancient history, mostly backstory." aria-pressed="false">
-          <span class="book-side"></span>
-          <span class="book-spine">
-            <span class="book-title">The Darkness That Comes Before</span>
-            <span class="book-author">R. Scott Bakker</span>
-          </span>
-        </button>
-      </div>
-      <div class="shelf-plank"></div>
+      <p class="flow-hint">Drag or swipe to browse</p>
     </div>
     <article class="card book-detail" id="book-detail">
       <p class="label card-label" id="bd-status">The bar</p>
       <p><strong id="bd-title">Between Two Fires</strong> <span class="book-byline">by <span id="bd-author">Christopher Buehlman</span></span></p>
       <p id="bd-blurb">The standard. Plague-era France, a disgraced knight, and a war between heaven and hell fought at ground level. Everything else on this shelf gets measured against it.</p>
     </article>
-    <p class="section-note">The six on the lower shelf are the shortlist I'm picking between. I haven't started one yet; the shelf moves when I do.</p>
+    <p class="section-note">Six of these are the shortlist I'm picking between. I haven't started one yet; the list moves when I do.</p>
   </section>
 </main>
 
@@ -104,24 +113,67 @@
 </footer>
 <script>
 (function () {
+  var track = document.getElementById('flow-track');
+  if (!track) return;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var detail = {
     status: document.getElementById('bd-status'),
     title: document.getElementById('bd-title'),
     author: document.getElementById('bd-author'),
     blurb: document.getElementById('bd-blurb')
   };
-  var books = Array.prototype.slice.call(document.querySelectorAll('.book'));
-  books.forEach(function (b) {
-    b.addEventListener('click', function () {
-      books.forEach(function (x) { x.classList.remove('selected'); x.setAttribute('aria-pressed', 'false'); });
-      b.classList.add('selected');
-      b.setAttribute('aria-pressed', 'true');
-      detail.status.textContent = b.getAttribute('data-status');
-      detail.title.textContent = b.getAttribute('data-title');
-      detail.author.textContent = b.getAttribute('data-author');
-      detail.blurb.textContent = b.getAttribute('data-blurb');
+  var items = Array.prototype.slice.call(track.querySelectorAll('.cov'));
+  var centered = -1;
+
+  function select(i) {
+    if (i === centered) return;
+    centered = i;
+    items.forEach(function (x, j) {
+      x.classList.toggle('selected', j === i);
+      x.setAttribute('aria-pressed', j === i ? 'true' : 'false');
     });
+    var b = items[i];
+    detail.status.textContent = b.getAttribute('data-status');
+    detail.title.textContent = b.getAttribute('data-title');
+    detail.author.textContent = b.getAttribute('data-author');
+    detail.blurb.textContent = b.getAttribute('data-blurb');
+  }
+
+  function layout() {
+    var mid = track.scrollLeft + track.clientWidth / 2;
+    var best = 0, bestDist = Infinity;
+    items.forEach(function (it, i) {
+      var c = it.offsetLeft + it.offsetWidth / 2;
+      var off = (c - mid) / it.offsetWidth; // distance from center, in book widths
+      var rot = Math.max(-62, Math.min(62, off * -55));
+      var z = -Math.min(240, Math.abs(off) * 75);
+      it.style.transform = 'rotateY(' + rot.toFixed(1) + 'deg) translateZ(' + z.toFixed(0) + 'px)';
+      it.style.zIndex = String(100 - Math.round(Math.abs(off) * 10));
+      it.style.filter = 'brightness(' + (1 - Math.min(0.45, Math.abs(off) * 0.17)).toFixed(2) + ')';
+      if (Math.abs(c - mid) < bestDist) { bestDist = Math.abs(c - mid); best = i; }
+    });
+    select(best);
+  }
+
+  var ticking = false;
+  track.addEventListener('scroll', function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(function () { layout(); ticking = false; }); }
+  }, { passive: true });
+  window.addEventListener('resize', layout);
+
+  function centerItem(i, smooth) {
+    var it = items[i];
+    track.scrollTo({
+      left: it.offsetLeft - (track.clientWidth - it.offsetWidth) / 2,
+      behavior: smooth && !reduced ? 'smooth' : 'auto'
+    });
+  }
+  items.forEach(function (it, i) {
+    it.addEventListener('click', function () { centerItem(i, true); });
   });
+
+  centerItem(0, false);
+  layout();
 })();
 </script>
 <script>
