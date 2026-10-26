@@ -872,10 +872,12 @@ html.latent-live[data-world="golden"] .slice-cap { background: rgba(24, 14, 4, 0
 html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.38); }
 
 /* ---------- Latent Sitemap ---------- */
+.latent-head { margin-bottom: 14px; }
+.latent-head h1 { font-size: 28px; color: #f4f7fb; }
 .latent-stage {
   position: relative;
-  height: 74vh;
-  min-height: 480px;
+  height: 80vh;
+  min-height: 520px;
   border-radius: 18px;
   overflow: hidden;
   background: #030209;
@@ -898,25 +900,6 @@ html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.3
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09),
               inset 0 1px 0 rgba(255, 255, 255, 0.13);
   border-radius: 14px;
-}
-.latent-card { padding: 20px 22px; margin-bottom: 18px; }
-.latent-kicker {
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  color: var(--teal);
-}
-.latent-card h1 { font-size: 30px; margin: 5px 0 8px; color: #f4f7fb; }
-.latent-card p { font-size: 14.5px; line-height: 1.65; color: rgba(230, 238, 250, 0.92); max-width: 640px; }
-.latent-card .latent-panel-note { margin-top: 8px; font-size: 12.5px; color: rgba(167, 179, 199, 0.9); }
-.latent-card-hint {
-  margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(94, 234, 212, 0.85);
 }
 .latent-explore {
   display: none;
@@ -956,5 +939,4 @@ html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.3
 .map-group li a:hover, .map-group h3 a:hover { color: #f4f7fb; }
 @media (max-width: 720px) {
   .latent-stage { height: 64vh; min-height: 430px; }
-  .latent-card h1 { font-size: 25px; }
-}
+  }

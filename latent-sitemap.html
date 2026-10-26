@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Latent Sitemap — Adam Laloge</title>
 <meta name="description" content="A sitemap drawn as a latent space: every photo, book, artwork, and project on Adam Laloge's site as a point in one flowing map.">
-<link rel="stylesheet" href="styles.css?v=31">
+<link rel="stylesheet" href="styles.css?v=33">
 </head>
 <body>
 <header class="site-header">
@@ -26,14 +26,9 @@
 </header>
 
 <main class="wrap">
-  <section class="latent-intro">
-    <div class="latent-glass latent-card">
-      <p class="latent-kicker">Sitemap</p>
-      <h1>Latent Sitemap</h1>
-      <p>This site drawn as a latent space. Every photo, book, artwork, and project is a point here: placed by what it belongs with, colored by a color measured from the thing itself. Near means related.</p>
-      <p class="latent-panel-note">The map is generated from the site's own content each time the site is built, so it never goes stale. Add something to the site and it shows up here.</p>
-      <p class="latent-card-hint">Move or drag to explore &middot; tap a bright point to select it, tap it again to open it &middot; tap the dark to sample</p>
-    </div>
+  <section class="latent-head">
+    <h1>Latent Sitemap</h1>
+    <p class="section-note">Tap a point to select it, tap it again to open it. On a computer, just click.</p>
   </section>
   <section class="latent-map-sec">
     <div class="latent-stage" id="latent-stage">
@@ -160,6 +155,15 @@
     mask.addColorStop(0.7, 'rgba(0,0,0,0.75)');
     mask.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = mask; g.fillRect(0, 0, 256, 256);
+    // Smooth the cloud: shrink it right down and blow it back up. The
+    // round trip erases the internal blob edges, which are what quantize
+    // into visible grain on 1x displays. Fog has no detail worth keeping.
+    var small = document.createElement('canvas'); small.width = small.height = 56;
+    var sg = small.getContext('2d');
+    sg.drawImage(c, 0, 0, 56, 56);
+    g.globalCompositeOperation = 'source-over';
+    g.clearRect(0, 0, 256, 256);
+    g.drawImage(small, 0, 0, 256, 256);
     return c;
   }
   function makeSpark(rgb) {
