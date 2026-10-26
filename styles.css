@@ -136,7 +136,21 @@ section {
 section:first-of-type { border-top: none; margin-top: 0; }
 
 /* Hero: the starfield lives here, as a backdrop. The rest of the page is plain dark. */
-.hero { padding-top: 72px; position: relative; overflow: hidden; }
+html, body { overflow-x: clip; }
+.hero {
+  padding-top: 72px;
+  position: relative;
+  overflow: hidden;
+  /* Full-bleed: the sky runs edge to edge, breaking out of the content column */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding-left: 28px;
+  padding-right: 28px;
+  box-sizing: border-box;
+}
+@media (min-width: 1101px) {
+  .hero { padding-left: calc(50vw - 522px); padding-right: calc(50vw - 522px); }
+}
 .hero > *:not(#sky) { position: relative; z-index: 1; }
 /* Static fallback sky (no-JS), scoped to the hero like the canvas */
 .hero::before {

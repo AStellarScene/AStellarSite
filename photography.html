@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Photography — Adam Laloge</title>
 <meta name="description" content="Photographs by Adam Laloge: landscapes and sunsets.">
-<link rel="stylesheet" href="styles.css?v=8">
+<link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
 <header class="site-header">
@@ -25,29 +25,30 @@
 
 <main class="wrap">
   <section id="photography">
-                          <p class="label">Photography</p>
-                          <h2>Off the clock</h2>
-                          <p class="section-note">Landscapes and sunsets. All of these are my own photographs.</p>
-                      
-                          <div class="gal-chips" role="group" aria-label="Filter photos">
-                            <button class="chip active" data-filter="all" type="button">All</button>
-                            <button class="chip" data-filter="sunsets" type="button">Sunsets</button>
-                            <button class="chip" data-filter="shoreline" type="button">Shoreline</button>
-                            <button class="chip" data-filter="details" type="button">Details</button>
-                          </div>
-                      
-                          <div class="gal-stage">
-                            <img id="gal-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass">
-                            <button class="gal-btn gal-prev" id="gal-prev" type="button" aria-label="Previous photo">&#8249;</button>
-                            <button class="gal-btn gal-next" id="gal-next" type="button" aria-label="Next photo">&#8250;</button>
-                            <div class="gal-cap">
-                              <span id="gal-title">Sunset Through the Grass</span>
-                              <span class="gal-count" id="gal-count">1 / 8</span>
-                            </div>
-                          </div>
-                      
-                          <div class="gal-thumbs" id="gal-thumbs"></div>
-                        </section>
+                              <p class="label">Photography</p>
+                              <h2>Off the clock</h2>
+                              <p class="section-note">Landscapes and sunsets. All of these are my own photographs.</p>
+                          
+                              <div class="gal-chips" role="group" aria-label="Filter photos">
+                                <button class="chip active" data-filter="all" type="button">All</button>
+                                <button class="chip" data-filter="sunsets" type="button">Sunsets</button>
+                                <button class="chip" data-filter="shoreline" type="button">Shoreline</button>
+              <button class="chip" data-filter="landscape" type="button">Landscapes</button>
+                                <button class="chip" data-filter="details" type="button">Details</button>
+                              </div>
+                          
+                              <div class="gal-stage">
+                                <img id="gal-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass">
+                                <button class="gal-btn gal-prev" id="gal-prev" type="button" aria-label="Previous photo">&#8249;</button>
+                                <button class="gal-btn gal-next" id="gal-next" type="button" aria-label="Next photo">&#8250;</button>
+                                <div class="gal-cap">
+                                  <span id="gal-title">Sunset Through the Grass</span>
+                                  <span class="gal-count" id="gal-count">1 / 19</span>
+                                </div>
+                              </div>
+                          
+                              <div class="gal-thumbs" id="gal-thumbs"></div>
+                            </section>
 </main>
 
 <footer class="site-footer">
@@ -63,13 +64,21 @@
     { src: 'photos/sunset-water.jpg',    title: 'Sun Over Open Water',      group: 'sunsets',   w: 1206, h: 1809, alt: 'Sun low over open water, its reflection running down the frame' },
     { src: 'photos/pier-lighthouse.jpg', title: 'The Pier',                 group: 'shoreline', w: 1206, h: 804,  alt: 'A long pier to a lighthouse, people walking out over the water' },
     { src: 'photos/shoreline-bluff.jpg', title: 'From the Bluff',           group: 'shoreline', w: 1206, h: 804,  alt: 'The shoreline from a bluff, blue water over a narrow beach' },
-    { src: 'photos/gull-beach.jpg',      title: 'Waterline',                group: 'shoreline', w: 1206, h: 804,  alt: 'A gull walking the waterline on a sandy beach' },
     { src: 'photos/juniper-berries.jpg', title: 'Juniper Berries',          group: 'details',   w: 1206, h: 804,  alt: 'Juniper branch with blue berries, close up' },
-    { src: 'photos/red-berries.jpg',     title: 'Red Berries',              group: 'details',   w: 1206, h: 804,  alt: 'Red berries on a branch, close up' },
     { src: 'photos/acorn.jpg',           title: 'Acorn',                    group: 'details',   w: 1206, h: 804,  alt: 'An acorn on sandy ground among fallen leaves, close up' },
     { src: 'photos/pine-backlit.jpg',    title: 'Pine, Backlit',            group: 'details',   w: 1206, h: 804,  alt: 'Pine branch close up, needles rimmed with low sunlight, spider silk between them' },
     { src: 'photos/sunset-trees.jpg',    title: 'Sun Through the Trees',    group: 'sunsets',   w: 1206, h: 804,  alt: 'Sun low over open water, framed by silhouetted trees on both sides' },
-    { src: 'photos/meadow-barn.jpg',     title: 'The Meadow',               group: 'sunsets',   w: 1206, h: 804,  alt: 'A meadow at golden hour, split-rail fence in front, a small barn in the light between the trees' }
+    { src: 'photos/meadow-barn.jpg',     title: 'The Meadow',               group: 'sunsets',   w: 1206, h: 804,  alt: 'A meadow at golden hour, split-rail fence in front, a small barn in the light between the trees' },
+    { src: 'photos/winter-path.jpg',     title: 'Winter Path',              group: 'sunsets',   w: 1206, h: 804,  alt: 'A paved path through bare winter trees, sunset glowing at the end of it' },
+    { src: 'photos/field-tree.jpg',      title: 'The Field Tree',           group: 'landscape', w: 1206, h: 804,  alt: 'A bare oak in an open field, a white barn behind it' },
+    { src: 'photos/dunes.jpg',           title: 'The Dunes',                group: 'shoreline', w: 1206, h: 1608, alt: 'Sand dunes and juniper under a wide blue sky' },
+    { src: 'photos/lake-reeds.jpg',      title: 'Reeds on the Lake',        group: 'shoreline', w: 1206, h: 905,  alt: 'Ferns and reeds at the edge of a lake, a small island across the water' },
+    { src: 'photos/harbor-overlook.jpg', title: 'Over the Harbor',          group: 'shoreline', w: 1206, h: 905,  alt: 'Houses above a harbor seen from a hill, a lighthouse across the water' },
+    { src: 'photos/lighthouse-wake.jpg', title: 'The Wake',                 group: 'shoreline', w: 1206, h: 1222, alt: 'A boat wake spreading across open water toward a white lighthouse' },
+    { src: 'photos/ferry-flag.jpg',      title: 'Ferry Flag',               group: 'shoreline', w: 1206, h: 905,  alt: 'An American flag flying from a ferry, a long bridge behind it' },
+    { src: 'photos/the-bridge.jpg',      title: 'The Long Bridge',          group: 'shoreline', w: 1206, h: 905,  alt: 'A green suspension bridge crossing open water under a cloudy sky' },
+    { src: 'photos/autumn-woods.jpg',    title: 'Autumn Woods',             group: 'landscape', w: 1206, h: 905,  alt: 'Golden autumn woods, fallen leaves, late light through the trees' },
+    { src: 'photos/beach-dusk.jpg',      title: 'Beach at Dusk',            group: 'sunsets',   w: 1206, h: 905,  alt: 'A sandy beach curving away at sunset, small waves coming in' }
   ];
   var img = document.getElementById('gal-img');
   if (!img) return;

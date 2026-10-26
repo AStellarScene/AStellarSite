@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Adam Laloge</title>
 <meta name="description" content="Personal site of Adam Laloge, in West Harrison, Indiana: software projects, photography, and what I'm building lately.">
-<link rel="stylesheet" href="styles.css?v=8">
+<link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
 <header class="site-header">
@@ -103,7 +103,7 @@
   document.documentElement.classList.add('sky-on');
   var hero = canvas.parentElement;
 
-  var DPR = Math.min(window.devicePixelRatio || 1, 1.75);
+  var DPR = Math.min(window.devicePixelRatio || 1, window.innerWidth < 760 ? 1.3 : 1.75);
   var W = 0, H = 0;
   var stars = [], sparkles = [], blobs = [], bursts = [], meteor = null;
   var nextMeteorAt = 5000 + Math.random() * 7000;
@@ -132,7 +132,29 @@
   };
   var TINTS = [SPR.white, SPR.white, SPR.white, SPR.teal, SPR.gold];
 
-  var pointer = { x: -9999, y: -9999, sx: -9999, sy: -9999, active: false };
+  var pointer = { x: -9999, y: -9999, sx: -9999, sy: -9999, active: false, touch: false };
+
+  // The nebula is rendered to a small offscreen canvas and scaled up: the
+  // gradients are soft, so the upscale is invisible, and the expensive
+  // 'screen' blend happens at 1/36th of the pixels. Refreshed every 4th
+  // frame, which the slow drift makes imperceptible.
+  var neb = document.createElement('canvas');
+  var nctx = neb.getContext('2d');
+  var frameNo = 0;
+  function renderNebula(t) {
+    var nw = neb.width, nh = neb.height;
+    nctx.clearRect(0, 0, nw, nh);
+    nctx.globalCompositeOperation = 'screen';
+    blobs.forEach(function (b) {
+      var bx = (b.fx + Math.sin(t * b.p1 + b.ph) * 0.05) * nw;
+      var by = (b.fy + Math.cos(t * b.p2 + b.ph * 1.7) * 0.06) * nh;
+      var br = b.r * Math.max(nw, nh);
+      nctx.globalAlpha = b.a * (0.85 + 0.15 * Math.sin(t * 0.0002 + b.ph));
+      nctx.drawImage(b.spr, bx - br, by - br, br * 2, br * 2);
+    });
+    nctx.globalCompositeOperation = 'source-over';
+    nctx.globalAlpha = 1;
+  }
 
   function build() {
     var rect = hero.getBoundingClientRect();
@@ -141,6 +163,8 @@
     canvas.width = Math.round(W * DPR);
     canvas.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    neb.width = Math.max(80, Math.round(W / 6));
+    neb.height = Math.max(60, Math.round(H / 6));
 
     blobs = [
       { fx: 0.16, fy: 0.30, r: 0.62, spr: SPR.teal,   a: 0.16, p1: 0.00011, p2: 0.00007, ph: 0.5 },
@@ -149,7 +173,7 @@
       { fx: 0.42, fy: 0.55, r: 0.45, spr: SPR.teal,   a: 0.08, p1: 0.00013, p2: 0.00005, ph: 5.3 }
     ];
 
-    var count = Math.min(190, Math.floor(W * H / 5200));
+    var count = Math.min(W < 760 ? 150 : 190, Math.floor(W * H / (W < 760 ? 6400 : 5200)));
     stars = [];
     for (var i = 0; i < count; i++) {
       var layer = i % 3; // 0 far, 1 mid, 2 near
@@ -201,23 +225,19 @@
     pointer.sy += (pointer.y - pointer.sy) * 0.06;
     var px = (pointer.sx / Math.max(W, 1) - 0.5), py = (pointer.sy / Math.max(H, 1) - 0.5);
 
-    // Flowing nebula: big soft sprites drifting on slow sine currents.
-    ctx.globalCompositeOperation = 'screen';
-    blobs.forEach(function (b) {
-      var bx = (b.fx + Math.sin(t * b.p1 + b.ph) * 0.05) * W;
-      var by = (b.fy + Math.cos(t * b.p2 + b.ph * 1.7) * 0.06) * H;
-      var br = b.r * Math.max(W, H);
-      ctx.globalAlpha = b.a * (0.85 + 0.15 * Math.sin(t * 0.0002 + b.ph));
-      ctx.drawImage(b.spr, bx - br, by - br, br * 2, br * 2);
-    });
+    // Flowing nebula, pre-composited at low res (see renderNebula).
+    frameNo++;
+    if (frameNo % 4 === 1) renderNebula(t);
+    ctx.drawImage(neb, 0, 0, W, H);
 
-    // Pointer bloom: a soft light where the visitor is.
-    if (pointer.active) {
+    // Pointer bloom: a soft light where the visitor is (mouse/pen only).
+    if (pointer.active && !pointer.touch) {
+      ctx.globalCompositeOperation = 'screen';
       ctx.globalAlpha = 0.10;
       ctx.drawImage(SPR.teal, pointer.sx - 190, pointer.sy - 190, 380, 380);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
     }
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1;
 
     // Stars: layered parallax, slow current, twinkle, pointer brightening.
     stars.forEach(function (st) {
@@ -326,6 +346,7 @@
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
   hero.addEventListener('pointermove', function (e) {
+    pointer.touch = e.pointerType === 'touch';
     var p = heroPos(e);
     pointer.x = p.x; pointer.y = p.y;
     if (!pointer.active) { pointer.sx = p.x; pointer.sy = p.y; }
