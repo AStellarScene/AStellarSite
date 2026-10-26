@@ -164,6 +164,16 @@
     g.globalCompositeOperation = 'source-over';
     g.clearRect(0, 0, 256, 256);
     g.drawImage(small, 0, 0, 256, 256);
+    // Dither the cloud: a whisper of monochrome noise baked into the
+    // sprite breaks the 8-bit contour steps that otherwise stripe a big
+    // soft gradient on 1x displays. Baked in, so it never shimmers.
+    var imgData = g.getImageData(0, 0, 256, 256);
+    var px = imgData.data;
+    for (var q = 0; q < px.length; q += 4) {
+      var nz = (Math.random() + Math.random() - 1) * 2.4;
+      px[q] += nz; px[q + 1] += nz; px[q + 2] += nz;
+    }
+    g.putImageData(imgData, 0, 0);
     return c;
   }
   function makeSpark(rgb) {
