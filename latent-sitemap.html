@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Latent Sitemap — Adam Laloge</title>
 <meta name="description" content="A sitemap drawn as a latent space: every photo, book, artwork, and project on Adam Laloge's site as a point in one flowing map.">
-<link rel="stylesheet" href="styles.css?v=34">
+<link rel="stylesheet" href="styles.css?v=35">
 </head>
 <body>
 <header class="site-header">
@@ -33,7 +33,7 @@
         <h1>Latent Sitemap</h1>
         <p class="tb-hint">Tap a point to select it &middot; tap again to open it &middot; tap the dark to sample</p>
       </div>
-      <button class="latent-glass latent-explore" id="latent-explore" type="button">Explore the map</button>
+      <button class="latent-glass latent-explore" id="latent-explore" type="button">Scroll the page</button>
     </div>
   </section>
   <section class="sitemap-list-sec">
@@ -300,7 +300,8 @@
     probe.tx = pt.x; probe.ty = pt.y; probe.active = true; probe.last = performance.now();
     downPt = pt; downAt = performance.now(); downType = e.pointerType || 'mouse';
   }, { passive: true });
-  canvas.addEventListener('pointercancel', function () { downPt = null; }, { passive: true });
+  canvas.addEventListener('pointercancel', function () { downPt = null; probe.last = 0; }, { passive: true });
+  canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
   canvas.addEventListener('pointerup', function (e) {
     if (!downPt) return;
     var pt = toLocal(e);
@@ -327,17 +328,18 @@
     sample(pt.x, pt.y);
   }, { passive: true });
 
-  // Explore mode (touch): the chip hands drag control to the map, so a
-  // drag explores instead of scrolling the page. Off by default, so the
-  // page scrolls normally until the visitor asks for the map.
+  // Touch ownership (touch devices): the map captures drags by default
+  // (touch-action: none in the stylesheet), so touching the visualizer
+  // never scrolls the page or fights the browser mid-gesture. The chip
+  // hands control back: tap it and drags scroll the page again.
   var exploreBtn = document.getElementById('latent-explore');
   if (exploreBtn) {
-    var exploring = false;
+    var released = false;
     exploreBtn.addEventListener('click', function () {
-      exploring = !exploring;
-      canvas.style.touchAction = exploring ? 'none' : 'pan-y';
-      exploreBtn.textContent = exploring ? 'Done' : 'Explore the map';
-      exploreBtn.classList.toggle('on', exploring);
+      released = !released;
+      canvas.style.touchAction = released ? 'pan-y' : 'none';
+      exploreBtn.textContent = released ? 'Explore the map' : 'Scroll the page';
+      exploreBtn.classList.toggle('on', released);
     });
   }
 
