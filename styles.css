@@ -370,6 +370,9 @@ section:first-of-type { border-top: none; margin-top: 0; }
   transform: rotateY(-90deg) translateZ(calc(var(--bd) / 2));
   background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.1)), var(--cov);
 }
+.flow-block { margin-top: 24px; }
+.flow-block .flow-scene { margin: 8px 0 14px; }
+.flow-label { margin: 0 0 2px; }
 .flow-hint {
   text-align: center;
   color: var(--dim);

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bookshelf — Adam Laloge</title>
 <meta name="description" content="Adam Laloge's bookshelf: adult fantasy, the bar, and the shortlist he's picking from.">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 <header class="site-header">
@@ -27,9 +27,11 @@
   <section id="bookshelf">
     <p class="label">Bookshelf</p>
     <h2>The bookshelf</h2>
-    <p>I read adult fantasy, the dark end of it: magic, dragons, and worlds that don't pull punches. Not YA, and not romance wearing a fantasy costume. Flick through the covers; tap one to bring it to the front.</p>
-    <div class="flow-scene">
-      <div class="flow-track" id="flow-track">
+    <p>I read adult fantasy, the dark end of it: magic, dragons, and worlds that don't pull punches. Not YA, and not romance wearing a fantasy costume. Two shelves: what I'm reading, and what's waiting. Flick through the covers; tap one to bring it to the front.</p>
+    <div class="flow-block">
+      <p class="label flow-label">Reading</p>
+      <div class="flow-scene">
+        <div class="flow-track">
         <button type="button" class="cov selected" style="--bd:34px;--cov:#4a1f1f" data-title="Between Two Fires" data-author="Christopher Buehlman" data-status="The bar" data-blurb="The standard. Plague-era France, a disgraced knight, and a war between heaven and hell fought at ground level. Everything else on this shelf gets measured against it." aria-pressed="true" aria-label="Between Two Fires by Christopher Buehlman">
           <span class="cov-edge cov-edge-left"></span>
           <span class="cov-edge cov-edge-right"></span>
@@ -39,7 +41,20 @@
             <span class="cov-author">Christopher Buehlman</span>
           </span>
         </button>
-        <button type="button" class="cov" style="--bd:36px;--cov:#1f2a44" data-title="The Shadow of the Gods" data-author="John Gwynne" data-status="Up next" data-blurb="Grimdark with dragons, and the one that asks the least homework up front. Current front-runner." aria-pressed="false" aria-label="The Shadow of the Gods by John Gwynne">
+        </div>
+        <p class="flow-hint">Drag or swipe to browse</p>
+      </div>
+      <article class="card book-detail">
+        <p class="label card-label bd-status">The bar</p>
+        <p><strong class="bd-title">Between Two Fires</strong> <span class="book-byline">by <span class="bd-author">Christopher Buehlman</span></span></p>
+        <p class="bd-blurb">The standard. Plague-era France, a disgraced knight, and a war between heaven and hell fought at ground level. Everything else on this shelf gets measured against it.</p>
+      </article>
+    </div>
+    <div class="flow-block">
+      <p class="label flow-label">To read</p>
+      <div class="flow-scene">
+        <div class="flow-track">
+        <button type="button" class="cov selected" style="--bd:36px;--cov:#1f2a44" data-title="The Shadow of the Gods" data-author="John Gwynne" data-status="Up next" data-blurb="Grimdark with dragons, and the one that asks the least homework up front. Current front-runner." aria-pressed="true" aria-label="The Shadow of the Gods by John Gwynne">
           <span class="cov-edge cov-edge-left"></span>
           <span class="cov-edge cov-edge-right"></span>
           <span class="cov-front">
@@ -93,15 +108,16 @@
             <span class="cov-author">R. Scott Bakker</span>
           </span>
         </button>
+        </div>
+        <p class="flow-hint">Drag or swipe to browse</p>
       </div>
-      <p class="flow-hint">Drag or swipe to browse</p>
+      <article class="card book-detail">
+        <p class="label card-label bd-status">Up next</p>
+        <p><strong class="bd-title">The Shadow of the Gods</strong> <span class="book-byline">by <span class="bd-author">John Gwynne</span></span></p>
+        <p class="bd-blurb">Grimdark with dragons, and the one that asks the least homework up front. Current front-runner.</p>
+      </article>
     </div>
-    <article class="card book-detail" id="book-detail">
-      <p class="label card-label" id="bd-status">The bar</p>
-      <p><strong id="bd-title">Between Two Fires</strong> <span class="book-byline">by <span id="bd-author">Christopher Buehlman</span></span></p>
-      <p id="bd-blurb">The standard. Plague-era France, a disgraced knight, and a war between heaven and hell fought at ground level. Everything else on this shelf gets measured against it.</p>
-    </article>
-    <p class="section-note">Six of these are the shortlist I'm picking between. I haven't started one yet; the list moves when I do.</p>
+    <p class="section-note">The to-read shelf is the shortlist I'm picking between. I haven't started one yet; when I do, it moves to the top shelf.</p>
   </section>
 </main>
 
@@ -113,67 +129,69 @@
 </footer>
 <script>
 (function () {
-  var track = document.getElementById('flow-track');
-  if (!track) return;
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var detail = {
-    status: document.getElementById('bd-status'),
-    title: document.getElementById('bd-title'),
-    author: document.getElementById('bd-author'),
-    blurb: document.getElementById('bd-blurb')
-  };
-  var items = Array.prototype.slice.call(track.querySelectorAll('.cov'));
-  var centered = -1;
+  document.querySelectorAll('.flow-block').forEach(function (block) {
+    var track = block.querySelector('.flow-track');
+    if (!track) return;
+    var detail = {
+      status: block.querySelector('.bd-status'),
+      title: block.querySelector('.bd-title'),
+      author: block.querySelector('.bd-author'),
+      blurb: block.querySelector('.bd-blurb')
+    };
+    var items = Array.prototype.slice.call(track.querySelectorAll('.cov'));
+    var centered = -1;
 
-  function select(i) {
-    if (i === centered) return;
-    centered = i;
-    items.forEach(function (x, j) {
-      x.classList.toggle('selected', j === i);
-      x.setAttribute('aria-pressed', j === i ? 'true' : 'false');
-    });
-    var b = items[i];
-    detail.status.textContent = b.getAttribute('data-status');
-    detail.title.textContent = b.getAttribute('data-title');
-    detail.author.textContent = b.getAttribute('data-author');
-    detail.blurb.textContent = b.getAttribute('data-blurb');
-  }
+    function select(i) {
+      if (i === centered) return;
+      centered = i;
+      items.forEach(function (x, j) {
+        x.classList.toggle('selected', j === i);
+        x.setAttribute('aria-pressed', j === i ? 'true' : 'false');
+      });
+      var b = items[i];
+      detail.status.textContent = b.getAttribute('data-status');
+      detail.title.textContent = b.getAttribute('data-title');
+      detail.author.textContent = b.getAttribute('data-author');
+      detail.blurb.textContent = b.getAttribute('data-blurb');
+    }
 
-  function layout() {
-    var mid = track.scrollLeft + track.clientWidth / 2;
-    var best = 0, bestDist = Infinity;
+    function layout() {
+      var mid = track.scrollLeft + track.clientWidth / 2;
+      var best = 0, bestDist = Infinity;
+      items.forEach(function (it, i) {
+        var c = it.offsetLeft + it.offsetWidth / 2;
+        var off = (c - mid) / it.offsetWidth; // distance from center, in book widths
+        var rot = Math.max(-62, Math.min(62, off * -55));
+        var z = -Math.min(240, Math.abs(off) * 75);
+        it.style.transform = 'rotateY(' + rot.toFixed(1) + 'deg) translateZ(' + z.toFixed(0) + 'px)';
+        it.style.zIndex = String(100 - Math.round(Math.abs(off) * 10));
+        it.style.filter = 'brightness(' + (1 - Math.min(0.45, Math.abs(off) * 0.17)).toFixed(2) + ')';
+        if (Math.abs(c - mid) < bestDist) { bestDist = Math.abs(c - mid); best = i; }
+      });
+      select(best);
+    }
+
+    var ticking = false;
+    track.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(function () { layout(); ticking = false; }); }
+    }, { passive: true });
+    window.addEventListener('resize', layout);
+
+    function centerItem(i, smooth) {
+      var it = items[i];
+      track.scrollTo({
+        left: it.offsetLeft - (track.clientWidth - it.offsetWidth) / 2,
+        behavior: smooth && !reduced ? 'smooth' : 'auto'
+      });
+    }
     items.forEach(function (it, i) {
-      var c = it.offsetLeft + it.offsetWidth / 2;
-      var off = (c - mid) / it.offsetWidth; // distance from center, in book widths
-      var rot = Math.max(-62, Math.min(62, off * -55));
-      var z = -Math.min(240, Math.abs(off) * 75);
-      it.style.transform = 'rotateY(' + rot.toFixed(1) + 'deg) translateZ(' + z.toFixed(0) + 'px)';
-      it.style.zIndex = String(100 - Math.round(Math.abs(off) * 10));
-      it.style.filter = 'brightness(' + (1 - Math.min(0.45, Math.abs(off) * 0.17)).toFixed(2) + ')';
-      if (Math.abs(c - mid) < bestDist) { bestDist = Math.abs(c - mid); best = i; }
+      it.addEventListener('click', function () { centerItem(i, true); });
     });
-    select(best);
-  }
 
-  var ticking = false;
-  track.addEventListener('scroll', function () {
-    if (!ticking) { ticking = true; requestAnimationFrame(function () { layout(); ticking = false; }); }
-  }, { passive: true });
-  window.addEventListener('resize', layout);
-
-  function centerItem(i, smooth) {
-    var it = items[i];
-    track.scrollTo({
-      left: it.offsetLeft - (track.clientWidth - it.offsetWidth) / 2,
-      behavior: smooth && !reduced ? 'smooth' : 'auto'
-    });
-  }
-  items.forEach(function (it, i) {
-    it.addEventListener('click', function () { centerItem(i, true); });
+    centerItem(0, false);
+    layout();
   });
-
-  centerItem(0, false);
-  layout();
 })();
 </script>
 <script>
