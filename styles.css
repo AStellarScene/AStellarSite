@@ -538,8 +538,13 @@ ul.plain { list-style: none; padding-left: 0; }
   background: #000;
   transition: height 0.8s cubic-bezier(0.22, 0.8, 0.3, 1);
 }
-.latent-band { scroll-margin-top: 76px; }
-.latent-band.open { height: calc(100vh - 64px); min-height: 480px; }
+.latent-band.open {
+  position: fixed;
+  inset: 0;
+  height: auto;
+  min-height: 0;
+  z-index: 40;
+}
 .slice {
   -webkit-appearance: none;
   appearance: none;
@@ -649,6 +654,16 @@ ul.plain { list-style: none; padding-left: 0; }
 .latent-band.open .slice.active .slice-cap { opacity: 1; transform: none; }
 .slice:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
 
+/* Over an opened world: header and title block float above the image */
+html.latent-live .site-header { position: relative; z-index: 50; }
+html.latent-live .latent-head { position: relative; z-index: 45; }
+html.latent-live[data-world] .site-header {
+  backdrop-filter: blur(14px) saturate(1.35);
+  -webkit-backdrop-filter: blur(14px) saturate(1.35);
+}
+html.latent-live[data-world="golden"] .site-header { background: rgba(26, 16, 5, 0.38); }
+html.latent-live[data-world="ember"] .site-header { background: rgba(22, 9, 5, 0.38); }
+
 /* Opening a world re-skins the whole page in its colors */
 html.latent-live body,
 html.latent-live .site-header,
@@ -710,7 +725,6 @@ html.latent-live[data-world="ember"] .world-ambient {
 }
 @media (max-width: 760px) {
   .latent-band { height: 54vh; min-height: 320px; }
-  .latent-band.open { height: calc(100vh - 64px); min-height: 420px; }
   .slice-cap strong { font-size: 21px; }
 }
 
@@ -718,8 +732,13 @@ html.latent-live[data-world="ember"] .world-ambient {
    wavy edges run horizontally, seams ride the horizontal boundaries */
 @media (orientation: portrait) {
   .latent-band { flex-direction: column; height: 68vh; }
-  .latent-band { scroll-margin-top: 76px; }
-.latent-band.open { height: calc(100vh - 64px); min-height: 480px; }
+  .latent-band.open {
+  position: fixed;
+  inset: 0;
+  height: auto;
+  min-height: 0;
+  z-index: 40;
+}
   .slice + .slice { margin-left: 0; margin-top: -16px; }
   .slice:not(:first-child) {
     clip-path: polygon(0 7px, 5% 6px, 17% 15px, 31% 4px, 45% 14px, 59% 5px, 73% 15px, 87% 4px, 100% 13px, 100% 100%, 0 100%);
