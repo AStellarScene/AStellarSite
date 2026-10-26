@@ -1019,8 +1019,14 @@ body.sitemap-body .site-header {
   position: absolute;
   top: 12px;
   left: 0;
-  right: 0;
-  padding: 16px 20px 15px;
+  right: auto;
+  width: min(540px, 100%);
+  padding: 14px 18px 13px;
+  background:
+    radial-gradient(120% 150% at 8% 0%, rgba(34, 190, 205, 0.16), rgba(34, 190, 205, 0) 55%),
+    radial-gradient(120% 160% at 96% 110%, rgba(216, 96, 158, 0.13), rgba(216, 96, 158, 0) 55%),
+    linear-gradient(120deg, rgba(34, 190, 205, 0.07), rgba(124, 93, 250, 0.07) 55%, rgba(228, 96, 52, 0.06)),
+    rgba(8, 11, 22, 0.36);
 }
 .latent-phead h1 { font-size: 30px; color: var(--heading); margin: 3px 0 5px; }
 .latent-phead .phead-note { color: #a7b3c7; font-size: 14.5px; margin: 0; }
