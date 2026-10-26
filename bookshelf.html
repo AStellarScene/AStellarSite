@@ -252,6 +252,21 @@
 
     centerItem(0, false);
     layout();
+    // Deep link (from Atlas): #book-<slug> brings that cover to the
+    // front of its shelf instead of just landing on the page.
+    (function () {
+      var m = /^#book-(.+)$/.exec(location.hash || '');
+      if (!m) return;
+      var slug = m[1], found = -1;
+      items.forEach(function (it, i) {
+        var t = (it.getAttribute('data-title') || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        if (t === slug) found = i;
+      });
+      if (found < 0) return;
+      centerItem(found, false);
+      layout();
+      block.scrollIntoView({ block: 'center' });
+    })();
   });
 })();
 </script>
