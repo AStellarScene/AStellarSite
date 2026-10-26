@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Games — Adam Laloge</title>
+<meta name="description" content="Games by Adam Laloge. Fly Theft Auto 3D, playable in the browser inside an arcade cabinet.">
+<link rel="stylesheet" href="styles.css?v=28">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">Adam Laloge</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
+    <nav id="site-nav">
+      <a href="index.html">Home</a>
+      <a href="work.html">Projects</a>
+      <a href="about.html">About</a>
+      <a href="photography.html">Photography</a>
+      <a href="bookshelf.html">Bookshelf</a>
+      <a href="dreams.html">Latent Dreams</a>
+      <a href="games.html" class="active">Games</a>
+      <a href="resume.html">Resume</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="games">
+    <p class="label">Games</p>
+    <h2>Games</h2>
+    <p>Things I make to play with. First one in the cabinet is mine in the only way that matters: I decided what it should be, and I decided when it was fun.</p>
+  </section>
+
+  <div class="cabinet">
+    <div class="cab-marquee"><span>Fly Theft Auto 3D</span></div>
+    <div class="cab-screen" id="cab-screen">
+      <iframe id="fta-frame" title="Fly Theft Auto 3D" data-src="games/fly-theft-auto.html" allow="autoplay" loading="lazy"></iframe>
+      <div class="crt" aria-hidden="true"></div>
+      <button type="button" class="coin-gate" id="coin-gate" aria-label="Insert coin and start Fly Theft Auto 3D">
+        <span class="coin-slot" aria-hidden="true"></span>
+        <span class="coin-text">Insert coin</span>
+        <span class="coin-sub">Click to power the cabinet</span>
+      </button>
+    </div>
+    <div class="cab-bar">
+      <span class="cab-status" id="cab-status">Cabinet idle &middot; the fly is waiting</span>
+      <button type="button" class="chip" id="crt-toggle" aria-pressed="true">Scanlines on</button>
+    </div>
+  </div>
+
+  <section>
+    <h3>What it is</h3>
+    <p>You are a fly in an endless streamed world: city, parks, desert, lakes, a beach with a pier. Jack moving traffic, scatter crowds, dive-bomb cars from the air, jam the cops' radios, and lose the heat somewhere useful. Roadblocks, spike strips, and searchlights push back. It runs entirely in the browser; nothing to install. Progression lasts for the session: close the tab and the city forgets you.</p>
+    <h3>Controls</h3>
+    <ul>
+      <li><strong>WASD or arrow keys</strong> &mdash; drive, and steer the fly</li>
+      <li><strong>E or Space</strong> &mdash; steal the car you're hovering over; Space again to hop out</li>
+      <li><strong>F</strong> &mdash; horn in a car; as the fly, dive-bomb a car or jam a cop's radio</li>
+      <li><strong>Shift</strong> &mdash; boost (as the fly, rise)</li>
+      <li><strong>Ctrl</strong> &mdash; drift (as the fly, descend)</li>
+      <li><strong>Q</strong> &mdash; radio: Crimewave, Night Drive, Panic FM</li>
+      <li><strong>R</strong> &mdash; restart</li>
+      <li><strong>Touch</strong> &mdash; the game brings its own stick and buttons</li>
+    </ul>
+    <p class="section-note">How this was made: I directed the design and judged the fun; AI agents wrote the code under that direction. The first 3D version was terrible. This is the one that survived.</p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span><strong>Adam Laloge</strong></span>
+    <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a></span>
+  </div>
+</footer>
+<script>
+(function () {
+  var gate = document.getElementById('coin-gate');
+  var frame = document.getElementById('fta-frame');
+  var status = document.getElementById('cab-status');
+  var screen = document.getElementById('cab-screen');
+  if (gate && frame) {
+    gate.addEventListener('click', function () {
+      frame.src = frame.getAttribute('data-src');
+      gate.classList.add('off');
+      if (status) status.innerHTML = 'Cabinet on &middot; press Release the fly in the game to start';
+      try { frame.focus(); } catch (e) {}
+    });
+  }
+  var toggle = document.getElementById('crt-toggle');
+  if (toggle && screen) {
+    toggle.addEventListener('click', function () {
+      var off = screen.classList.toggle('crt-off');
+      toggle.textContent = off ? 'Scanlines off' : 'Scanlines on';
+      toggle.setAttribute('aria-pressed', off ? 'false' : 'true');
+    });
+  }
+})();
+</script>
+<script>
+(function () {
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('site-nav');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+
+</body>
+</html>
