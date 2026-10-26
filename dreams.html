@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Latent Dreams — Adam Laloge</title>
 <meta name="description" content="AI artwork directed by Adam Laloge. Images sit in two-image splits. Open one and it fills the screen while the page takes on its colors.">
-<link rel="stylesheet" href="styles.css?v=25">
+<link rel="stylesheet" href="styles.css?v=26">
 </head>
 <body>
 <header class="site-header">
@@ -74,6 +74,16 @@
   var slices = Array.prototype.slice.call(band.querySelectorAll('.slice'));
   var openIdx = -1;
   document.documentElement.classList.add('latent-live');
+  // The opened band starts below the top bar; CSS needs the bar's real
+  // height so the image is sized to the space under it, fully in view.
+  var header = document.querySelector('.site-header');
+  function setBar() {
+    if (!header) return;
+    var h = header.offsetHeight;
+    document.documentElement.style.setProperty('--bar-h', h + 'px');
+    document.documentElement.style.setProperty('--bar-half', (h / 2) + 'px');
+  }
+  window.addEventListener('resize', function () { if (openIdx >= 0) setBar(); });
   function toggle(idx) {
     if (openIdx === idx) {
       openIdx = -1;
@@ -81,7 +91,10 @@
       slices.forEach(function (s) { s.classList.remove('active'); s.setAttribute('aria-expanded', 'false'); });
       document.documentElement.removeAttribute('data-world');
       document.documentElement.classList.remove('world-lock');
+      document.documentElement.style.removeProperty('--bar-h');
+      document.documentElement.style.removeProperty('--bar-half');
     } else {
+      setBar();
       openIdx = idx;
       band.classList.add('open');
       slices.forEach(function (s, i) {

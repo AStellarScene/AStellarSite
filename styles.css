@@ -537,8 +537,11 @@ ul.plain { list-style: none; padding-left: 0; }
   transition: height 0.8s cubic-bezier(0.22, 0.8, 0.3, 1);
 }
 .latent-band.open {
+  /* Starts below the top bar (its height arrives as --bar-h, measured by
+     the page script) so the opened image is completely in view and never
+     slides under the bar's glass. */
   position: fixed;
-  inset: 0;
+  inset: var(--bar-h, 57px) 0 0 0;
   height: auto;
   min-height: 0;
   z-index: 40;
@@ -660,18 +663,38 @@ html.world-lock, html.world-lock body { overflow: hidden; }
 html.latent-live .site-header { position: relative; z-index: 50; }
 html.latent-live .latent-head { position: relative; z-index: 45; }
 html.latent-live[data-world] .site-header {
-  /* Pinned over the opened world: the image runs full-bleed underneath
-     the bar to the top edge of the screen, and the bar is frosted glass
-     over it, so nothing is hard-cut at the bar's lower edge. */
+  /* Pinned at the top while a world is open. The image itself does NOT
+     run under the bar (the opened band starts below it, so the artwork
+     stays completely in view); the glass is faked by the ::before layer,
+     a duplicated copy of the image's top strip, mirrored and blurred. */
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  backdrop-filter: blur(14px) saturate(1.35);
-  -webkit-backdrop-filter: blur(14px) saturate(1.35);
+  overflow: hidden;
+  background: #060607;
 }
-html.latent-live[data-world="golden"] .site-header { background: rgba(26, 16, 5, 0.38); }
-html.latent-live[data-world="ember"] .site-header { background: rgba(22, 9, 5, 0.38); }
+html.latent-live[data-world] .site-header::before {
+  content: "";
+  position: absolute;
+  inset: -20px;
+  background-size: cover;
+  background-position: 50% 32%;
+  transform: scaleY(-1);
+  filter: blur(16px) saturate(1.35);
+  pointer-events: none;
+}
+html.latent-live[data-world] .site-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+html.latent-live[data-world] .header-inner { position: relative; z-index: 1; }
+html.latent-live[data-world="golden"] .site-header::before { background-image: url("art/golden-city.jpg"); }
+html.latent-live[data-world="ember"] .site-header::before { background-image: url("art/obsidian-dragon.jpg"); }
+html.latent-live[data-world="golden"] .site-header::after { background: rgba(26, 16, 5, 0.38); }
+html.latent-live[data-world="ember"] .site-header::after { background: rgba(22, 9, 5, 0.38); }
 
 /* When a world opens, the text above it fades away entirely */
 html.latent-live .latent-head { transition: opacity 0.7s ease; }
@@ -747,7 +770,7 @@ html.latent-live[data-world="ember"] .world-ambient {
   .latent-band { flex-direction: column; height: 68vh; }
   .latent-band.open {
   position: fixed;
-  inset: 0;
+  inset: var(--bar-h, 57px) 0 0 0;
   height: auto;
   min-height: 0;
   z-index: 40;
@@ -798,11 +821,11 @@ html.latent-live[data-world="ember"] .world-ambient {
   margin-left: -50vw;
   width: 100vw;
   max-width: none;
-  height: 100vh;
-  height: 100dvh;
+  height: calc(100vh - var(--bar-h, 57px));
+  height: calc(100dvh - var(--bar-h, 57px));
   /* Subject-safe framing: when the viewport is wider than the image and
      cover has to crop vertically, take more from the bottom so the
-     subject near the top survives and sits below the frosted bar. */
+     subject near the top survives inside the visible area. */
   object-position: 50% 32%;
 }
 @media (orientation: portrait) {
@@ -810,8 +833,8 @@ html.latent-live[data-world="ember"] .world-ambient {
     left: 0;
     margin-left: 0;
     top: 50%;
-    margin-top: -50vh;
-    margin-top: -50dvh;
+    margin-top: calc(-50vh + var(--bar-half, 28px));
+    margin-top: calc(-50dvh + var(--bar-half, 28px));
   }
 }
 
