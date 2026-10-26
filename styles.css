@@ -538,7 +538,8 @@ ul.plain { list-style: none; padding-left: 0; }
   background: #000;
   transition: height 0.8s cubic-bezier(0.22, 0.8, 0.3, 1);
 }
-.latent-band.open { height: 84px; }
+.latent-band { scroll-margin-top: 76px; }
+.latent-band.open { height: calc(100vh - 64px); min-height: 480px; }
 .slice {
   -webkit-appearance: none;
   appearance: none;
@@ -605,9 +606,8 @@ ul.plain { list-style: none; padding-left: 0; }
 .latent-head { padding-bottom: 20px; }
 .latent-head .section-note { max-width: 62ch; }
 .latent-band { margin-bottom: 10px; }
-.latent-band.open .slice { flex-grow: 1; opacity: 1; clip-path: none; }
-.latent-band.open .slice.active { box-shadow: inset 0 0 0 2px var(--gold); }
-.latent-band.open .slice-cap { display: none; }
+.latent-band.open .slice { flex-grow: 0.0001; opacity: 0; }
+.latent-band.open .slice.active { flex-grow: 30; opacity: 1; clip-path: none; margin-left: 0; }
 .latent-band.open .slice-title { opacity: 0; }
 .slice-title {
   position: absolute;
@@ -648,16 +648,6 @@ ul.plain { list-style: none; padding-left: 0; }
 }
 .latent-band.open .slice.active .slice-cap { opacity: 1; transform: none; }
 .slice:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
-
-/* The caption of the world you're inside, set over its image */
-.world-cap { display: none; margin-top: 22px; }
-.world-cap.show { display: block; animation: capIn 0.6s ease both; }
-@keyframes capIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: none; }
-}
-.world-cap h3 { font-size: 27px; margin: 4px 0 6px; text-shadow: 0 1px 14px rgba(0, 0, 0, 0.65); }
-.world-cap p { color: var(--heading); text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7); max-width: 560px; }
 
 /* Opening a world re-skins the whole page in its colors */
 html.latent-live body,
@@ -701,17 +691,17 @@ html.latent-live[data-world="ember"] {
 html.latent-live[data-world="golden"] .world-ambient {
   opacity: 1;
   background:
-    linear-gradient(rgba(16, 9, 3, 0.22), rgba(16, 9, 3, 0.34) 52%, rgba(16, 9, 3, 0.66)),
-    radial-gradient(820px 560px at 92% 4%, rgba(255, 150, 50, 0.16), transparent 62%),
-    url("art/golden-city.jpg") center / cover no-repeat,
+    radial-gradient(720px 480px at 14% -4%, rgba(255, 179, 71, 0.22), transparent 62%),
+    radial-gradient(820px 560px at 92% 4%, rgba(255, 122, 40, 0.14), transparent 62%),
+    radial-gradient(900px 700px at 85% 90%, rgba(150, 90, 30, 0.10), transparent 62%),
     #140c05;
 }
 html.latent-live[data-world="ember"] .world-ambient {
   opacity: 1;
   background:
-    linear-gradient(rgba(10, 5, 4, 0.22), rgba(10, 5, 4, 0.34) 52%, rgba(10, 5, 4, 0.66)),
-    radial-gradient(820px 560px at 92% 2%, rgba(110, 130, 255, 0.13), transparent 62%),
-    url("art/obsidian-dragon.jpg") center / cover no-repeat,
+    radial-gradient(720px 480px at 14% -4%, rgba(255, 96, 44, 0.20), transparent 62%),
+    radial-gradient(820px 560px at 92% 2%, rgba(110, 130, 255, 0.12), transparent 62%),
+    radial-gradient(900px 700px at 85% 90%, rgba(255, 60, 30, 0.10), transparent 62%),
     #0e0605;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -720,7 +710,7 @@ html.latent-live[data-world="ember"] .world-ambient {
 }
 @media (max-width: 760px) {
   .latent-band { height: 54vh; min-height: 320px; }
-  .latent-band.open { height: 72px; }
+  .latent-band.open { height: calc(100vh - 64px); min-height: 420px; }
   .slice-cap strong { font-size: 21px; }
 }
 
@@ -728,7 +718,8 @@ html.latent-live[data-world="ember"] .world-ambient {
    wavy edges run horizontally, seams ride the horizontal boundaries */
 @media (orientation: portrait) {
   .latent-band { flex-direction: column; height: 68vh; }
-  .latent-band.open { height: 84px; }
+  .latent-band { scroll-margin-top: 76px; }
+.latent-band.open { height: calc(100vh - 64px); min-height: 480px; }
   .slice + .slice { margin-left: 0; margin-top: -16px; }
   .slice:not(:first-child) {
     clip-path: polygon(0 7px, 5% 6px, 17% 15px, 31% 4px, 45% 14px, 59% 5px, 73% 15px, 87% 4px, 100% 13px, 100% 100%, 0 100%);
@@ -761,17 +752,3 @@ html.latent-live[data-world="ember"] .world-ambient {
   }
 }
 
-@media (max-width: 760px) {
-  html.latent-live[data-world="golden"] .world-ambient {
-    background:
-      linear-gradient(rgba(16, 9, 3, 0.34), rgba(16, 9, 3, 0.48) 52%, rgba(16, 9, 3, 0.78)),
-      url("art/golden-city.jpg") center / cover no-repeat,
-      #140c05;
-  }
-  html.latent-live[data-world="ember"] .world-ambient {
-    background:
-      linear-gradient(rgba(10, 5, 4, 0.34), rgba(10, 5, 4, 0.48) 52%, rgba(10, 5, 4, 0.78)),
-      url("art/obsidian-dragon.jpg") center / cover no-repeat,
-      #0e0605;
-  }
-}

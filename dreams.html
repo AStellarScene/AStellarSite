@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Latent Dreams — Adam Laloge</title>
 <meta name="description" content="Latent Dreams: AI artwork by Adam Laloge. Worlds sliced into slivers that open into full immersive views, each recoloring the site.">
-<link rel="stylesheet" href="styles.css?v=17">
+<link rel="stylesheet" href="styles.css?v=18">
 </head>
 <body>
 <header class="site-header">
@@ -54,12 +54,6 @@
     </button>
   </div>
 
-  <div class="world-cap" id="world-cap" aria-live="polite">
-    <p class="label">Now inside</p>
-    <h3 id="wc-title"></h3>
-    <p id="wc-note"></p>
-  </div>
-
   <p class="flow-hint">Tap a world to step inside &middot; tap again to come back</p>
 
   <section>
@@ -86,7 +80,6 @@
       band.classList.remove('open');
       slices.forEach(function (s) { s.classList.remove('active'); s.setAttribute('aria-expanded', 'false'); });
       document.documentElement.removeAttribute('data-world');
-      document.getElementById('world-cap').classList.remove('show');
     } else {
       openIdx = idx;
       band.classList.add('open');
@@ -95,13 +88,16 @@
         s.setAttribute('aria-expanded', i === idx ? 'true' : 'false');
       });
       document.documentElement.setAttribute('data-world', slices[idx].getAttribute('data-world'));
-      var capEl = slices[idx].querySelector('.slice-cap');
-      document.getElementById('wc-title').textContent = capEl.querySelector('strong').textContent;
-      document.getElementById('wc-note').textContent = capEl.querySelector('span').textContent;
-      document.getElementById('world-cap').classList.add('show');
     }
   }
-  slices.forEach(function (s, i) { s.addEventListener('click', function () { toggle(i); }); });
+  var reducedM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  slices.forEach(function (s, i) {
+    s.addEventListener('click', function () {
+      var opening = openIdx !== i;
+      toggle(i);
+      if (opening) band.scrollIntoView({ behavior: reducedM ? 'auto' : 'smooth', block: 'start' });
+    });
+  });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && openIdx >= 0) toggle(openIdx); });
 })();
 </script>
