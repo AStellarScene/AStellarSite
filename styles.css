@@ -881,12 +881,16 @@ html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.3
   height: 100%;
   display: block;
   z-index: 0;
-  touch-action: pan-y;
+  touch-action: none;
   cursor: crosshair;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
 }
+/* No backdrop-filter here: a full-screen animated filter over a live
+   canvas is what made WebKit flicker. The frost is baked instead —
+   soft region-colored glows + a dark tint (inline on the element),
+   with the canvas veiling itself as the glass rises. */
 .latent-glass-layer {
   position: fixed;
   inset: 0;
@@ -894,14 +898,11 @@ html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.3
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  background: rgba(6, 8, 16, 0.4);
-  backdrop-filter: blur(18px) saturate(1.35);
-  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  background: rgba(6, 8, 16, 0.55);
 }
 body.sitemap-body .site-header,
 body.sitemap-body .site-footer { position: relative; z-index: 3; }
 .sitemap-flow { position: relative; z-index: 2; }
-html.map-locked, html.map-locked body { overflow: hidden; }
 /* The Latent Dreams glass: tinted translucency, backdrop blur, a lit rim. */
 .latent-glass {
   background: rgba(8, 11, 22, 0.44);
@@ -939,31 +940,47 @@ html.map-locked, html.map-locked body { overflow: hidden; }
   color: rgba(226, 240, 255, 0.78);
   text-align: right;
 }
-.latent-explore {
+/* The scroll strip (touch only): the one zone on the first screen
+   where a drag pulls the page up instead of steering the light. */
+.latent-scrollcue {
   display: none;
   position: absolute;
+  left: 0;
   right: 0;
-  bottom: 14px;
-  padding: 9px 15px;
-  border: 0;
-  border-radius: 999px;
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(244, 247, 251, 0.92);
-  cursor: pointer;
+  bottom: 0;
+  height: 86px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
   pointer-events: auto;
+  touch-action: pan-y;
+  background: linear-gradient(to top, rgba(4, 5, 12, 0.6), rgba(4, 5, 12, 0));
+  color: rgba(226, 240, 255, 0.85);
 }
-@media (pointer: coarse) { .latent-explore { display: block; } }
-.latent-explore.on { color: #2dd4bf; }
-.latent-explore.in-map {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 60;
-  color: #2dd4bf;
+@media (pointer: coarse) { .latent-scrollcue { display: flex; } }
+.cue-word {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
 }
+.cue-arrow { display: flex; flex-direction: column; align-items: center; }
+.cue-arrow i {
+  width: 11px;
+  height: 11px;
+  border-right: 2px solid rgba(94, 234, 212, 0.9);
+  border-bottom: 2px solid rgba(94, 234, 212, 0.9);
+  transform: rotate(45deg);
+  margin-top: -4px;
+  animation: cueDrop 1.8s ease-in-out infinite;
+}
+.cue-arrow i:last-child { animation-delay: 0.25s; }
+@keyframes cueDrop {
+  0%, 100% { opacity: 0.25; transform: rotate(45deg) translate(0, 0); }
+  50% { opacity: 1; transform: rotate(45deg) translate(3px, 3px); }
+}
+@media (prefers-reduced-motion: reduce) { .cue-arrow i { animation: none; } }
 .sitemap-list-sec { margin-top: 7vh; padding-bottom: 9vh; }
 .sitemap-list-sec h2, .sitemap-list-sec .section-note { text-shadow: 0 1px 14px rgba(0, 0, 0, 0.65); }
 .map-groups {
