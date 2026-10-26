@@ -29,7 +29,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title}</title>
 <meta name="description" content="{desc}">
-<link rel="stylesheet" href="styles.css?v=48">
+<link rel="stylesheet" href="styles.css?v=49">
 </head>
 <body>
 """
@@ -721,6 +721,7 @@ def _map_group(heading, page_href, region):
             '      </div>') % (page_href, heading, lis)
 
 sitemap_body = """  <canvas id="latent-map" aria-hidden="true"></canvas>
+  <div id="latent-hit"></div>
   <div class="latent-glass-layer" aria-hidden="true" style="background: radial-gradient(60% 50% at 30% 44%, rgba(224, 170, 80, 0.17), rgba(224, 170, 80, 0) 70%), radial-gradient(55% 45% at 76% 40%, rgba(150, 110, 200, 0.15), rgba(150, 110, 200, 0) 70%), radial-gradient(60% 50% at 24% 80%, rgba(220, 90, 50, 0.16), rgba(220, 90, 50, 0) 70%), radial-gradient(55% 45% at 74% 79%, rgba(45, 190, 175, 0.15), rgba(45, 190, 175, 0) 70%), rgba(6, 8, 16, 0.55);"></div>
   <script>document.body.classList.add('sitemap-body');</script>
   <div class="sitemap-flow">
@@ -728,12 +729,13 @@ sitemap_body = """  <canvas id="latent-map" aria-hidden="true"></canvas>
     <div class="latent-glass latent-phead">
       <p class="label">Sitemap</p>
       <h1>Atlas</h1>
-      <p class="phead-note">Tap a point to select it &middot; tap again to open it &middot; scroll for the list &#8595;</p>
+      <p class="phead-note">Drag to explore &middot; tap a point to select it &middot; tap again to open it</p>
     </div>
-    <div class="latent-scrollcue" aria-hidden="true">
-      <span class="cue-word">Scroll</span>
-      <span class="cue-arrow"><i></i><i></i></span>
-    </div>
+    <button class="latent-scrollzone" id="scroll-zone" type="button" aria-label="Scroll down to the list">
+      <span class="zone-handle" aria-hidden="true"></span>
+      <span class="zone-label">Scroll for the list</span>
+      <span class="cue-arrow" aria-hidden="true"><i></i><i></i></span>
+    </button>
   </section>
   <section class="sitemap-list-sec">
     <h2>Everything, as a list</h2>
@@ -761,7 +763,9 @@ LATENT_MAP_JS = r"""<script>
   var DATA = /*__DATA__*/null;
   var canvas = document.getElementById('latent-map');
   var glassEl = document.querySelector('.latent-glass-layer');
-  var cueEl = document.querySelector('.latent-scrollcue');
+  var hit = document.getElementById('latent-hit');
+  var zone = document.getElementById('scroll-zone');
+  var cueEl = zone;
   if (!canvas || !DATA) return;
   var ctx = canvas.getContext('2d');
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -916,10 +920,27 @@ LATENT_MAP_JS = r"""<script>
   // eases toward it, fading the map's content while the DOM glass layer
   // rises over the still-living nebula.
   var glassTarget = 0, glassCur = 0, lastGlassWrite = -1;
+  // The view state flip, with hysteresis: past 60% of a screen the
+  // page is content (the hit surface goes inert via data-view and
+  // the page scrolls like any other page); back under 35% it is the
+  // map again. Between the thresholds the previous state stands, so
+  // a visitor parked mid-turn never faces a surface that does
+  // neither. The flip only ever affects the NEXT gesture, and the
+  // initial state is read from the actual scroll position, so a
+  // restored or deep-linked page starts in the right one.
+  var viewState = '';
   function onScroll() {
     var vh = window.innerHeight || 1;
     var y = window.scrollY || window.pageYOffset || 0;
     glassTarget = Math.max(0, Math.min(1, (y - vh * 0.42) / (vh * 0.55)));
+    var st = viewState;
+    if (viewState === '') st = y > vh * 0.6 ? 'content' : 'map';
+    else if (y > vh * 0.6) st = 'content';
+    else if (y < vh * 0.35) st = 'map';
+    if (st !== viewState) {
+      viewState = st;
+      document.body.setAttribute('data-view', st);
+    }
   }
   window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -947,15 +968,14 @@ LATENT_MAP_JS = r"""<script>
   }
   window.addEventListener('resize', resize);
 
-  // The canvas itself takes no input at all (pointer-events: none in
-  // the CSS), so the map listens at window level: the probe follows the
-  // pointer anywhere on the page, and taps are read wherever they land.
-  // Client coordinates are canvas coordinates — the canvas is fixed
-  // and fills the viewport.
-  window.addEventListener('pointermove', function (e) {
-    if (e.pointerType === 'touch' && tState) return; // the touch layer below owns touch steering
-    probe.tx = e.clientX; probe.ty = e.clientY; probe.active = true; probe.last = performance.now();
-  }, { passive: true });
+  // Touch discipline: a touch never navigates by accident. The first
+  // tap on a point selects it (nameplate + ring); a second tap on the
+  // same point opens it. A mouse click opens directly. A drag is never
+  // a tap, so exploring can't fire a link.
+  var coarse = window.matchMedia('(pointer: coarse)').matches;
+  var hitR = coarse ? 74 : 54;
+  var selected = null, selectedAt = 0;
+  var downPt = null, downAt = 0, downType = '';
 
   function sample(x, y) {
     bursts.push({ x: x, y: y, r: 6, a: 1 });
@@ -966,96 +986,81 @@ LATENT_MAP_JS = r"""<script>
     });
   }
 
-  // Touch discipline: a touch never navigates by accident. The first
-  // tap on a point selects it (nameplate + ring); a second tap on the
-  // same point opens it. A mouse click opens directly. A drag is never
-  // a tap, so exploring can't fire a link.
-  var coarse = window.matchMedia('(pointer: coarse)').matches;
-  var hitR = coarse ? 74 : 54;
-  var selected = null, selectedAt = 0;
-  var downPt = null, downAt = 0, downType = '';
-
-  window.addEventListener('pointerdown', function (e) {
-    probe.tx = e.clientX; probe.ty = e.clientY; probe.active = true; probe.last = performance.now();
-    downPt = { x: e.clientX, y: e.clientY }; downAt = performance.now(); downType = e.pointerType || 'mouse';
-  }, { passive: true });
-  window.addEventListener('pointercancel', function () { downPt = null; probe.last = 0; }, { passive: true });
-  window.addEventListener('contextmenu', function (e) {
-    // No long-press menu over the map itself; links keep theirs.
-    if (glassCur < 0.4 && !(e.target && e.target.closest && e.target.closest('a, button'))) e.preventDefault();
-  });
-  window.addEventListener('pointerup', function (e) {
-    if (!downPt) return;
-    // A tap on a link or button belongs to that element, not the map.
-    if (e.target && e.target.closest && e.target.closest('a, button')) { downPt = null; return; }
-    var moved = Math.abs(e.clientX - downPt.x) + Math.abs(e.clientY - downPt.y);
-    var dt = performance.now() - downAt;
-    var type = downType;
-    downPt = null;
-    if (moved > 16 || dt > 450) return; // a drag, not a tap
-    if (glassCur > 0.4) return; // the map is glassed over; taps belong to the page
-    var best = null, bestD = 1e9;
-    items.forEach(function (p) {
-      var dx = p.x - e.clientX, dy = p.y - e.clientY, d = dx * dx + dy * dy;
-      if (d < bestD) { bestD = d; best = p; }
-    });
-    if (best && bestD < hitR * hitR) {
-      if (type === 'mouse' || (selected === best && performance.now() - selectedAt < 3500)) {
-        window.location.href = best.href;
+  // Input lives on a dedicated hit surface over the canvas (the
+  // canvas itself stays pointer-events: none, purely visual). The
+  // surface is the canvas's SIBLING, never a parent or child, so its
+  // touch-action: none is never intersected with the scroll zone's
+  // pan-y. Ownership of a touch is decided by hit-testing at
+  // touchstart -- which element the finger landed on -- never by
+  // classifying the gesture after it has begun: on iOS that window
+  // closes before a classifier can act (claims must land on
+  // touchstart or the first touchmove, root listeners are passive by
+  // default, and moves turn uncancelable once scrolling starts).
+  if (hit) {
+    hit.addEventListener('pointermove', function (e) {
+      probe.tx = e.clientX; probe.ty = e.clientY; probe.active = true; probe.last = performance.now();
+    }, { passive: true });
+    hit.addEventListener('pointerdown', function (e) {
+      probe.tx = e.clientX; probe.ty = e.clientY; probe.active = true; probe.last = performance.now();
+      downPt = { x: e.clientX, y: e.clientY }; downAt = performance.now(); downType = e.pointerType || 'mouse';
+      try { hit.setPointerCapture(e.pointerId); } catch (err) {}
+    }, { passive: true });
+    // pointercancel is a normal end of a drag (system gesture,
+    // second finger, rotation), never an error: reset and move on.
+    hit.addEventListener('pointercancel', function () { downPt = null; probe.last = 0; }, { passive: true });
+    // No long-press callout or menu over the map itself.
+    hit.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    hit.addEventListener('pointerup', function (e) {
+      if (!downPt) return;
+      var moved = Math.abs(e.clientX - downPt.x) + Math.abs(e.clientY - downPt.y);
+      var dt = performance.now() - downAt;
+      var type = downType;
+      downPt = null;
+      if (moved > 16 || dt > 450) return; // a drag, not a tap
+      if (glassCur > 0.4) return; // the map is glassed over; taps belong to the page
+      var best = null, bestD = 1e9;
+      items.forEach(function (p) {
+        var dx = p.x - e.clientX, dy = p.y - e.clientY, d = dx * dx + dy * dy;
+        if (d < bestD) { bestD = d; best = p; }
+      });
+      if (best && bestD < hitR * hitR) {
+        if (type === 'mouse' || (selected === best && performance.now() - selectedAt < 3500)) {
+          window.location.href = best.href;
+          return;
+        }
+        selected = best; selectedAt = performance.now();
+        probe.x = probe.tx = e.clientX; probe.y = probe.ty = e.clientY;
         return;
       }
-      selected = best; selectedAt = performance.now();
-      probe.x = probe.tx = e.clientX; probe.y = probe.ty = e.clientY;
-      return;
-    }
-    selected = null;
-    sample(e.clientX, e.clientY);
-  }, { passive: true });
+      selected = null;
+      sample(e.clientX, e.clientY);
+    }, { passive: true });
 
-  // Direction lock, in raw touch events — the layer that makes the
-  // touch model hold on WebKit. touch-action: pan-y is recent in
-  // Safari and ignored by older iOS, which left the browser to
-  // arbitrate drags on its own: the page would scroll mid-steer, or
-  // the probe would chase a scrolling finger. So the engine judges
-  // each touch itself, in its first ~10px of travel:
-  // - Mostly vertical: the page's. Never preventDefaulted; the
-  //   browser scrolls and the probe ignores the gesture entirely.
-  // - Mostly horizontal: the map's. preventDefaulted from the moment
-  //   it's claimed — before WebKit commits to a scroll of its own —
-  //   and the claim also cancels any tap the pointerup logic was
-  //   tracking, so a steer can never fire a link.
-  // - Shorter than the threshold: a tap, left to pointerup above.
-  // Over the glassed list (glassCur high) the layer stands down and
-  // every touch is native page behavior.
-  var tState = null;
-  window.addEventListener('touchstart', function (e) {
-    if (e.touches.length !== 1) { tState = null; return; }
-    var t = e.touches[0];
-    tState = { x: t.clientX, y: t.clientY, axis: null };
-  }, { passive: true });
-  window.addEventListener('touchmove', function (e) {
-    if (!tState || e.touches.length !== 1 || glassCur > 0.4) return;
-    var t = e.touches[0];
-    if (!tState.axis) {
-      var dx = Math.abs(t.clientX - tState.x), dy = Math.abs(t.clientY - tState.y);
-      if (Math.max(dx, dy) < 10) return; // not judged yet
-      tState.axis = dx > dy ? 'x' : 'y'; // ties go to the page
-      if (tState.axis === 'x') downPt = null; // a steer is never a tap
-    }
-    if (tState.axis === 'x') {
-      e.preventDefault();
-      probe.tx = t.clientX; probe.ty = t.clientY; probe.active = true; probe.last = performance.now();
-    }
-  }, { passive: false });
-  function touchDone() { tState = null; }
-  window.addEventListener('touchend', touchDone, { passive: true });
-  window.addEventListener('touchcancel', touchDone, { passive: true });
+    // Fallback claim for engines that ignore touch-action: none
+    // (pre-13 iOS, embedded WebViews): non-passive listeners on the
+    // surface ELEMENT itself -- window/document/body listeners are
+    // passive by default in both Chrome and WebKit, so a claim there
+    // would be ignored -- registered once at init, never inside a
+    // handler, so the first touchmove is already covered.
+    var claim = function (e) { if (e.cancelable) e.preventDefault(); };
+    hit.addEventListener('touchstart', claim, { passive: false });
+    hit.addEventListener('touchmove', claim, { passive: false });
+  }
 
-  // Touch model: there are no zones. Vertical drags scroll natively
-  // anywhere — margins, map, list; sideways drags steer the map;
-  // taps select, then open. The CSS touch-action declaration backs
-  // this where it's honored (Chrome/Android), and the direction lock
-  // above enforces the same contract where it isn't (WebKit).
+  // The scroll zone is the one place on the first screen where a
+  // touch scrolls the page: it carries touch-action: pan-y in the
+  // CSS, so drags starting on it are native browser scrolls. It is
+  // also a button -- a tap (or Enter/Space) scrolls the list into
+  // view directly. Once the page reaches the content, the state
+  // flip above makes the hit surface inert and the whole page
+  // scrolls normally, the zone included in what scrolls away.
+  if (zone) {
+    zone.addEventListener('click', function () {
+      var sec = document.querySelector('.sitemap-list-sec');
+      if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      else window.scrollTo(0, window.innerHeight || 0);
+    });
+  }
 
   var running = true, raf = null;
 
@@ -1101,11 +1106,9 @@ LATENT_MAP_JS = r"""<script>
       lastGlassWrite = glassCur;
       glassEl.style.opacity = glassCur.toFixed(2);
       glassEl.style.visibility = glassCur < 0.01 ? 'hidden' : 'visible';
-      // The scroll strip belongs to the map screen only: once the turn
-      // begins it gets out of the way.
+      // The scroll zone belongs to the map screen only: once the
+      // turn begins it gets out of the way.
       if (cueEl) cueEl.classList.toggle('cue-gone', glassCur > 0.05);
-      // (No touch handoff exists anymore — the canvas intercepts
-      // nothing, so the page's touches were never taken from it.)
     }
 
     ctx.globalCompositeOperation = 'source-over';
@@ -1309,7 +1312,8 @@ LATENT_MAP_JS = r"""<script>
       ctx.beginPath(); ctx.arc(probe.x, probe.y, 2.4, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
       var wantCursor = (nearItem && nearItemD < 54 * 54) ? 'pointer' : '';
-      if (document.body.style.cursor !== wantCursor) document.body.style.cursor = wantCursor;
+      var curEl = hit || document.body;
+      if (curEl.style.cursor !== wantCursor) curEl.style.cursor = wantCursor;
     } else {
       // Fully glassed: keep the points parked at their homes so the map
       // is composed when the visitor scrolls back up.
