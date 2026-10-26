@@ -274,7 +274,7 @@ section:first-of-type { border-top: none; margin-top: 0; }
 .gal-thumb:hover { border-color: rgba(94, 234, 212, 0.5); }
 .gal-thumb.active { border-color: var(--gold); }
 
-/* Bookshelf — Cover Flow */
+/* Bookshelf — Cover Flow of real 3D books */
 .flow-scene {
   background: radial-gradient(120% 90% at 50% 0%, rgba(94, 234, 212, 0.05), transparent 60%), var(--panel);
   border: 1px solid var(--panel-border);
@@ -282,11 +282,15 @@ section:first-of-type { border-top: none; margin-top: 0; }
   padding: 10px 0 18px;
   margin: 18px 0 22px;
 }
+.flow-block { margin-top: 24px; }
+.flow-block .flow-scene { margin: 8px 0 14px; }
+.flow-label { margin: 0 0 2px; }
 .flow-track {
   display: flex;
-  gap: 30px;
+  align-items: flex-end;
+  gap: 46px;
   overflow-x: auto;
-  padding: 34px calc(50% - 84px) 26px;
+  padding: 30px calc(50% - 90px) 30px;
   perspective: 1200px;
   scroll-snap-type: x proximity;
   scrollbar-width: none;
@@ -296,8 +300,8 @@ section:first-of-type { border-top: none; margin-top: 0; }
 .cov {
   position: relative;
   flex: 0 0 auto;
-  width: 168px;
-  height: 252px;
+  width: var(--bw);
+  height: var(--bh);
   padding: 0;
   border: none;
   background: none;
@@ -310,7 +314,7 @@ section:first-of-type { border-top: none; margin-top: 0; }
 .cov-front {
   position: absolute;
   inset: 0;
-  transform: translateZ(calc(var(--bd) / 2));
+  transform: translateZ(calc(var(--bt) / 2));
   backface-visibility: hidden;
   border-radius: 3px 8px 8px 3px;
   background: linear-gradient(105deg, rgba(0,0,0,0.5), rgba(255,255,255,0.06) 22%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.45)), var(--cov);
@@ -352,27 +356,65 @@ section:first-of-type { border-top: none; margin-top: 0; }
   text-transform: uppercase;
   color: var(--gold);
 }
-.cov-edge {
+.cov-spine {
+  position: absolute;
+  top: 1px;
+  left: 0;
+  width: var(--bt);
+  height: calc(100% - 2px);
+  transform: rotateY(-90deg) translateZ(calc(var(--bt) / 2));
+  backface-visibility: hidden;
+  background: linear-gradient(90deg, rgba(0,0,0,0.45), rgba(255,255,255,0.07) 30%, rgba(0,0,0,0.5)), var(--cov);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 0;
+}
+.sp-title {
+  writing-mode: vertical-rl;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  color: #e8e2d2;
+  white-space: nowrap;
+  overflow: hidden;
+  max-height: 78%;
+}
+.sp-author {
+  writing-mode: vertical-rl;
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+  overflow: hidden;
+  max-height: 34%;
+}
+.cov-pages {
   position: absolute;
   top: 2px;
-  height: calc(100% - 4px);
-  width: var(--bd);
-  backface-visibility: hidden;
-}
-.cov-edge-right {
   right: 0;
-  transform: rotateY(90deg) translateZ(calc(var(--bd) / 2));
+  width: var(--bt);
+  height: calc(100% - 4px);
+  transform: rotateY(90deg) translateZ(calc(var(--bt) / 2));
+  backface-visibility: hidden;
   background: repeating-linear-gradient(90deg, #ddd3ba 0 2px, #c9bd9f 2px 4px);
   border-radius: 1px;
 }
-.cov-edge-left {
-  left: 0;
-  transform: rotateY(-90deg) translateZ(calc(var(--bd) / 2));
-  background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.1)), var(--cov);
+.cov-top {
+  position: absolute;
+  top: 0;
+  left: 1px;
+  width: calc(100% - 2px);
+  height: var(--bt);
+  transform: rotateX(90deg) translateZ(calc(var(--bt) / 2));
+  backface-visibility: hidden;
+  background: repeating-linear-gradient(180deg, #ddd3ba 0 2px, #c9bd9f 2px 4px);
+  border-radius: 1px;
 }
-.flow-block { margin-top: 24px; }
-.flow-block .flow-scene { margin: 8px 0 14px; }
-.flow-label { margin: 0 0 2px; }
 .flow-hint {
   text-align: center;
   color: var(--dim);
@@ -385,9 +427,8 @@ section:first-of-type { border-top: none; margin-top: 0; }
 .book-detail { margin-top: 4px; }
 .book-byline { color: var(--dim); }
 @media (max-width: 760px) {
-  .cov { width: 132px; height: 198px; }
   .cov-title { font-size: 16px; }
-  .flow-track { padding: 26px calc(50% - 66px) 20px; gap: 22px; }
+  .flow-track { gap: 34px; padding: 22px calc(50% - 90px) 24px; }
 }
 
 /* Resume */
