@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Photography — Adam Laloge</title>
 <meta name="description" content="Photographs by Adam Laloge: landscapes and sunsets.">
-<link rel="stylesheet" href="styles.css?v=10">
+<link rel="stylesheet" href="styles.css?v=11">
 </head>
 <body>
 <header class="site-header">
   <div class="wrap header-inner">
-    <span class="brand">Adam Laloge</span>
+    <a class="brand" href="index.html">Adam Laloge</a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
     <nav id="site-nav">
       <a href="index.html">Home</a>
@@ -25,30 +25,34 @@
 
 <main class="wrap">
   <section id="photography">
-                                  <p class="label">Photography</p>
-                                  <h2>Off the clock</h2>
-                                  <p class="section-note">Landscapes and sunsets. All of these are my own photographs.</p>
-                              
-                                  <div class="gal-chips" role="group" aria-label="Filter photos">
-                                    <button class="chip active" data-filter="all" type="button">All</button>
-                                    <button class="chip" data-filter="sunsets" type="button">Sunsets</button>
-                                    <button class="chip" data-filter="shoreline" type="button">Shoreline</button>
-                  <button class="chip" data-filter="landscape" type="button">Landscapes</button>
-                                    <button class="chip" data-filter="details" type="button">Details</button>
-                                  </div>
-                              
-                                  <div class="gal-stage">
-                                    <img id="gal-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass">
-                                    <button class="gal-btn gal-prev" id="gal-prev" type="button" aria-label="Previous photo">&#8249;</button>
-                                    <button class="gal-btn gal-next" id="gal-next" type="button" aria-label="Next photo">&#8250;</button>
-                                    <div class="gal-cap">
-                                      <span id="gal-title">Sunset Through the Grass</span>
-                                      <span class="gal-count" id="gal-count">1 / 19</span>
-                                    </div>
-                                  </div>
-                              
-                                  <div class="gal-thumbs" id="gal-thumbs"></div>
-                                </section>
+                                      <p class="label">Photography</p>
+                                      <h2>Off the clock</h2>
+                                      <p class="section-note">Landscapes and sunsets. All of these are my own photographs.</p>
+                                  
+                                      <div class="gal-chips" role="group" aria-label="Filter photos">
+                                        <button class="chip active" data-filter="all" type="button">All</button>
+                                        <button class="chip" data-filter="sunsets" type="button">Sunsets</button>
+                                        <button class="chip" data-filter="shoreline" type="button">Shoreline</button>
+                      <button class="chip" data-filter="landscape" type="button">Landscapes</button>
+                                        <button class="chip" data-filter="details" type="button">Details</button>
+                                      </div>
+                                  
+                                      <div class="pflow-scene">
+                                        <div class="pflow-track" id="pflow-track" tabindex="0" aria-label="Photo flow: scroll, or focus and use the arrow keys"></div>
+                                        <p class="flow-hint">Scroll to browse &middot; tap a photo to center it</p>
+                                      </div>
+    
+                                      <div class="panel book-detail photo-detail" aria-live="polite">
+                                        <p class="label" id="pd-group">Sunsets</p>
+                                        <h3 id="pd-title">Sunset Through the Grass</h3>
+                                        <p id="pd-alt">Sunset over calm water, seen through silhouetted beach grass</p>
+                                        <p class="book-byline"><span id="pd-count">1 / 19</span></p>
+                                        <div class="pd-nav">
+                                          <button class="btn btn-ghost pd-btn" id="pd-prev" type="button">&#8249; Prev</button>
+                                          <button class="btn btn-ghost pd-btn" id="pd-next" type="button">Next &#8250;</button>
+                                        </div>
+                                      </div>
+                                    </section>
 </main>
 
 <footer class="site-footer">
@@ -80,75 +84,86 @@
     { src: 'photos/autumn-woods.jpg',    title: 'Autumn Woods',             group: 'landscape', w: 1206, h: 905,  alt: 'Golden autumn woods, fallen leaves, late light through the trees' },
     { src: 'photos/beach-dusk.jpg',      title: 'Beach at Dusk',            group: 'sunsets',   w: 1206, h: 905,  alt: 'A sandy beach curving away at sunset, small waves coming in' }
   ];
-  var img = document.getElementById('gal-img');
-  if (!img) return;
-  var titleEl = document.getElementById('gal-title');
-  var countEl = document.getElementById('gal-count');
-  var thumbsEl = document.getElementById('gal-thumbs');
-  var stage = img.parentElement;
+  var GROUP_LABEL = { sunsets: 'Sunsets', shoreline: 'Shoreline', landscape: 'Landscapes', details: 'Details' };
+  var track = document.getElementById('pflow-track');
+  if (!track) return;
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var items = [], list = PHOTOS.slice(), current = -1, holdUntil = 0;
 
-  var visible = PHOTOS.map(function (_, i) { return i; });
-  var pos = 0; // position within `visible`
-  var timer = null;
-
-  PHOTOS.forEach(function (p, i) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'gal-thumb';
-    b.setAttribute('aria-label', p.title);
-    var t = document.createElement('img');
-    t.src = p.src; t.alt = ''; t.loading = 'lazy';
-    b.appendChild(t);
-    b.addEventListener('click', function () { show(visible.indexOf(i)); restart(); });
-    thumbsEl.appendChild(b);
-  });
-  var thumbBtns = Array.prototype.slice.call(thumbsEl.children);
-
-  function render() {
-    var idx = visible[pos];
-    var p = PHOTOS[idx];
-    // Adaptive stage: match the frame to the photo's own proportions so
-    // nothing is cropped; cap portrait height at 80vh by narrowing the stage.
-    stage.style.aspectRatio = p.w + ' / ' + p.h;
-    stage.style.maxWidth = p.w >= p.h ? '100%' : Math.round(80 * p.w / p.h) + 'vh';
-    img.classList.add('gal-fade');
-    setTimeout(function () {
-      img.src = p.src; img.alt = p.alt;
-      img.onload = function () { img.classList.remove('gal-fade'); };
-      setTimeout(function () { img.classList.remove('gal-fade'); }, 60);
-    }, reduced ? 0 : 180);
-    titleEl.textContent = p.title;
-    countEl.textContent = (pos + 1) + ' / ' + visible.length;
-    thumbBtns.forEach(function (b, i) {
-      b.classList.toggle('active', i === idx);
-      b.style.display = visible.indexOf(i) === -1 ? 'none' : '';
+  function center(idx, behavior) {
+    var it = items[idx];
+    if (!it) return;
+    var tr = track.getBoundingClientRect(), r = it.getBoundingClientRect();
+    track.scrollTo({ left: track.scrollLeft + (r.left + r.width / 2) - (tr.left + tr.width / 2), behavior: behavior || 'smooth' });
+  }
+  function layout() {
+    var tr = track.getBoundingClientRect(), mid = tr.left + tr.width / 2, best = -1, bestD = 1e9;
+    items.forEach(function (it, i) {
+      var r = it.getBoundingClientRect(), c = r.left + r.width / 2;
+      var off = (c - mid) / r.width;
+      // Transform and z-index only: per-frame filters are what made the
+      // bookshelf janky, and the rule carries over.
+      it.style.transform = 'rotateY(' + Math.max(-55, Math.min(55, off * -48)).toFixed(1) + 'deg) translateZ(' + (-Math.min(200, Math.abs(off) * 70)).toFixed(0) + 'px)';
+      it.style.zIndex = String(100 - Math.round(Math.abs(off) * 10));
+      if (Math.abs(off) < bestD) { bestD = Math.abs(off); best = i; }
     });
+    if (best !== current && best >= 0) {
+      current = best;
+      items.forEach(function (it, i) { it.classList.toggle('selected', i === current); });
+      var p = list[current];
+      document.getElementById('pd-group').textContent = GROUP_LABEL[p.group] || p.group;
+      document.getElementById('pd-title').textContent = p.title;
+      document.getElementById('pd-alt').textContent = p.alt;
+      document.getElementById('pd-count').textContent = (current + 1) + ' / ' + list.length;
+    }
   }
-  function show(n) { pos = (n + visible.length) % visible.length; render(); }
-  function next() { show(pos + 1); }
-  function restart() {
-    if (timer) clearInterval(timer);
-    if (!reduced) timer = setInterval(next, 6000);
+  var ticking = false;
+  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; layout(); }); } }
+  track.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+
+  function hold() { holdUntil = Date.now() + 10000; }
+  function build(filter) {
+    list = PHOTOS.filter(function (p) { return filter === 'all' || p.group === filter; });
+    track.innerHTML = '';
+    items = list.map(function (p, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pcov';
+      b.style.setProperty('--ar', p.w + '/' + p.h);
+      b.setAttribute('aria-label', p.title);
+      var img = document.createElement('img');
+      img.src = p.src; img.alt = ''; img.draggable = false;
+      img.loading = i < 4 ? 'eager' : 'lazy';
+      b.appendChild(img);
+      b.addEventListener('click', function () { hold(); center(i); });
+      track.appendChild(b);
+      return b;
+    });
+    current = -1;
+    requestAnimationFrame(function () { track.scrollLeft = 0; center(0, 'auto'); layout(); });
   }
-  document.getElementById('gal-next').addEventListener('click', function () { next(); restart(); });
-  document.getElementById('gal-prev').addEventListener('click', function () { show(pos - 1); restart(); });
-  stage.addEventListener('mouseenter', function () { if (timer) clearInterval(timer); });
-  stage.addEventListener('mouseleave', restart);
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'ArrowRight') { next(); restart(); }
-    if (e.key === 'ArrowLeft') { show(pos - 1); restart(); }
+  ['pointerdown', 'wheel', 'touchstart'].forEach(function (ev) { track.addEventListener(ev, hold, { passive: true }); });
+  track.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { hold(); center(Math.min(items.length - 1, current + 1)); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { hold(); center(Math.max(0, current - 1)); e.preventDefault(); }
   });
-  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (chip) {
+  document.getElementById('pd-prev').addEventListener('click', function () { hold(); center(Math.max(0, current - 1)); });
+  document.getElementById('pd-next').addEventListener('click', function () { hold(); center(Math.min(items.length - 1, current + 1)); });
+  document.querySelectorAll('.gal-chips .chip').forEach(function (chip) {
     chip.addEventListener('click', function () {
-      document.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
+      document.querySelectorAll('.gal-chips .chip').forEach(function (c) { c.classList.remove('active'); });
       chip.classList.add('active');
-      var f = chip.getAttribute('data-filter');
-      visible = PHOTOS.map(function (p, i) { return i; }).filter(function (i) { return f === 'all' || PHOTOS[i].group === f; });
-      pos = 0; render(); restart();
+      hold(); build(chip.getAttribute('data-filter'));
     });
   });
-  render(); restart();
+  build('all');
+  if (!reduced) {
+    setInterval(function () {
+      if (document.hidden || Date.now() < holdUntil || items.length < 2) return;
+      center((current + 1) % items.length);
+    }, 5000);
+  }
 })();
 </script>
 <script>
