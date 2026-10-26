@@ -29,7 +29,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title}</title>
 <meta name="description" content="{desc}">
-<link rel="stylesheet" href="styles.css?v=49">
+<link rel="stylesheet" href="styles.css?v=50">
 </head>
 <body>
 """
@@ -732,7 +732,6 @@ sitemap_body = """  <canvas id="latent-map" aria-hidden="true"></canvas>
       <p class="phead-note">Drag to explore &middot; tap a point to select it &middot; tap again to open it</p>
     </div>
     <button class="latent-scrollzone" id="scroll-zone" type="button" aria-label="Scroll down to the list">
-      <span class="zone-handle" aria-hidden="true"></span>
       <span class="zone-label">Scroll for the list</span>
       <span class="cue-arrow" aria-hidden="true"><i></i><i></i></span>
     </button>
