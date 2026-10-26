@@ -775,3 +775,29 @@ html.latent-live[data-world="ember"] .world-ambient {
   }
 }
 
+
+/* Zoom smoothness: while a world opens, its image is pinned at final
+   screen size and merely revealed/panned by the growing slice, instead
+   of being re-scaled by object-fit on every frame — that rescale kink
+   was the jerk. The drift also pauses for the duration of the move. */
+.latent-band.open .slice { will-change: flex-grow; }
+.latent-band.open .slice img { animation-play-state: paused; }
+.latent-band.open .slice.active img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -50vw;
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+}
+@media (orientation: portrait) {
+  .latent-band.open .slice.active img {
+    left: 0;
+    margin-left: 0;
+    top: 50%;
+    margin-top: -50vh;
+    margin-top: -50dvh;
+  }
+}
