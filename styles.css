@@ -713,6 +713,14 @@ ul.plain { list-style: none; padding-left: 0; }
 .latent-band.gl-live .seam { display: none; }
 .slice img { transition: opacity 0.5s ease; }
 .latent-band.gl-live .slice img { opacity: 0; animation: none; }
+/* Under GL the band's own height transition must go: it exists only
+   on the close path (opening snaps, since CSS cannot animate to
+   auto), and while it runs the geometry is mid-flight, so the
+   shader's targets get re-read in steps -- a staircase the eye sees
+   as stutter. With it off, both directions snap the box and let the
+   eased seam + reframing carry the visible motion, symmetrically.
+   The no-GL fallback keeps its transition (rule is gl-on scoped). */
+html.gl-on .latent-band { transition: none; }
 
 /* While the WebGL seam is live, the band's image moves; the top
    bar's static duplicated crop would clash with it (a second,
