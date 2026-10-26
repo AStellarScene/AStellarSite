@@ -902,7 +902,10 @@ html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.3
 }
 body.sitemap-body .site-header,
 body.sitemap-body .site-footer { position: relative; z-index: 3; }
-.sitemap-flow { position: relative; z-index: 2; }
+/* The flow must never swallow input meant for the canvas beneath it:
+   it is click-through everywhere except its actual links/buttons. */
+.sitemap-flow { position: relative; z-index: 2; pointer-events: none; }
+.sitemap-flow a, .sitemap-flow button { pointer-events: auto; }
 /* The Latent Dreams glass: tinted translucency, backdrop blur, a lit rim. */
 .latent-glass {
   background: rgba(8, 11, 22, 0.44);
@@ -944,20 +947,24 @@ body.sitemap-body .site-footer { position: relative; z-index: 3; }
    where a drag pulls the page up instead of steering the light. */
 .latent-scrollcue {
   display: none;
-  position: absolute;
+  position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 86px;
+  z-index: 4;
+  height: 92px;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  padding-bottom: 18px;
   gap: 3px;
   pointer-events: auto;
   touch-action: pan-y;
-  background: linear-gradient(to top, rgba(4, 5, 12, 0.6), rgba(4, 5, 12, 0));
+  background: linear-gradient(to top, rgba(4, 5, 12, 0.62), rgba(4, 5, 12, 0));
   color: rgba(226, 240, 255, 0.85);
+  transition: opacity 0.35s ease;
 }
+.latent-scrollcue.cue-gone { opacity: 0; pointer-events: none; }
 @media (pointer: coarse) { .latent-scrollcue { display: flex; } }
 .cue-word {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
