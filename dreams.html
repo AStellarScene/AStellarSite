@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dreamscape — Adam Laloge</title>
 <meta name="description" content="AI artwork directed by Adam Laloge. Images sit in two-image splits. Open one and it fills the screen while the page takes on its colors.">
-<link rel="stylesheet" href="styles.css?v=53">
+<link rel="stylesheet" href="styles.css?v=54">
 </head>
 <body>
 <header class="site-header">
@@ -113,11 +113,17 @@
 </script>
 <script>
 (function () {
-  // Dreamscape liquid-dimensional seam: vanilla WebGL1 shader
-  // displacement over the two artworks, per the 2026-10-26 research
-  // report (research_notes/dreamscape-liquid-dimensional-ripple).
-  // Progressive enhancement only: the DOM slices stay the tap layer
-  // and the fallback. If anything here fails, the page is unchanged.
+  // Dreamscape liquid-dimensional seam v2: vanilla WebGL1 shader
+  // displacement over the two artworks (research report:
+  // research_notes/dreamscape-liquid-dimensional-ripple). DOM slices
+  // stay the tap layer and the fallback; if anything fails, the page
+  // is unchanged. v2 fixes from device testing: portrait seam axis
+  // (GL y runs bottom-up, layout runs top-down), seam calms to an
+  // off-screen straight edge when a world is open, power-of-two
+  // textures with mipmaps + anisotropy (NPOT in WebGL1 cannot
+  // mipmap, which cost image quality), cached band rect (no
+  // per-frame layout reads), and a watchdog driver so the seam
+  // follows taps even if requestAnimationFrame stalls (iOS).
   var band = document.getElementById('latent-band');
   var canvas = document.getElementById('dream-gl');
   if (!band || !canvas) return;
@@ -143,6 +149,8 @@
     'uniform float uTA;',
     'uniform float uTB;',
     'uniform float uVA;',
+    'uniform vec4 uRectA;', // POT sub-rect: (scaleX, scaleY, offX, offY)
+    'uniform vec4 uRectB;',
     'vec2 coverUv(vec2 uv, float ta){',
     '  vec2 f = vec2(0.5, 0.68);', // object-position 50% 32%, GL-flipped
     '  float r = uVA / ta;',
@@ -164,11 +172,18 @@
     'void main(){',
     '  vec2 uv = vUv;',
     '  float s = mix(uv.y, uv.x, uHoriz);',
-    '  float n = mix(uv.x, uv.y, uHoriz);',
+    // Across-axis: landscape = x from the left (world A). Portrait =
+    // from the TOP (world A stacks first), but GL y runs bottom-up,
+    // hence the flip -- v1 painted the portrait worlds swapped.
+    '  float n = mix(uv.x, 1.0 - uv.y, uHoriz);',
     '  float t = uTime;',
-    '  float w = wave(s, t);',
+    // When a world is open the split parks at an edge; the seam must
+    // calm to a straight off-screen line or a wavy sliver of the
+    // other world shows along the edge.
+    '  float edge = smoothstep(0.0, 0.07, uSplit) * smoothstep(1.0, 0.93, uSplit);',
+    '  float w = wave(s, t) * edge;',
     '  float d = n - (uSplit + w);',
-    '  float bandF = exp(-abs(d) / uBand);',
+    '  float bandF = exp(-abs(d) / uBand) * edge;',
     '  float sl = slope(s, t);',
     '  float refr = sl * 0.012 * bandF;',
     '  vec2 refrVec = mix(vec2(refr, 0.0), vec2(0.0, refr), uHoriz);',
@@ -177,13 +192,15 @@
     '  vec2 driftB = vec2(sin(t * 0.19 + 2.1), sin(t * 0.27 + 0.4)) * 0.012;',
     '  vec2 uvA = coverUv(uv, uTA) + driftA + refrVec * breathe;',
     '  vec2 uvB = coverUv(uv, uTB) + driftB + refrVec * 1.6 * breathe;',
+    '  uvA = uvA * uRectA.xy + uRectA.zw;',
+    '  uvB = uvB * uRectB.xy + uRectB.zw;',
     '  vec3 colA = texture2D(uTexA, uvA).rgb;',
     '  vec3 colB = texture2D(uTexB, uvB).rgb;',
     '  float m = smoothstep(-0.0015, 0.0015, d);',
     '  vec3 col = mix(colA, colB, m);',
     '  col += clamp(sl, -1.0, 1.0) * bandF * 0.13;',
-    '  col += exp(-abs(d) * 220.0) * 0.08;',
-    '  col -= exp(-abs(d - 0.006) * 160.0) * 0.05;',
+    '  col += exp(-abs(d) * 220.0) * 0.08 * edge;',
+    '  col -= exp(-abs(d - 0.006) * 160.0) * 0.05 * edge;',
     '  gl_FragColor = vec4(col, 1.0);',
     '}'
   ].join('\n');
@@ -210,53 +227,74 @@
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   var U = {};
-  ['uTexA', 'uTexB', 'uTime', 'uSplit', 'uHoriz', 'uBand', 'uTA', 'uTB', 'uVA'].forEach(function (name) {
+  ['uTexA', 'uTexB', 'uTime', 'uSplit', 'uHoriz', 'uBand', 'uTA', 'uTB', 'uVA', 'uRectA', 'uRectB'].forEach(function (name) {
     U[name] = gl.getUniformLocation(prog, name);
   });
   gl.uniform1i(U.uTexA, 0);
   gl.uniform1i(U.uTexB, 1);
   gl.uniform1f(U.uBand, 0.055);
 
+  var anisoExt = gl.getExtension('EXT_texture_filter_anisotropic') ||
+                 gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
+  var maxAniso = anisoExt ? Math.min(8, gl.getParameter(anisoExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT)) : 1;
+
+  function nextPow2(v) { var p = 1; while (p < v) p *= 2; return p; }
   var texA = null, texB = null, ready = false;
   function makeTex(unit, img) {
+    // Re-pack onto a power-of-two canvas so WebGL1 allows mipmaps;
+    // NPOT textures are stuck with LINEAR and shimmer/soften.
+    var W = nextPow2(img.naturalWidth), H = nextPow2(img.naturalHeight);
+    var cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    cv.getContext('2d').drawImage(img, 0, 0);
     var t = gl.createTexture();
     gl.activeTexture(gl.TEXTURE0 + unit);
     gl.bindTexture(gl.TEXTURE_2D, t);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
-    // NPOT-safe: the artworks are 1206px wide -- no mipmaps, clamp only.
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, cv);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    return { tex: t, aspect: img.naturalWidth / img.naturalHeight };
+    if (anisoExt && maxAniso > 1) gl.texParameteri(gl.TEXTURE_2D, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    var rect = [img.naturalWidth / W, img.naturalHeight / H, 0, 1 - img.naturalHeight / H];
+    return { tex: t, aspect: img.naturalWidth / img.naturalHeight, rect: rect };
   }
   var loaded = 0;
   function onLoad(which, img) {
     return function () {
-      if (which === 0) texA = makeTex(0, img); else texB = makeTex(1, img);
+      try {
+        if (which === 0) texA = makeTex(0, img); else texB = makeTex(1, img);
+      } catch (e) { return; } // texture failure: fallback stays, no gl-live
       loaded++;
       if (loaded === 2) start();
     };
   }
-  var imgA = new Image(); imgA.onload = onLoad(0, imgA); imgA.src = 'art/golden-city.jpg';
-  var imgB = new Image(); imgB.onload = onLoad(1, imgB); imgB.src = 'art/obsidian-dragon.jpg';
+  function loadTextures() {
+    loaded = 0; texA = null; texB = null;
+    var imgA = new Image(); imgA.onload = onLoad(0, imgA); imgA.src = 'art/golden-city.jpg';
+    var imgB = new Image(); imgB.onload = onLoad(1, imgB); imgB.src = 'art/obsidian-dragon.jpg';
+  }
+  loadTextures();
 
   var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
   var dprSteps = [2, 1.5, 1.25, 1], stepIdx = 0;
   var inView = true, running = false, raf = 0, lastTs = 0, tSec = 0, splitCur = 0.5;
+  var lastTickAt = 0, lastRafAt = 0, intervalDriver = null;
+  var bandW = 0, bandH = 0;
   var ftSum = 0, ftCount = 0;
 
   function resize() {
-    var w = band.clientWidth, h = band.clientHeight;
-    if (!w || !h) return;
+    bandW = band.clientWidth; bandH = band.clientHeight;
+    if (!bandW || !bandH) return;
     var dpr = Math.min(window.devicePixelRatio || 1, dprSteps[stepIdx]);
-    var bw = Math.round(w * dpr), bh = Math.round(h * dpr);
+    var bw = Math.round(bandW * dpr), bh = Math.round(bandH * dpr);
     if (canvas.width !== bw || canvas.height !== bh) {
       canvas.width = bw; canvas.height = bh;
       gl.viewport(0, 0, bw, bh);
     }
-    gl.uniform1f(U.uVA, w / h);
+    gl.uniform1f(U.uVA, bandW / bandH);
   }
   var resizeTimer = 0;
   if (window.ResizeObserver) {
@@ -268,11 +306,13 @@
   window.addEventListener('resize', function () { resize(); if (mq.matches) drawStatic(); });
 
   function layoutSplit() {
-    var r = band.getBoundingClientRect();
-    if (r.width >= r.height) {
-      return { horiz: 0, split: Math.min(1, Math.max(0, (slices[0].offsetWidth - 8) / r.width)) };
+    // Band rect is cached by resize(); the only per-frame layout read
+    // is the first slice's size, which carries the flex animation.
+    if (!bandW || !bandH) return { horiz: 0, split: splitCur };
+    if (bandW >= bandH) {
+      return { horiz: 0, split: Math.min(1, Math.max(0, (slices[0].offsetWidth - 8) / bandW)) };
     }
-    return { horiz: 1, split: Math.min(1, Math.max(0, (slices[0].offsetHeight - 8) / r.height)) };
+    return { horiz: 1, split: Math.min(1, Math.max(0, (slices[0].offsetHeight - 8) / bandH)) };
   }
 
   function draw(time, split, horiz) {
@@ -282,46 +322,70 @@
     gl.uniform1f(U.uHoriz, horiz);
     gl.uniform1f(U.uTA, texA.aspect);
     gl.uniform1f(U.uTB, texB.aspect);
+    gl.uniform4f(U.uRectA, texA.rect[0], texA.rect[1], texA.rect[2], texA.rect[3]);
+    gl.uniform4f(U.uRectB, texB.rect[0], texB.rect[1], texB.rect[2], texB.rect[3]);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
   function drawStatic() {
     if (!ready) return;
     resize();
     var lay = layoutSplit();
+    splitCur = lay.split;
     draw(0, lay.split, lay.horiz);
   }
 
-  function frame(ts) {
-    if (!running) return;
-    raf = requestAnimationFrame(frame);
+  function tick(ts) {
+    lastTickAt = performance.now();
     if (!lastTs) lastTs = ts;
-    var dt = Math.min(0.05, (ts - lastTs) / 1000);
+    var dt = Math.min(0.05, Math.max(0, (ts - lastTs) / 1000));
     lastTs = ts;
     tSec += dt;
     var lay = layoutSplit();
     splitCur += (lay.split - splitCur) * (1 - Math.exp(-dt / 0.09));
     draw(tSec, splitCur, lay.horiz);
     // Adaptive quality: sustained slow frames step the DPR cap down.
-    ftSum += dt * 1000; ftCount++;
+    if (dt > 0) { ftSum += dt * 1000; ftCount++; }
     if (ftCount >= 60) {
       if (ftSum / ftCount > 22 && stepIdx < dprSteps.length - 1) { stepIdx++; resize(); }
       ftSum = 0; ftCount = 0;
     }
   }
+  function rafFrame(ts) {
+    if (!running) return;
+    lastRafAt = performance.now();
+    tick(ts);
+    raf = requestAnimationFrame(rafFrame);
+  }
   function startLoop() {
     if (running || mq.matches) return;
     running = true; lastTs = 0;
-    raf = requestAnimationFrame(frame);
+    raf = requestAnimationFrame(rafFrame);
   }
   function stopLoop() {
     running = false;
     if (raf) cancelAnimationFrame(raf);
+    if (intervalDriver) { clearInterval(intervalDriver); intervalDriver = null; }
+  }
+  function shouldRun() {
+    return ready && !mq.matches && inView && document.visibilityState === 'visible';
   }
   function gate() {
     if (!ready) return;
     if (mq.matches) { stopLoop(); drawStatic(); return; }
-    if (inView && document.visibilityState === 'visible') startLoop(); else stopLoop();
+    if (shouldRun()) startLoop(); else stopLoop();
   }
+  // Watchdog: if rAF stalls on a device while the band should be
+  // animating, an interval takes over so taps still move the seam.
+  setInterval(function () {
+    if (!shouldRun() || !running) return;
+    var now = performance.now();
+    if (now - lastTickAt > 700 && !intervalDriver) {
+      intervalDriver = setInterval(function () { tick(performance.now()); }, 50);
+    }
+    if (intervalDriver && now - lastRafAt <= 700) {
+      clearInterval(intervalDriver); intervalDriver = null;
+    }
+  }, 400);
 
   if (window.IntersectionObserver) {
     new IntersectionObserver(function (entries) {
@@ -331,20 +395,32 @@
   }
   document.addEventListener('visibilitychange', gate);
   if (mq.addEventListener) mq.addEventListener('change', gate);
-  // Reduced-motion path: taps still move the seam, one frame per change.
-  new MutationObserver(function () { if (mq.matches) drawStatic(); })
-    .observe(band, { attributes: true, attributeFilter: ['class'] });
+  // Reduced-motion path: time stays frozen, but the seam still
+  // follows the tap expansion for the length of the transition.
+  var rmTimer = null;
+  new MutationObserver(function () {
+    if (!mq.matches || !ready) return;
+    var until = performance.now() + 950;
+    if (rmTimer) clearInterval(rmTimer);
+    rmTimer = setInterval(function () {
+      resize();
+      var lay = layoutSplit();
+      splitCur = lay.split;
+      draw(0, lay.split, lay.horiz);
+      if (performance.now() > until) { clearInterval(rmTimer); rmTimer = null; }
+    }, 40);
+  }).observe(band, { attributes: true, attributeFilter: ['class'] });
 
   canvas.addEventListener('webglcontextlost', function (e) {
     e.preventDefault();
     stopLoop();
+    ready = false;
     band.classList.remove('gl-live');
+    document.documentElement.classList.remove('gl-on');
     canvas.style.opacity = '0';
   });
   canvas.addEventListener('webglcontextrestored', function () {
-    loaded = 0; texA = null; texB = null; ready = false;
-    var a2 = new Image(); a2.onload = onLoad(0, a2); a2.src = 'art/golden-city.jpg';
-    var b2 = new Image(); b2.onload = onLoad(1, b2); b2.src = 'art/obsidian-dragon.jpg';
+    loadTextures();
   });
 
   function start() {
@@ -352,9 +428,10 @@
     resize();
     var lay = layoutSplit();
     splitCur = lay.split;
-    draw(mq.matches ? 0 : 0.001, lay.split, lay.horiz);
+    draw(0.001, lay.split, lay.horiz);
     // First successful frame drawn: reveal the canvas over the DOM.
     band.classList.add('gl-live');
+    document.documentElement.classList.add('gl-on');
     canvas.style.opacity = '1';
     gate();
   }

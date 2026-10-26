@@ -713,6 +713,13 @@ ul.plain { list-style: none; padding-left: 0; }
 .latent-band.gl-live .seam { display: none; }
 .slice img { transition: opacity 0.5s ease; }
 .latent-band.gl-live .slice img { opacity: 0; animation: none; }
+
+/* While the WebGL seam is live, the band's image moves; the top
+   bar's static duplicated crop would clash with it (a second,
+   frozen copy of the artwork in the bar). Under GL the bar keeps
+   its per-world tint but drops the picture. */
+html.latent-live.gl-on[data-world="golden"] .site-header::before,
+html.latent-live.gl-on[data-world="ember"] .site-header::before { background-image: none; }
 .slice-title { z-index: 3; }
 /* Room for the words to breathe */
 .latent-head { padding-bottom: 20px; }
