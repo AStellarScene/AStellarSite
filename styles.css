@@ -956,12 +956,12 @@ body.past-map .sitemap-flow { pointer-events: auto; }
   right: 0;
   bottom: 0;
   z-index: 4;
-  height: 92px;
+  height: 106px;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  padding-bottom: 18px;
-  gap: 3px;
+  padding-bottom: 20px;
+  gap: 4px;
   pointer-events: auto;
   touch-action: pan-y;
   background: linear-gradient(to top, rgba(4, 5, 12, 0.62), rgba(4, 5, 12, 0));
@@ -971,24 +971,24 @@ body.past-map .sitemap-flow { pointer-events: auto; }
 .latent-scrollcue.cue-gone { opacity: 0; pointer-events: none; }
 .cue-word {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.34em;
   text-transform: uppercase;
 }
 .cue-arrow { display: flex; flex-direction: column; align-items: center; }
 .cue-arrow i {
-  width: 11px;
-  height: 11px;
-  border-right: 2px solid rgba(94, 234, 212, 0.9);
-  border-bottom: 2px solid rgba(94, 234, 212, 0.9);
+  width: 14px;
+  height: 14px;
+  border-right: 2.5px solid rgba(94, 234, 212, 0.9);
+  border-bottom: 2.5px solid rgba(94, 234, 212, 0.9);
   transform: rotate(45deg);
-  margin-top: -4px;
+  margin-top: -5px;
   animation: cueDrop 1.8s ease-in-out infinite;
 }
 .cue-arrow i:last-child { animation-delay: 0.25s; }
 @keyframes cueDrop {
   0%, 100% { opacity: 0.25; transform: rotate(45deg) translate(0, 0); }
-  50% { opacity: 1; transform: rotate(45deg) translate(3px, 3px); }
+  50% { opacity: 1; transform: rotate(45deg) translate(4px, 4px); }
 }
 @media (prefers-reduced-motion: reduce) { .cue-arrow i { animation: none; } }
 .sitemap-list-sec { margin-top: 7vh; padding-bottom: 9vh; }
