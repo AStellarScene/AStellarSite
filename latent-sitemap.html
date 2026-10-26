@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atlas — Adam Laloge</title>
 <meta name="description" content="A sitemap drawn as a latent space: every photo, book, artwork, and project on Adam Laloge's site as a point in one flowing map.">
-<link rel="stylesheet" href="styles.css?v=43">
+<link rel="stylesheet" href="styles.css?v=44">
 </head>
 <body>
 <header class="site-header">
@@ -305,8 +305,12 @@
   }
   window.addEventListener('resize', resize);
 
-  // The canvas is fixed, so client coordinates are canvas coordinates.
-  canvas.addEventListener('pointermove', function (e) {
+  // The canvas itself takes no input at all (pointer-events: none in
+  // the CSS), so the map listens at window level: the probe follows the
+  // pointer anywhere on the page, and taps are read wherever they land.
+  // Client coordinates are canvas coordinates — the canvas is fixed
+  // and fills the viewport.
+  window.addEventListener('pointermove', function (e) {
     probe.tx = e.clientX; probe.ty = e.clientY; probe.active = true; probe.last = performance.now();
   }, { passive: true });
 
@@ -328,14 +332,19 @@
   var selected = null, selectedAt = 0;
   var downPt = null, downAt = 0, downType = '';
 
-  canvas.addEventListener('pointerdown', function (e) {
+  window.addEventListener('pointerdown', function (e) {
     probe.tx = e.clientX; probe.ty = e.clientY; probe.active = true; probe.last = performance.now();
     downPt = { x: e.clientX, y: e.clientY }; downAt = performance.now(); downType = e.pointerType || 'mouse';
   }, { passive: true });
-  canvas.addEventListener('pointercancel', function () { downPt = null; probe.last = 0; }, { passive: true });
-  canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
-  canvas.addEventListener('pointerup', function (e) {
+  window.addEventListener('pointercancel', function () { downPt = null; probe.last = 0; }, { passive: true });
+  window.addEventListener('contextmenu', function (e) {
+    // No long-press menu over the map itself; links keep theirs.
+    if (glassCur < 0.4 && !(e.target && e.target.closest && e.target.closest('a, button'))) e.preventDefault();
+  });
+  window.addEventListener('pointerup', function (e) {
     if (!downPt) return;
+    // A tap on a link or button belongs to that element, not the map.
+    if (e.target && e.target.closest && e.target.closest('a, button')) { downPt = null; return; }
     var moved = Math.abs(e.clientX - downPt.x) + Math.abs(e.clientY - downPt.y);
     var dt = performance.now() - downAt;
     var type = downType;
@@ -360,11 +369,12 @@
     sample(e.clientX, e.clientY);
   }, { passive: true });
 
-  // Touch model: the canvas owns every touch on it (CSS touch-action:
-  // none) — drags explore, taps select. The one exception is the
-  // animated scroll strip at the bottom of the first screen, a plain
-  // DOM element with touch-action: pan-y: drags starting there scroll
-  // the page like any other content. No modes, nothing to enter or leave.
+  // Touch model: there are no zones. The page declares one gesture
+  // contract (body { touch-action: pan-y }): vertical drags scroll
+  // natively anywhere — margins, map, list — and the browser's own
+  // arbitration (pointercancel when a scroll claims the gesture)
+  // keeps the two apart. Sideways drags and taps reach the map
+  // through the window listeners above.
 
   var running = true, raf = null;
 
@@ -413,10 +423,8 @@
       // The scroll strip belongs to the map screen only: once the turn
       // begins it gets out of the way.
       if (cueEl) cueEl.classList.toggle('cue-gone', glassCur > 0.05);
-      // Past the turn, touches belong to the content (see .past-map in
-      // the CSS): the list must scroll from anywhere, not just links.
-      if (glassCur > 0.4) document.body.classList.add('past-map');
-      else if (glassCur < 0.3) document.body.classList.remove('past-map');
+      // (No touch handoff exists anymore — the canvas intercepts
+      // nothing, so the page's touches were never taken from it.)
     }
 
     ctx.globalCompositeOperation = 'source-over';
@@ -619,7 +627,8 @@
       ctx.fillStyle = '#2dd4bf';
       ctx.beginPath(); ctx.arc(probe.x, probe.y, 2.4, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
-      canvas.style.cursor = (nearItem && nearItemD < 54 * 54) ? 'pointer' : 'crosshair';
+      var wantCursor = (nearItem && nearItemD < 54 * 54) ? 'pointer' : '';
+      if (document.body.style.cursor !== wantCursor) document.body.style.cursor = wantCursor;
     } else {
       // Fully glassed: keep the points parked at their homes so the map
       // is composed when the visitor scrolls back up.

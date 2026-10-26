@@ -874,6 +874,12 @@ html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.3
 /* ---------- Latent Sitemap ---------- */
 /* The nebula is a fixed full-page background; the page scrolls over it,
    and scrolling raises a frosted layer as the map's content fades. */
+/* The canvas is purely visual: pointer-events none means it can never
+   intercept a touch or a click, anywhere, at any scroll depth. Input
+   reaches the map through window-level listeners instead. One gesture
+   contract for the whole page: vertical drags scroll (browser-owned),
+   everything else is the map's. */
+body.sitemap-body { touch-action: pan-y; }
 #latent-map {
   position: fixed;
   inset: 0;
@@ -881,11 +887,7 @@ html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.3
   height: 100%;
   display: block;
   z-index: 0;
-  touch-action: none;
-  cursor: crosshair;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
+  pointer-events: none;
 }
 /* No backdrop-filter here: a full-screen animated filter over a live
    canvas is what made WebKit flicker. The frost is baked instead —
@@ -910,14 +912,7 @@ body.sitemap-body .site-header {
   backdrop-filter: blur(14px) saturate(1.4);
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
 }
-/* The flow must never swallow input meant for the canvas beneath it:
-   it is click-through everywhere except its actual links/buttons. */
-.sitemap-flow { position: relative; z-index: 2; pointer-events: none; }
-.sitemap-flow a, .sitemap-flow button { pointer-events: auto; }
-/* Once the turn is underway (body.past-map, set by the engine), the
-   content takes its touches back: anywhere in the list region drags
-   scroll the page, instead of falling through to the inert canvas. */
-body.past-map .sitemap-flow { pointer-events: auto; }
+.sitemap-flow { position: relative; z-index: 2; }
 /* The Latent Dreams glass: tinted translucency, backdrop blur, a lit rim. */
 .latent-glass {
   background: rgba(8, 11, 22, 0.44);
@@ -932,7 +927,6 @@ body.past-map .sitemap-flow { pointer-events: auto; }
   height: calc(100vh - 118px);
   height: calc(100svh - 118px);
   min-height: 440px;
-  pointer-events: none;
 }
 /* The page header follows the same pattern as every other page —
    eyebrow label, heading, note — carried on frosted glass because the
@@ -943,7 +937,6 @@ body.past-map .sitemap-flow { pointer-events: auto; }
   left: 0;
   right: 0;
   padding: 16px 20px 15px;
-  pointer-events: none;
 }
 .latent-phead h1 { font-size: 30px; color: var(--heading); margin: 3px 0 5px; }
 .latent-phead .phead-note { color: #a7b3c7; font-size: 14.5px; margin: 0; }
@@ -962,8 +955,7 @@ body.past-map .sitemap-flow { pointer-events: auto; }
   justify-content: flex-end;
   padding-bottom: 20px;
   gap: 4px;
-  pointer-events: auto;
-  touch-action: pan-y;
+  pointer-events: none;
   background: linear-gradient(to top, rgba(4, 5, 12, 0.62), rgba(4, 5, 12, 0));
   color: rgba(226, 240, 255, 0.85);
   transition: opacity 0.35s ease;
