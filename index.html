@@ -139,7 +139,7 @@
   };
   var TINTS = [SPR.white, SPR.white, SPR.white, SPR.teal, SPR.gold];
 
-  var pointer = { x: -9999, y: -9999, sx: -9999, sy: -9999, active: false, touch: false };
+  var pointer = { cx: 0, cy: 0, x: 0, y: 0, sx: 0, sy: 0, inf: 0, active: false, touch: false };
 
   // The nebula is rendered to a small offscreen canvas and scaled up: the
   // gradients are soft, so the upscale is invisible, and the expensive
@@ -167,6 +167,8 @@
     var rect = hero.getBoundingClientRect();
     W = Math.max(320, rect.width);
     H = Math.max(240, rect.height);
+    pointer.x = pointer.sx = W / 2;
+    pointer.y = pointer.sy = H / 2;
     canvas.width = Math.round(W * DPR);
     canvas.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -189,7 +191,7 @@
         y: Math.random() * H,
         layer: layer,
         r: 0.5 + layer * 0.45 + Math.random() * 0.7,
-        base: 0.35 + Math.random() * 0.5,
+        base: 0.5 + Math.random() * 0.48,
         tw: Math.random() * Math.PI * 2,
         tws: 0.4 + Math.random() * 1.1,
         spr: TINTS[Math.floor(Math.random() * TINTS.length)],
@@ -227,10 +229,21 @@
     lastT = t;
     ctx.clearRect(0, 0, W, H);
 
-    // Pointer light eases toward the real pointer (lerp = smoothness).
-    pointer.sx += (pointer.x - pointer.sx) * 0.06;
-    pointer.sy += (pointer.y - pointer.sy) * 0.06;
-    var px = (pointer.sx / Math.max(W, 1) - 0.5), py = (pointer.sy / Math.max(H, 1) - 0.5);
+    // Pointer response: ease on a time constant, not per frame, so
+    // 120Hz and 60Hz displays feel the same; and an influence value
+    // fades the whole effect in and out, so entering or leaving the
+    // hero never makes the field jump.
+    var heroRect = hero.getBoundingClientRect();
+    pointer.x = pointer.cx - heroRect.left;
+    pointer.y = pointer.cy - heroRect.top;
+    var kp = 1 - Math.exp(-dt / 80);
+    pointer.sx += (pointer.x - pointer.sx) * kp;
+    pointer.sy += (pointer.y - pointer.sy) * kp;
+    var ki = 1 - Math.exp(-dt / 160);
+    pointer.inf += ((pointer.active ? 1 : 0) - pointer.inf) * ki;
+    if (!pointer.active && pointer.inf < 0.002) pointer.inf = 0;
+    var px = (pointer.sx / Math.max(W, 1) - 0.5) * pointer.inf;
+    var py = (pointer.sy / Math.max(H, 1) - 0.5) * pointer.inf;
 
     // Flowing nebula, pre-composited at low res (see renderNebula).
     frameNo++;
@@ -238,9 +251,9 @@
     ctx.drawImage(neb, 0, 0, W, H);
 
     // Pointer bloom: a soft light where the visitor is (mouse/pen only).
-    if (pointer.active && !pointer.touch) {
+    if (pointer.inf > 0.01 && !pointer.touch) {
       ctx.globalCompositeOperation = 'screen';
-      ctx.globalAlpha = 0.10;
+      ctx.globalAlpha = 0.12 * pointer.inf;
       ctx.drawImage(SPR.teal, pointer.sx - 190, pointer.sy - 190, 380, 380);
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;
@@ -254,19 +267,23 @@
       var x = st.x + ox, y = st.y + oy;
       var tw = 0.72 + 0.28 * Math.sin(t * 0.001 * st.tws + st.tw);
       var boost = 0;
-      if (pointer.active) {
+      if (pointer.inf > 0.01) {
         var dx = x - pointer.sx, dy = y - pointer.sy;
         var d2 = dx * dx + dy * dy;
-        if (d2 < 16900) boost = (1 - d2 / 16900) * 0.55;
+        if (d2 < 16900) boost = (1 - d2 / 16900) * 0.6 * pointer.inf;
       }
       var a = Math.min(1, st.base * tw + boost);
       var r = st.r * (1 + boost * 0.9);
       ctx.globalAlpha = a;
-      var gs = r * 7;
-      ctx.drawImage(st.spr, x - gs / 2, y - gs / 2, gs, gs);
-      ctx.fillStyle = 'rgba(255,255,255,' + Math.min(1, a + 0.15) + ')';
+      // Far stars skip the glow sprite: a third of the drawImage calls
+      // gone, which is where the frame stutter was coming from.
+      if (st.layer > 0) {
+        var gs = r * 7;
+        ctx.drawImage(st.spr, x - gs / 2, y - gs / 2, gs, gs);
+      }
+      ctx.fillStyle = 'rgba(255,255,255,' + Math.min(1, a + 0.3) + ')';
       ctx.beginPath();
-      ctx.arc(x, y, Math.max(0.4, r * 0.5), 0, 6.2832);
+      ctx.arc(x, y, Math.max(0.45, r * 0.55), 0, 6.2832);
       ctx.fill();
     });
     ctx.globalAlpha = 1;
@@ -348,22 +365,25 @@
     }
   }
 
-  function heroPos(e) {
-    var r = hero.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
-  }
   hero.addEventListener('pointermove', function (e) {
     pointer.touch = e.pointerType === 'touch';
-    var p = heroPos(e);
-    pointer.x = p.x; pointer.y = p.y;
-    if (!pointer.active) { pointer.sx = p.x; pointer.sy = p.y; }
+    pointer.cx = e.clientX; pointer.cy = e.clientY;
+    if (!pointer.active) {
+      // Entering: seed the light at the cursor while its influence is
+      // still 0, then let the fade bring it in. No visible jump.
+      var r0 = hero.getBoundingClientRect();
+      pointer.sx = pointer.x = e.clientX - r0.left;
+      pointer.sy = pointer.y = e.clientY - r0.top;
+    }
     pointer.active = true;
   });
-  hero.addEventListener('pointerleave', function () { pointer.active = false; pointer.x = -9999; });
+  hero.addEventListener('pointerleave', function () { pointer.active = false; });
   hero.addEventListener('pointerdown', function (e) {
-    var p = heroPos(e);
-    pointer.x = p.x; pointer.y = p.y; pointer.active = true;
-    burstAt(p.x, p.y);
+    pointer.touch = e.pointerType === 'touch';
+    pointer.cx = e.clientX; pointer.cy = e.clientY;
+    pointer.active = true;
+    var r = hero.getBoundingClientRect();
+    burstAt(e.clientX - r.left, e.clientY - r.top);
   });
 
   var resizeTimer = null;
