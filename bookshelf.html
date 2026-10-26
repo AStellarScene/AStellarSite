@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bookshelf — Adam Laloge</title>
 <meta name="description" content="Adam Laloge's bookshelf: historical horror, dark fantasy, and sci-fi — what he's reading and what's next.">
-<link rel="stylesheet" href="styles.css?v=46">
+<link rel="stylesheet" href="styles.css?v=47">
 </head>
 <body>
 <header class="site-header">
@@ -190,19 +190,26 @@
         if (Math.abs(off) > 3) centerItem(centered, true);
       }, 150);
     }, { passive: true });
-        // Desktop wheel: vertical deltas drive the track sideways through a
-    // clamped target that the scroll position eases toward, so repeated
-    // notches accumulate instead of fighting the animation. The wheel is
-    // only consumed while the track can still move in that direction;
-    // at either end the event is left alone and the page scrolls on.
+    // Wheel routing — each axis does its own job:
+    // - Trackpad sideways swipe: the flow glides on deltaX, and the events
+    //   are captured whole so the page never moves mid-gesture.
+    // - Trackpad vertical scroll: never intercepted. The page scrolls and
+    //   the flow is pinned, so diagonal drift can't wiggle it.
+    // - Mouse wheel (line/page mode, or a coarse full-size first step):
+    //   vertical notches convert to a sideways glide — a wheel has no
+    //   sideways to give.
+    // The axis is judged once per gesture from its first deltas and held
+    // until the stream goes quiet (~140ms); judging event-by-event
+    // flip-flopped on diagonal trackpad input.
     var wheelTarget = null, wheelRaf = null;
+    var gesture = null, gestureTimer = null;
     function stopWheel() {
       wheelTarget = null;
       if (wheelRaf) { cancelAnimationFrame(wheelRaf); wheelRaf = null; }
     }
     function stepWheel() {
       if (wheelTarget === null) { wheelRaf = null; return; }
-      var diff = wheelTarget - track.scrollLeft;
+        var diff = wheelTarget - track.scrollLeft;
       if (Math.abs(diff) < 0.6) {
         track.scrollLeft = wheelTarget;
         wheelTarget = null;
@@ -212,12 +219,34 @@
       track.scrollLeft += diff * 0.22;
       wheelRaf = requestAnimationFrame(stepWheel);
     }
+    function armGesture() {
+      clearTimeout(gestureTimer);
+      gestureTimer = setTimeout(function () { gesture = null; }, 140);
+    }
     track.addEventListener('wheel', function (e) {
-      if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // horizontal deltas scroll natively
-      var d = e.deltaY;
-      if (e.deltaMode === 1) d *= 24; // lines to px
-      else if (e.deltaMode === 2) d *= track.clientWidth; // pages to px
+        if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
+      var dx = e.deltaX, dy = e.deltaY;
+      if (e.deltaMode === 1) { dx *= 24; dy *= 24; }              // lines to px
+      else if (e.deltaMode === 2) { dx *= track.clientWidth; dy *= track.clientWidth; }
+      armGesture();
+      if (!gesture) {
+        gesture = { ax: 0, ay: 0, bx: 0, by: 0, axis: null,
+                    mouse: e.deltaMode !== 0 || Math.abs(e.deltaY) >= 50 || Math.abs(e.deltaX) >= 50,
+                    left: track.scrollLeft };
+      }
+      var g = gesture;
+      g.ax += Math.abs(dx); g.ay += Math.abs(dy); g.bx += dx; g.by += dy;
+      if (!g.axis) {
+        if (!g.mouse && Math.max(g.ax, g.ay) < 8) return;  // too small to judge yet
+        g.axis = g.ax > g.ay ? 'x' : (g.mouse ? 'convert' : 'y');
+        if (g.axis === 'y') stopWheel();                   // a page scroll cancels any glide
+        dx = g.bx; dy = g.by;                              // spend the buffered deltas whole
+      }
+      if (g.axis === 'y') {
+        if (track.scrollLeft !== g.left) track.scrollLeft = g.left;
+        return;
+      }
+      var d = g.axis === 'x' ? dx : dy;
       if (!d) return;
       var max = track.scrollWidth - track.clientWidth;
       if (max <= 0) return;
@@ -225,7 +254,7 @@
       var target = Math.max(0, Math.min(max, base + d));
       if (Math.abs(target - track.scrollLeft) < 1) { stopWheel(); return; }
       e.preventDefault();
-      wheelTarget = target;
+        wheelTarget = target;
       if (reduced) {
         track.scrollLeft = wheelTarget;
         wheelTarget = null;

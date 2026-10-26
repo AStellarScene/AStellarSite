@@ -247,12 +247,13 @@ html, body { overflow-x: clip; }
   perspective: 1300px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 .pflow-track::-webkit-scrollbar { display: none; }
 .pflow-track:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; border-radius: 10px; }
 .pcov {
   flex: 0 0 auto;
-  height: 396px;
+  height: 440px;
   aspect-ratio: var(--ar);
   padding: 0;
   border: 1px solid var(--panel-border);
@@ -384,6 +385,7 @@ html, body { overflow-x: clip; }
   perspective: 1200px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 .flow-track::-webkit-scrollbar { display: none; }
 .cov {
