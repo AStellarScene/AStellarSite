@@ -53,6 +53,9 @@ body::before {
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  /* The sky melts into the page at both ends instead of slicing at the hero box */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 30px, #000 calc(100% - 110px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 30px, #000 calc(100% - 110px), transparent 100%);
 }
 /* When the canvas is live, retire the hero's static dot layer so stars don't double up */
 html.sky-on .hero::before { display: none; }
@@ -139,6 +142,7 @@ section:first-of-type { border-top: none; margin-top: 0; }
 html, body { overflow-x: clip; }
 .hero {
   padding-top: 72px;
+  padding-bottom: 88px;
   position: relative;
   overflow: hidden;
   /* Full-bleed: the sky runs edge to edge, breaking out of the content column */
