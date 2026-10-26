@@ -560,23 +560,51 @@ ul.plain { list-style: none; padding-left: 0; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.12);
+  transform: scale(1.15);
   animation: sliceDrift 16s ease-in-out infinite alternate;
   pointer-events: none;
 }
 .slice:nth-child(2) img { animation-duration: 21s; animation-delay: -6s; }
 .slice:nth-child(3) img { animation-duration: 18s; animation-delay: -3s; }
 @keyframes sliceDrift {
-  from { transform: scale(1.12) translateX(-1.6%); }
-  to { transform: scale(1.12) translateX(1.6%); }
+  from { transform: scale(1.15) translateX(-2.4%); }
+  to { transform: scale(1.15) translateX(2.4%); }
 }
-/* Dreamy wobbly edges between worlds, alternating phase */
-.slice:not(:last-child) {
-  clip-path: polygon(0 0, calc(100% - 6px) 0, calc(100% - 14px) 12%, calc(100% - 4px) 26%, calc(100% - 15px) 40%, calc(100% - 5px) 54%, calc(100% - 14px) 68%, calc(100% - 4px) 82%, calc(100% - 12px) 100%, 0 100%);
+/* Dreamy wobbly edges between worlds: each slice's leading edge is the
+   wave, so the world beneath shows through the troughs. Alternating phase. */
+.slice:not(:first-child) {
+  clip-path: polygon(7px 0, 100% 0, 100% 100%, 13px 100%, 4px 87%, 15px 73%, 5px 59%, 14px 45%, 4px 31%, 15px 17%, 6px 5%);
 }
-.slice:nth-child(even):not(:last-child) {
-  clip-path: polygon(0 0, calc(100% - 12px) 0, calc(100% - 3px) 14%, calc(100% - 14px) 28%, calc(100% - 5px) 44%, calc(100% - 15px) 58%, calc(100% - 4px) 72%, calc(100% - 13px) 86%, calc(100% - 6px) 100%, 0 100%);
+.slice:nth-child(even):not(:first-child) {
+  clip-path: polygon(13px 0, 100% 0, 100% 100%, 6px 100%, 15px 85%, 4px 71%, 14px 56%, 5px 42%, 15px 27%, 4px 13%, 10px 3%);
 }
+/* The seam membrane: a narrow blurred strip riding the boundary, swaying
+   slowly (transform only) so the melt between worlds stays alive. */
+.seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -19px;
+  width: 38px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  backdrop-filter: blur(7px) saturate(1.25);
+  -webkit-backdrop-filter: blur(7px) saturate(1.25);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  animation: seamSway 9s ease-in-out infinite alternate;
+}
+@keyframes seamSway {
+  from { transform: translateX(-5px); }
+  to { transform: translateX(5px); }
+}
+.latent-band.open .seam { opacity: 0; }
+.slice-title { z-index: 3; }
+/* Room for the words to breathe */
+.latent-head { padding-bottom: 20px; }
+.latent-head .section-note { max-width: 62ch; }
+.latent-band { margin-bottom: 10px; }
 .latent-band.open .slice { flex-grow: 0.0001; opacity: 0; }
 .latent-band.open .slice.active { flex-grow: 30; opacity: 1; clip-path: none; margin-left: 0; }
 .slice-title {
@@ -629,7 +657,7 @@ html.latent-live .label, html.latent-live .brand, html.latent-live .section-note
   transition: background-color 0.9s ease, color 0.9s ease, border-color 0.9s ease;
 }
 html.latent-live[data-world="golden"] {
-  --bg: #140c05;
+  --base: #140c05;
   --heading: #ffe9c4;
   --body: #d8c3a5;
   --dim: #a68d6d;
@@ -639,7 +667,7 @@ html.latent-live[data-world="golden"] {
   --panel-border: rgba(255, 179, 71, 0.22);
 }
 html.latent-live[data-world="ember"] {
-  --bg: #0e0605;
+  --base: #0e0605;
   --heading: #ffdcc8;
   --body: #d3aca0;
   --dim: #a87a6f;
@@ -647,6 +675,33 @@ html.latent-live[data-world="ember"] {
   --gold: #ff9a5c;
   --panel: rgba(255, 110, 50, 0.06);
   --panel-border: rgba(255, 110, 50, 0.22);
+}
+
+/* The world's ambient light: fixed glow layers in the image's colors,
+   crossfaded in over the page's stock nebula when a world opens */
+.world-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 1s ease;
+  pointer-events: none;
+}
+html.latent-live[data-world="golden"] .world-ambient {
+  opacity: 1;
+  background:
+    radial-gradient(720px 480px at 14% -4%, rgba(255, 179, 71, 0.22), transparent 62%),
+    radial-gradient(820px 560px at 92% 4%, rgba(255, 122, 40, 0.14), transparent 62%),
+    radial-gradient(900px 700px at 85% 90%, rgba(150, 90, 30, 0.10), transparent 62%),
+    #140c05;
+}
+html.latent-live[data-world="ember"] .world-ambient {
+  opacity: 1;
+  background:
+    radial-gradient(720px 480px at 14% -4%, rgba(255, 96, 44, 0.20), transparent 62%),
+    radial-gradient(820px 560px at 92% 2%, rgba(110, 130, 255, 0.12), transparent 62%),
+    radial-gradient(900px 700px at 85% 90%, rgba(255, 60, 30, 0.10), transparent 62%),
+    #0e0605;
 }
 @media (prefers-reduced-motion: reduce) {
   .slice img { animation: none; }

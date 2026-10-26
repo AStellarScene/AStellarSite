@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Space Dreams — Adam Laloge</title>
-<meta name="description" content="Space Dreams: AI artwork by Adam Laloge. Worlds sliced into slivers that open into full immersive views, each recoloring the site.">
-<link rel="stylesheet" href="styles.css?v=14">
+<title>Latent Dreams — Adam Laloge</title>
+<meta name="description" content="Latent Dreams: AI artwork by Adam Laloge. Worlds sliced into slivers that open into full immersive views, each recoloring the site.">
+<link rel="stylesheet" href="styles.css?v=15">
 </head>
 <body>
 <header class="site-header">
@@ -17,7 +17,7 @@
       <a href="work.html">Projects</a>
       <a href="about.html">About</a>
       <a href="photography.html">Photography</a>
-      <a href="dreams.html" class="active">Space Dreams</a>
+      <a href="dreams.html" class="active">Latent Dreams</a>
       <a href="bookshelf.html">Bookshelf</a>
       <a href="resume.html">Resume</a>
     </nav>
@@ -25,8 +25,9 @@
 </header>
 
 <main class="wrap">
-  <section>
-    <p class="label">Space Dreams</p>
+  <div class="world-ambient" aria-hidden="true"></div>
+  <section class="latent-head">
+    <p class="label">Latent Dreams</p>
     <h2>Worlds I imagined</h2>
     <p class="section-note">AI artwork, directed by me: I set the scene, iterate, and keep the frames that survive. The page is sliced into as many worlds as there are pieces, with dreamy edges between them. Tap one and it opens up, and the whole site takes on its colors, like stepping into a different world. Tap again to come back.</p>
   </section>
@@ -42,6 +43,7 @@
       </span>
     </button>
     <button type="button" class="slice" data-world="ember" aria-expanded="false" aria-label="Open Obsidian Dragon">
+      <span class="seam" aria-hidden="true"></span>
       <img src="art/obsidian-dragon.jpg" alt="An obsidian dragon with lava-lit cracks roaring over a burning volcanic valley at night" draggable="false">
       <span class="slice-title">Obsidian Dragon</span>
       <span class="slice-cap">
