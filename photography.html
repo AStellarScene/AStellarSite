@@ -26,41 +26,41 @@
 
 <main class="wrap">
   <section id="photography">
-                                                                                <p class="label">Photography</p>
-                                                                                <h2>Off the clock</h2>
-                                                                                <p class="section-note">Landscapes and sunsets. All of these are my own photographs.</p>
-                                                                            
-                                                                                <div class="gal-chips" role="group" aria-label="Filter photos">
-                                                                                  <button class="chip active" data-filter="all" type="button">All</button>
-                                                                                  <button class="chip" data-filter="sunsets" type="button">Sunsets</button>
-                                                                                  <button class="chip" data-filter="shoreline" type="button">Shoreline</button>
-                                                                <button class="chip" data-filter="landscape" type="button">Landscapes</button>
-                                                                                  <button class="chip" data-filter="details" type="button">Details</button>
+                                                                                    <p class="label">Photography</p>
+                                                                                    <h2>Off the clock</h2>
+                                                                                    <p class="section-note">Landscapes and sunsets. All of these are my own photographs.</p>
+                                                                                
+                                                                                    <div class="gal-chips" role="group" aria-label="Filter photos">
+                                                                                      <button class="chip active" data-filter="all" type="button">All</button>
+                                                                                      <button class="chip" data-filter="sunsets" type="button">Sunsets</button>
+                                                                                      <button class="chip" data-filter="shoreline" type="button">Shoreline</button>
+                                                                    <button class="chip" data-filter="landscape" type="button">Landscapes</button>
+                                                                                      <button class="chip" data-filter="details" type="button">Details</button>
+                                                                                    </div>
+                                                                                
+                                                                                    <div class="pflow-scene">
+                                                                                      <div class="pflow-track" id="pflow-track" tabindex="0" aria-label="Photo flow: scroll, or focus and use the arrow keys"></div>
+                                                                                      <p class="flow-hint">Scroll &middot; tap a photo to view</p>
+                                                                                    </div>
+                                                  
+                                                                                    <div class="photo-detail" aria-live="polite">
+                                                                              <div class="pd-top">
+                                                                                <div class="pd-head">
+                                                                                  <p class="label" id="pd-group">Sunsets</p>
+                                                                                  <h3 id="pd-title">Sunset Through the Grass</h3>
                                                                                 </div>
-                                                                            
-                                                                                <div class="pflow-scene">
-                                                                                  <div class="pflow-track" id="pflow-track" tabindex="0" aria-label="Photo flow: scroll, or focus and use the arrow keys"></div>
-                                                                                  <p class="flow-hint">Scroll &middot; tap a photo to view</p>
+                                                                                <div class="pd-side">
+                                                                                  <span id="pd-count">1 / 19</span>
+                                                                                  <div class="pd-nav">
+                                                                                    <button class="pd-arrow" id="pd-prev" type="button" aria-label="Previous photo">&#8249;</button>
+                                                                                    <button class="pd-arrow" id="pd-next" type="button" aria-label="Next photo">&#8250;</button>
+                                                                                  </div>
                                                                                 </div>
-                                              
-                                                                                <div class="photo-detail" aria-live="polite">
-                                                                          <div class="pd-top">
-                                                                            <div class="pd-head">
-                                                                              <p class="label" id="pd-group">Sunsets</p>
-                                                                              <h3 id="pd-title">Sunset Through the Grass</h3>
-                                                                            </div>
-                                                                            <div class="pd-side">
-                                                                              <span id="pd-count">1 / 19</span>
-                                                                              <div class="pd-nav">
-                                                                                <button class="pd-arrow" id="pd-prev" type="button" aria-label="Previous photo">&#8249;</button>
-                                                                                <button class="pd-arrow" id="pd-next" type="button" aria-label="Next photo">&#8250;</button>
                                                                               </div>
+                                                                              <p class="pd-desc" id="pd-alt">Sunset over calm water, seen through silhouetted beach grass</p>
                                                                             </div>
-                                                                          </div>
-                                                                          <p class="pd-desc" id="pd-alt">Sunset over calm water, seen through silhouetted beach grass</p>
-                                                                        </div>
-                                                                                </div>
-                                                                              </section>
+                                                                                    </div>
+                                                                                  </section>
 </main>
 
 <footer class="site-footer">
@@ -166,6 +166,56 @@
     requestAnimationFrame(function () { track.scrollLeft = 0; center(0, 'auto'); layout(); });
   }
   ['pointerdown', 'wheel', 'touchstart'].forEach(function (ev) { track.addEventListener(ev, hold, { passive: true }); });
+  // Desktop wheel, same treatment as the bookshelf: vertical deltas
+  // drive the track sideways through a clamped, eased target, routed
+  // through scrollLeft so the scroll handler and settle-centering stay
+  // in charge. The delta is only consumed while the track can still
+  // move that way; at the ends the page scrolls normally. While the
+  // viewing pane is open the wheel is ignored entirely.
+  var wheelTarget = null, wheelRaf = null;
+  function stopWheel() {
+    wheelTarget = null;
+    if (wheelRaf) { cancelAnimationFrame(wheelRaf); wheelRaf = null; }
+  }
+  function stepWheel() {
+    if (wheelTarget === null) { wheelRaf = null; return; }
+    if (typeof pane !== 'undefined' && pane && pane.open) { stopWheel(); return; }
+    var diff = wheelTarget - track.scrollLeft;
+    if (Math.abs(diff) < 0.6) {
+      track.scrollLeft = wheelTarget;
+      wheelTarget = null;
+      wheelRaf = null;
+      return;
+    }
+    track.scrollLeft += diff * 0.22;
+    wheelRaf = requestAnimationFrame(stepWheel);
+  }
+  track.addEventListener('wheel', function (e) {
+    if (typeof pane !== 'undefined' && pane && pane.open) return;
+    if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // horizontal deltas scroll natively
+    var d = e.deltaY;
+    if (e.deltaMode === 1) d *= 24; // lines to px
+    else if (e.deltaMode === 2) d *= track.clientWidth; // pages to px
+    if (!d) return;
+    var max = track.scrollWidth - track.clientWidth;
+    if (max <= 0) return;
+    var base = wheelTarget !== null ? wheelTarget : track.scrollLeft;
+    var target = Math.max(0, Math.min(max, base + d));
+    if (Math.abs(target - track.scrollLeft) < 1) { stopWheel(); return; }
+    e.preventDefault();
+    hold();
+    wheelTarget = target;
+    if (reduced) {
+      track.scrollLeft = wheelTarget;
+      wheelTarget = null;
+      return;
+    }
+    if (!wheelRaf) wheelRaf = requestAnimationFrame(stepWheel);
+  }, { passive: false });
+  ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+    track.addEventListener(ev, stopWheel, { passive: true });
+  });
   track.addEventListener('keydown', function (e) {
     if (e.key === 'ArrowRight') { hold(); center(Math.min(items.length - 1, current + 1)); e.preventDefault(); }
     if (e.key === 'ArrowLeft') { hold(); center(Math.max(0, current - 1)); e.preventDefault(); }

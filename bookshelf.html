@@ -177,9 +177,56 @@
     track.addEventListener('scroll', function () {
       if (!ticking) { ticking = true; requestAnimationFrame(function () { layout(); ticking = false; }); }
     }, { passive: true });
+        // Desktop wheel: vertical deltas drive the track sideways through a
+    // clamped target that the scroll position eases toward, so repeated
+    // notches accumulate instead of fighting the animation. The wheel is
+    // only consumed while the track can still move in that direction;
+    // at either end the event is left alone and the page scrolls on.
+    var wheelTarget = null, wheelRaf = null;
+    function stopWheel() {
+      wheelTarget = null;
+      if (wheelRaf) { cancelAnimationFrame(wheelRaf); wheelRaf = null; }
+    }
+    function stepWheel() {
+      if (wheelTarget === null) { wheelRaf = null; return; }
+      var diff = wheelTarget - track.scrollLeft;
+      if (Math.abs(diff) < 0.6) {
+        track.scrollLeft = wheelTarget;
+        wheelTarget = null;
+        wheelRaf = null;
+        return;
+      }
+      track.scrollLeft += diff * 0.22;
+      wheelRaf = requestAnimationFrame(stepWheel);
+    }
+    track.addEventListener('wheel', function (e) {
+      if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // horizontal deltas scroll natively
+      var d = e.deltaY;
+      if (e.deltaMode === 1) d *= 24; // lines to px
+      else if (e.deltaMode === 2) d *= track.clientWidth; // pages to px
+      if (!d) return;
+      var max = track.scrollWidth - track.clientWidth;
+      if (max <= 0) return;
+      var base = wheelTarget !== null ? wheelTarget : track.scrollLeft;
+      var target = Math.max(0, Math.min(max, base + d));
+      if (Math.abs(target - track.scrollLeft) < 1) { stopWheel(); return; }
+      e.preventDefault();
+      wheelTarget = target;
+      if (reduced) {
+        track.scrollLeft = wheelTarget;
+        wheelTarget = null;
+        return;
+      }
+      if (!wheelRaf) wheelRaf = requestAnimationFrame(stepWheel);
+    }, { passive: false });
+    ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+      track.addEventListener(ev, stopWheel, { passive: true });
+    });
     window.addEventListener('resize', layout);
 
     function centerItem(i, smooth) {
+      stopWheel();
       var it = items[i];
       track.scrollTo({
         left: it.offsetLeft - (track.clientWidth - it.offsetWidth) / 2,
