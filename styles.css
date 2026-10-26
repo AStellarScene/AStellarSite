@@ -492,7 +492,62 @@ html, body { overflow-x: clip; }
 
 /* Resume */
 .resume-meta { color: var(--body); }
-.job-head { margin: 18px 0 6px; color: var(--body); }
+
+/* ---------- Resume ---------- */
+#resume { max-width: 840px; }
+#resume h3 {
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+  margin: 36px 0 14px;
+}
+#resume .skills-grid { gap: 18px; }
+.job-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 18px;
+  margin: 20px 0 6px;
+}
+.job-company { margin: 0; }
+.job-loc { color: var(--dim); }
+.job-role { margin: 1px 0 0; font-style: italic; color: var(--body); }
+.job-dates {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  white-space: nowrap;
+  margin: 0;
+}
+.gold-note { color: var(--gold); }
+.skill-panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+.skill-panel li { margin: 5px 0; }
+@media (max-width: 560px) {
+  .job-head { flex-direction: column; gap: 2px; }
+}
+
+/* Print: the web resume should survive a recruiter's printer —
+   white page, dark text, site chrome and the download button hidden. */
+@media print {
+  body { background: #fff !important; }
+  body::before { display: none !important; }
+  .site-header, .site-footer { display: none !important; }
+  #resume { max-width: none; }
+  #resume .pill { display: none !important; }
+  body, p, li, .job-role, .resume-meta { color: #1c1c1c !important; }
+  h1, h2, h3, strong, .job-company strong { color: #000 !important; }
+  .label { color: #555 !important; }
+  .job-loc, .job-dates { color: #444 !important; }
+  #resume h3 { border-bottom-color: #bbb; }
+  .skill-panel { background: #fff !important; border-color: #bbb; }
+  .gold-note { color: #7a5c14 !important; }
+  a { color: #000 !important; text-decoration: none !important; }
+}
 .job-head strong { color: var(--heading); }
 ul { margin: 6px 0 10px; padding-left: 22px; }
 li { margin: 4px 0; }
