@@ -931,18 +931,38 @@ html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.3
 /* ---------- Latent Sitemap ---------- */
 /* The nebula is a fixed full-page background; the page scrolls over it,
    and scrolling raises a frosted layer as the map's content fades. */
-/* The canvas is purely visual: pointer-events none means it can never
-   intercept a touch or a click, anywhere, at any scroll depth. Input
-   reaches the map through window-level listeners instead. One gesture
-   contract for the whole page: vertical drags scroll (browser-owned),
-   everything else is the map's. */
-/* The contract is stamped on every element of this page, not just the
-   root: WebKit reads touch-action from the exact element touched and
-   does not walk up to ancestors, so a root-only rule left every drag
-   on iOS treated as a browser-owned gesture and the light never
-   followed a finger. */
-body.sitemap-body, body.sitemap-body * { touch-action: pan-y; }
-body.sitemap-body { overscroll-behavior: none; }
+/* Touch model (rebuilt 2026-10-26 from the interaction research): the
+   scroll-zone model. Ownership of a touch is decided by hit-testing
+   at touchstart -- which element the finger lands on -- never by
+   classifying the gesture after it begins. Direction classification
+   is structurally unreliable on iOS: a claim must land on touchstart
+   or the first touchmove, window/body listeners are passive by
+   default in both engines, and moves turn uncancelable once the
+   browser starts scrolling. Page-wide pan-y fails differently: it
+   hands every vertical drag to the browser, so vertical steering
+   dies with it, and WebKit has no pan-down for an asymmetric fix.
+   - The canvas stays purely visual (pointer-events: none). Input
+     lives on #latent-hit, a dedicated surface over it -- the
+     canvas's SIBLING, never a parent or child, so its
+     touch-action: none is never intersected with the zone's pan-y.
+   - The scroll zone (.latent-scrollzone) is the first screen's one
+     scrollable surface: touch-action: pan-y there, and it doubles
+     as a button that scrolls to the list.
+   - Once the page is scrolled to the content (body[data-view=
+     "content"], flipped with hysteresis in the page script), the
+     hit surface goes inert and the page scrolls like any other. */
+body.sitemap-body { overscroll-behavior-y: none; }
+body.sitemap-body a, body.sitemap-body button { touch-action: manipulation; }
+#latent-hit {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+body[data-view="content"] #latent-hit { pointer-events: none; }
 #latent-map {
   position: fixed;
   inset: 0;
@@ -966,7 +986,7 @@ body.sitemap-body { overscroll-behavior: none; }
   background: rgba(6, 8, 16, 0.55);
 }
 body.sitemap-body .site-header,
-body.sitemap-body .site-footer { position: relative; z-index: 3; }
+body.sitemap-body .site-footer { position: relative; z-index: 4; }
 /* On Atlas the header floats over the living nebula, so the bar and
    the opened nav menu get the frosted glass the other pages don't
    need: same header, glassed. */
@@ -975,7 +995,8 @@ body.sitemap-body .site-header {
   backdrop-filter: blur(14px) saturate(1.4);
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
 }
-.sitemap-flow { position: relative; z-index: 2; }
+.sitemap-flow { position: relative; z-index: 3; pointer-events: none; }
+.sitemap-flow a, .sitemap-flow button { pointer-events: auto; }
 /* The Latent Dreams glass: tinted translucency, backdrop blur, a lit rim. */
 .latent-glass {
   background: rgba(8, 11, 22, 0.44);
@@ -1003,32 +1024,52 @@ body.sitemap-body .site-header {
 }
 .latent-phead h1 { font-size: 30px; color: var(--heading); margin: 3px 0 5px; }
 .latent-phead .phead-note { color: #a7b3c7; font-size: 14.5px; margin: 0; }
-/* The scroll strip (touch only): the one zone on the first screen
-   where a drag pulls the page up instead of steering the light. */
-.latent-scrollcue {
-  display: flex;
+/* The scroll zone: a real button and the first screen's one
+   scrollable surface -- this page's bottom-sheet peek. Full width,
+   flush to the bottom edge (it has to reach the screen edges, not
+   stop at the content column), 64px plus the safe-area inset, with
+   the sheet's signals: a handle pill, a label naming where it
+   goes, and the chevron. Dragging on it scrolls natively
+   (touch-action: pan-y beats the generic button rule on
+   specificity); tapping it scrolls to the list. */
+body.sitemap-body .latent-scrollzone {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 4;
-  height: 106px;
+  z-index: 5;
+  display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 20px;
-  gap: 4px;
-  pointer-events: none;
-  background: linear-gradient(to top, rgba(4, 5, 12, 0.62), rgba(4, 5, 12, 0));
-  color: rgba(226, 240, 255, 0.85);
+  justify-content: center;
+  gap: 3px;
+  min-height: 64px;
+  padding: 9px 16px calc(9px + env(safe-area-inset-bottom, 0px));
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  background: linear-gradient(to top, rgba(6, 8, 16, 0.8), rgba(6, 8, 16, 0.58));
+  backdrop-filter: blur(10px) saturate(1.4);
+  -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  color: rgba(226, 240, 255, 0.88);
+  font: inherit;
+  cursor: pointer;
+  touch-action: pan-y;
   transition: opacity 0.35s ease;
 }
-.latent-scrollcue.cue-gone { opacity: 0; pointer-events: none; }
-.cue-word {
+.latent-scrollzone.cue-gone { opacity: 0; pointer-events: none; }
+.zone-handle {
+  width: 36px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(226, 240, 255, 0.38);
+}
+.zone-label {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 11px;
-  letter-spacing: 0.34em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
+  text-indent: 0.3em;
 }
 .cue-arrow { display: flex; flex-direction: column; align-items: center; }
 .cue-arrow i {
