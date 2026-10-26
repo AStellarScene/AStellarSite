@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Dreams — Adam Laloge</title>
+<meta name="description" content="Space Dreams: AI artwork by Adam Laloge. Worlds sliced into slivers that open into full immersive views, each recoloring the site.">
+<link rel="stylesheet" href="styles.css?v=14">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">Adam Laloge</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
+    <nav id="site-nav">
+      <a href="index.html">Home</a>
+      <a href="work.html">Projects</a>
+      <a href="about.html">About</a>
+      <a href="photography.html">Photography</a>
+      <a href="dreams.html" class="active">Space Dreams</a>
+      <a href="bookshelf.html">Bookshelf</a>
+      <a href="resume.html">Resume</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section>
+    <p class="label">Space Dreams</p>
+    <h2>Worlds I imagined</h2>
+    <p class="section-note">AI artwork, directed by me: I set the scene, iterate, and keep the frames that survive. The page is sliced into as many worlds as there are pieces, with dreamy edges between them. Tap one and it opens up, and the whole site takes on its colors, like stepping into a different world. Tap again to come back.</p>
+  </section>
+
+  <div class="latent-band" id="latent-band">
+    <button type="button" class="slice" data-world="golden" aria-expanded="false" aria-label="Open The Golden City">
+      <img src="art/golden-city.jpg" alt="A golden city of spires and bridges in the clouds, built around a glowing ring" draggable="false">
+      <span class="slice-title">The Golden City</span>
+      <span class="slice-cap">
+        <strong>The Golden City</strong>
+        <span>A city in the clouds, built around a ring of light.</span>
+        <span class="slice-hint">Tap again to come back</span>
+      </span>
+    </button>
+    <button type="button" class="slice" data-world="ember" aria-expanded="false" aria-label="Open Obsidian Dragon">
+      <img src="art/obsidian-dragon.jpg" alt="An obsidian dragon with lava-lit cracks roaring over a burning volcanic valley at night" draggable="false">
+      <span class="slice-title">Obsidian Dragon</span>
+      <span class="slice-cap">
+        <strong>Obsidian Dragon</strong>
+        <span>Obsidian and lava over a burning valley. The render my avatar was cut from.</span>
+        <span class="slice-hint">Tap again to come back</span>
+      </span>
+    </button>
+  </div>
+
+  <section>
+    <p class="section-note">More worlds arrive as I make them. Each one gets a slice, and its own colors.</p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span><strong>Adam Laloge</strong></span>
+    <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a></span>
+  </div>
+</footer>
+<script>
+(function () {
+  var band = document.getElementById('latent-band');
+  if (!band) return;
+  var slices = Array.prototype.slice.call(band.querySelectorAll('.slice'));
+  var openIdx = -1;
+  document.documentElement.classList.add('latent-live');
+  function toggle(idx) {
+    if (openIdx === idx) {
+      openIdx = -1;
+      band.classList.remove('open');
+      slices.forEach(function (s) { s.classList.remove('active'); s.setAttribute('aria-expanded', 'false'); });
+      document.documentElement.removeAttribute('data-world');
+    } else {
+      openIdx = idx;
+      band.classList.add('open');
+      slices.forEach(function (s, i) {
+        s.classList.toggle('active', i === idx);
+        s.setAttribute('aria-expanded', i === idx ? 'true' : 'false');
+      });
+      document.documentElement.setAttribute('data-world', slices[idx].getAttribute('data-world'));
+    }
+  }
+  slices.forEach(function (s, i) { s.addEventListener('click', function () { toggle(i); }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && openIdx >= 0) toggle(openIdx); });
+})();
+</script>
+<script>
+(function () {
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('site-nav');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -526,3 +526,134 @@ ul.plain { list-style: none; padding-left: 0; }
   }
   .footer-inner { flex-direction: column; gap: 6px; }
 }
+
+/* Space Dreams — the page sliced into worlds */
+.latent-band {
+  display: flex;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  height: 62vh;
+  min-height: 380px;
+  overflow: hidden;
+  background: #000;
+  transition: height 0.8s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.latent-band.open { height: 88vh; }
+.slice {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: #000;
+  cursor: pointer;
+  overflow: hidden;
+  transition: flex-grow 0.8s cubic-bezier(0.22, 0.8, 0.3, 1), opacity 0.6s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.slice + .slice { margin-left: -16px; }
+.slice img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.12);
+  animation: sliceDrift 16s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.slice:nth-child(2) img { animation-duration: 21s; animation-delay: -6s; }
+.slice:nth-child(3) img { animation-duration: 18s; animation-delay: -3s; }
+@keyframes sliceDrift {
+  from { transform: scale(1.12) translateX(-1.6%); }
+  to { transform: scale(1.12) translateX(1.6%); }
+}
+/* Dreamy wobbly edges between worlds, alternating phase */
+.slice:not(:last-child) {
+  clip-path: polygon(0 0, calc(100% - 6px) 0, calc(100% - 14px) 12%, calc(100% - 4px) 26%, calc(100% - 15px) 40%, calc(100% - 5px) 54%, calc(100% - 14px) 68%, calc(100% - 4px) 82%, calc(100% - 12px) 100%, 0 100%);
+}
+.slice:nth-child(even):not(:last-child) {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, calc(100% - 3px) 14%, calc(100% - 14px) 28%, calc(100% - 5px) 44%, calc(100% - 15px) 58%, calc(100% - 4px) 72%, calc(100% - 13px) 86%, calc(100% - 6px) 100%, 0 100%);
+}
+.latent-band.open .slice { flex-grow: 0.0001; opacity: 0; }
+.latent-band.open .slice.active { flex-grow: 30; opacity: 1; clip-path: none; margin-left: 0; }
+.slice-title {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  writing-mode: vertical-rl;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.85);
+  transition: opacity 0.3s ease;
+}
+.latent-band.open .slice-title { opacity: 0; }
+.slice-cap {
+  position: absolute;
+  left: 26px;
+  bottom: 24px;
+  right: 26px;
+  text-align: left;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease 0.35s, transform 0.5s ease 0.35s;
+  pointer-events: none;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.85);
+}
+.slice-cap strong { display: block; font-size: 26px; margin-bottom: 6px; }
+.slice-cap > span { display: block; color: rgba(255, 255, 255, 0.88); max-width: 520px; }
+.slice-cap .slice-hint {
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+}
+.latent-band.open .slice.active .slice-cap { opacity: 1; transform: none; }
+.slice:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
+
+/* Opening a world re-skins the whole page in its colors */
+html.latent-live body,
+html.latent-live .site-header,
+html.latent-live .site-footer,
+html.latent-live h1, html.latent-live h2, html.latent-live h3,
+html.latent-live .label, html.latent-live .brand, html.latent-live .section-note {
+  transition: background-color 0.9s ease, color 0.9s ease, border-color 0.9s ease;
+}
+html.latent-live[data-world="golden"] {
+  --bg: #140c05;
+  --heading: #ffe9c4;
+  --body: #d8c3a5;
+  --dim: #a68d6d;
+  --teal: #ffb347;
+  --gold: #f5c86e;
+  --panel: rgba(255, 179, 71, 0.06);
+  --panel-border: rgba(255, 179, 71, 0.22);
+}
+html.latent-live[data-world="ember"] {
+  --bg: #0e0605;
+  --heading: #ffdcc8;
+  --body: #d3aca0;
+  --dim: #a87a6f;
+  --teal: #ff7847;
+  --gold: #ff9a5c;
+  --panel: rgba(255, 110, 50, 0.06);
+  --panel-border: rgba(255, 110, 50, 0.22);
+}
+@media (prefers-reduced-motion: reduce) {
+  .slice img { animation: none; }
+  .slice, .latent-band { transition-duration: 0.01s; }
+}
+@media (max-width: 760px) {
+  .latent-band { height: 54vh; min-height: 320px; }
+  .latent-band.open { height: 82vh; }
+  .slice-cap strong { font-size: 21px; }
+}
