@@ -29,7 +29,19 @@ HEAD = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title}</title>
 <meta name="description" content="{desc}">
-<link rel="stylesheet" href="styles.css?v=57">
+<link rel="canonical" href="{url}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Adam Laloge">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{desc}">
+<meta property="og:url" content="{url}">
+<meta property="og:image" content="https://astellar.site/art/obsidian-dragon.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{title}">
+<meta name="twitter:description" content="{desc}">
+<meta name="twitter:image" content="https://astellar.site/art/obsidian-dragon.jpg">
+<meta name="theme-color" content="#070b16">
+{schema}<link rel="stylesheet" href="styles.css?v=57">
 </head>
 <body>
 """
@@ -82,14 +94,29 @@ NAV_JS = """<script>
 </script>
 """
 
-def page(fname, title, desc, active, body, extra_js=""):
-    html = (HEAD.format(title=title, desc=desc) + header(active)
+def page(fname, title, desc, active, body, extra_js="", schema=""):
+    url = "https://astellar.site/" + ("" if fname == "index.html" else fname)
+    html = (HEAD.format(title=title, desc=desc, url=url, schema=schema) + header(active)
             + '\n<main class="wrap">\n' + body + '\n</main>\n' + FOOTER
             + extra_js + NAV_JS + "\n</body>\n</html>\n")
     open(os.path.join(SITE, fname), "w").write(html)
     print("wrote", fname, len(html))
 
 DESC = "Personal site of Adam Laloge: software projects, photography, and what I'm building lately."
+
+PERSON_LD = """<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "Person", "name": "Adam Laloge", "url": "https://astellar.site/", "image": "https://astellar.site/art/obsidian-dragon.jpg", "email": "mailto:hello@adamlaloge.com", "jobTitle": "Engineering Test Technician", "worksFor": {"@type": "Organization", "name": "Baxter International"}, "sameAs": ["https://github.com/AStellarScene"]}
+</script>
+"""
+
+WORK_DESC = "Projects by Adam Laloge: BenchLab, Pace, Rotation, and Slip \u2014 software built in the open, with an honest status line on each."
+ABOUT_DESC = "About Adam Laloge: an engineering test technician in a medical-device lab who builds test software, is finishing a UX degree, photographs sunsets, and reads dark fantasy."
+PROJ_DESCS = {
+    "benchlab.html": "BenchLab, a testing simulator by Adam Laloge: a visual test builder, an in-browser simulated device, and traceability reports generated from the tests themselves.",
+    "pace.html": "Pace, by Adam Laloge: a planner for self-paced degree programs. Enter your courses and a target finish date; get a week-by-week plan with an ahead-or-behind readout.",
+    "rotation.html": "Rotation, by Adam Laloge: a five-day packed-lunch rotation as a tool \u2014 pick the week's meals and get the grocery list, checked against what you already have at home.",
+    "slip.html": "Slip, by Adam Laloge: a pause before small purchases. Enter a price and how often it recurs; Slip translates it into days of delay on your savings targets. Local data only.",
+}
 
 # ---------- Home ----------
 home_body = """  <section class="hero">
@@ -161,7 +188,7 @@ home_body = """  <section class="hero">
     <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
   </section>"""
 page("index.html", "Adam Laloge", DESC, "index.html",
-     home_body, "<script>" + sky_js + "</script>\n")
+     home_body, "<script>" + sky_js + "</script>\n", schema=PERSON_LD)
 
 # ---------- Work index ----------
 work_body = """  <section id="work">
@@ -195,7 +222,7 @@ work_body = """  <section id="work">
       </article>
     </div>
   </section>"""
-page("work.html", "Projects — Adam Laloge", DESC, "work.html", work_body)
+page("work.html", "Projects — Adam Laloge", WORK_DESC, "work.html", work_body)
 
 # ---------- Project pages ----------
 def project(fname, name, status, paras, bullets=None):
@@ -210,7 +237,7 @@ def project(fname, name, status, paras, bullets=None):
 %s%s
     <p><a href="work.html">&#8592; All projects</a></p>
   </section>""" % (name, status, "\n".join("    <p>%s</p>" % p for p in paras), bl)
-    page(fname, "%s — Adam Laloge" % name, DESC, "work.html", body)
+    page(fname, "%s — Adam Laloge" % name, PROJ_DESCS.get(fname, DESC), "work.html", body)
 
 project("benchlab.html", "BenchLab", "Prototype built, first usability test running",
     ["A testing simulator that runs in the browser. It's the public twin of the test-platform work I do at my job, rebuilt from scratch with nothing proprietary: the workflow is real, the device under test is simulated.",
@@ -257,7 +284,7 @@ about_body = """  <section id="about">
     <h2>Get in touch</h2>
     <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
   </section>"""
-page("about.html", "About — Adam Laloge", DESC, "about.html", about_body)
+page("about.html", "About — Adam Laloge", ABOUT_DESC, "about.html", about_body)
 
 # ---------- Latent Dreams ----------
 # Layout rule (Adam, 2026-10-25): artwork is added in pairs. Each pair is
