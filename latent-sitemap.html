@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Latent Sitemap — Adam Laloge</title>
 <meta name="description" content="A sitemap drawn as a latent space: every photo, book, artwork, and project on Adam Laloge's site as a point in one flowing map.">
-<link rel="stylesheet" href="styles.css?v=35">
+<link rel="stylesheet" href="styles.css?v=36">
 </head>
 <body>
 <header class="site-header">
@@ -26,15 +26,16 @@
 </header>
 
 <main class="wrap">
-  <section class="latent-map-sec">
-    <div class="latent-stage" id="latent-stage">
-      <canvas id="latent-map" aria-hidden="true"></canvas>
-      <div class="latent-glass latent-topbar">
-        <h1>Latent Sitemap</h1>
-        <p class="tb-hint">Tap a point to select it &middot; tap again to open it &middot; tap the dark to sample</p>
-      </div>
-      <button class="latent-glass latent-explore" id="latent-explore" type="button">Scroll the page</button>
+  <canvas id="latent-map" aria-hidden="true"></canvas>
+  <div class="latent-glass-layer" aria-hidden="true"></div>
+  <script>document.body.classList.add('sitemap-body');</script>
+  <div class="sitemap-flow">
+  <section class="latent-intro">
+    <div class="latent-glass latent-topbar">
+      <h1>Latent Sitemap</h1>
+      <p class="tb-hint">Tap a point to select it &middot; tap again to open it &middot; scroll for the list &#8595;</p>
     </div>
+    <button class="latent-glass latent-explore" id="latent-explore" type="button">Enter the map</button>
   </section>
   <section class="sitemap-list-sec">
     <h2>Everything, as a list</h2>
@@ -94,6 +95,7 @@
       </div>
     </div>
   </section>
+  </div>
 
 </main>
 
@@ -107,11 +109,13 @@
 (function () {
   'use strict';
   // Baked in at build time by build_pages.py: every item on this site is
-  // a point here, colored by a measured feature of itself.
+  // a point here, colored by a measured feature of itself. The canvas is
+  // a fixed full-page background; scrolling fades the map's content out
+  // and raises a frosted-glass layer with the plain list on it.
   var DATA = {"regions": {"photography": {"label": "PHOTOGRAPHY", "fx": 0.3, "fy": 0.44}, "bookshelf": {"label": "BOOKSHELF", "fx": 0.76, "fy": 0.4}, "worlds": {"label": "LATENT DREAMS", "fx": 0.24, "fy": 0.8}, "projects": {"label": "PROJECTS", "fx": 0.74, "fy": 0.79}}, "items": [{"kind": "photo", "title": "Sunset Through the Grass", "sub": "sunsets", "rgb": [215, 168, 128], "size": 17, "dx": -0.0116, "dy": -0.0981, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "Sun Over Open Water", "sub": "sunsets", "rgb": [215, 133, 24], "size": 17, "dx": 0.022, "dy": -0.0555, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "The Pier", "sub": "shoreline", "rgb": [205, 211, 215], "size": 17, "dx": 0.1141, "dy": -0.0258, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "From the Bluff", "sub": "shoreline", "rgb": [182, 215, 197], "size": 17, "dx": 0.0565, "dy": -0.0162, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "Juniper Berries", "sub": "details", "rgb": [198, 215, 167], "size": 17, "dx": -0.1184, "dy": -0.0162, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "Acorn", "sub": "details", "rgb": [215, 189, 133], "size": 17, "dx": -0.1098, "dy": -0.014, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "Pine, Backlit", "sub": "details", "rgb": [215, 176, 130], "size": 17, "dx": -0.0894, "dy": -0.0032, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "Sun Through the Trees", "sub": "sunsets", "rgb": [215, 160, 111], "size": 17, "dx": -0.0326, "dy": -0.0866, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "The Meadow", "sub": "sunsets", "rgb": [141, 168, 148], "size": 17, "dx": 0.0229, "dy": -0.0741, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "Winter Path", "sub": "sunsets", "rgb": [162, 182, 184], "size": 17, "dx": 0.0052, "dy": -0.0427, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "The Field Tree", "sub": "landscape", "rgb": [184, 196, 198], "size": 17, "dx": 0.0759, "dy": -0.009, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "The Dunes", "sub": "shoreline", "rgb": [153, 215, 199], "size": 17, "dx": 0.1198, "dy": 0.0077, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "Reeds on the Lake", "sub": "shoreline", "rgb": [189, 215, 151], "size": 17, "dx": 0.0638, "dy": -0.0038, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "Over the Harbor", "sub": "shoreline", "rgb": [189, 215, 95], "size": 17, "dx": 0.0971, "dy": 0.0347, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "The Wake", "sub": "shoreline", "rgb": [97, 189, 215], "size": 17, "dx": 0.1135, "dy": -0.0343, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "Ferry Flag", "sub": "shoreline", "rgb": [164, 189, 215], "size": 17, "dx": 0.0698, "dy": -0.0038, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "The Long Bridge", "sub": "shoreline", "rgb": [137, 177, 215], "size": 17, "dx": 0.1022, "dy": -0.0024, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "Autumn Woods", "sub": "landscape", "rgb": [215, 169, 76], "size": 17, "dx": 0.0912, "dy": 0.024, "region": "photography", "href": "photography.html"}, {"kind": "photo", "title": "Beach at Dusk", "sub": "sunsets", "rgb": [215, 188, 167], "size": 17, "dx": 0.0049, "dy": -0.0738, "region": "photography", "href": "photography.html"}, {"kind": "book", "title": "Between Two Fires", "sub": "The bar \u00b7 Christopher Buehlman", "rgb": [135, 107, 107], "size": 16, "dx": 0.0, "dy": -0.055, "region": "bookshelf", "href": "bookshelf.html"}, {"kind": "book", "title": "The Shadow of the Gods", "sub": "Up next \u00b7 John Gwynne", "rgb": [107, 114, 131], "size": 16, "dx": -0.0352, "dy": -0.0486, "region": "bookshelf", "href": "bookshelf.html"}, {"kind": "book", "title": "The Rage of Dragons", "sub": "Up next \u00b7 Evan Winter", "rgb": [146, 116, 101], "size": 16, "dx": 0.0181, "dy": -0.0534, "region": "bookshelf", "href": "bookshelf.html"}, {"kind": "book", "title": "The Ruin of Kings", "sub": "Up next \u00b7 Jenn Lyons", "rgb": [117, 107, 126], "size": 16, "dx": 0.0622, "dy": -0.0308, "region": "bookshelf", "href": "bookshelf.html"}, {"kind": "book", "title": "Of Blood and Fire", "sub": "Up next \u00b7 Ryan Cahill", "rgb": [157, 121, 97], "size": 16, "dx": 0.0743, "dy": 0.0077, "region": "bookshelf", "href": "bookshelf.html"}, {"kind": "book", "title": "Gardens of the Moon", "sub": "Up next \u00b7 Steven Erikson", "rgb": [105, 115, 111], "size": 16, "dx": 0.0482, "dy": 0.0421, "region": "bookshelf", "href": "bookshelf.html"}, {"kind": "book", "title": "The Darkness That Comes Before", "sub": "Up next \u00b7 R. Scott Bakker", "rgb": [101, 99, 97], "size": 16, "dx": -0.0026, "dy": 0.055, "region": "bookshelf", "href": "bookshelf.html"}, {"kind": "world", "title": "The Golden City", "sub": "Latent Dreams", "rgb": [215, 146, 84], "size": 30, "dx": -0.045, "dy": 0.0, "region": "worlds", "href": "dreams.html"}, {"kind": "world", "title": "Obsidian Dragon", "sub": "Latent Dreams", "rgb": [157, 109, 113], "size": 30, "dx": 0.045, "dy": 0.0, "region": "worlds", "href": "dreams.html"}, {"kind": "project", "title": "BenchLab", "sub": "Prototype built, first usability test running", "rgb": [119, 237, 218], "size": 20, "dx": 0.0049, "dy": 0.0499, "region": "projects", "href": "benchlab.html"}, {"kind": "project", "title": "Pace", "sub": "In development", "rgb": [139, 239, 224], "size": 20, "dx": 0.0329, "dy": -0.0441, "region": "projects", "href": "pace.html"}, {"kind": "project", "title": "Rotation", "sub": "In development", "rgb": [134, 239, 222], "size": 20, "dx": -0.0061, "dy": 0.0498, "region": "projects", "href": "rotation.html"}, {"kind": "project", "title": "Slip", "sub": "Planned, not started", "rgb": [171, 244, 232], "size": 20, "dx": 0.07, "dy": -0.0017, "region": "projects", "href": "slip.html"}]};
-  var stage = document.getElementById('latent-stage');
   var canvas = document.getElementById('latent-map');
-  if (!stage || !canvas || !DATA) return;
+  var glassEl = document.querySelector('.latent-glass-layer');
+  if (!canvas || !DATA) return;
   var ctx = canvas.getContext('2d');
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var W = 0, H = 0, DPR = 1;
@@ -155,18 +159,15 @@
     mask.addColorStop(0.7, 'rgba(0,0,0,0.75)');
     mask.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = mask; g.fillRect(0, 0, 256, 256);
-    // Smooth the cloud: shrink it right down and blow it back up. The
-    // round trip erases the internal blob edges, which are what quantize
-    // into visible grain on 1x displays. Fog has no detail worth keeping.
+    // Smooth the cloud (downscale round trip), then bake in a whisper of
+    // monochrome dither: together they keep the fog from lumping or
+    // banding into stripes on 1x displays.
     var small = document.createElement('canvas'); small.width = small.height = 56;
     var sg = small.getContext('2d');
     sg.drawImage(c, 0, 0, 56, 56);
     g.globalCompositeOperation = 'source-over';
     g.clearRect(0, 0, 256, 256);
     g.drawImage(small, 0, 0, 256, 256);
-    // Dither the cloud: a whisper of monochrome noise baked into the
-    // sprite breaks the 8-bit contour steps that otherwise stripe a big
-    // soft gradient on 1x displays. Baked in, so it never shimmers.
     var imgData = g.getImageData(0, 0, 256, 256);
     var px = imgData.data;
     for (var q = 0; q < px.length; q += 4) {
@@ -264,9 +265,21 @@
   var fixate = null;
   var nearItem = null, nearItemD = 1e9;
 
+  // The glass turn: scroll position drives a target; the render loop
+  // eases toward it, fading the map's content while the DOM glass layer
+  // rises over the still-living nebula.
+  var glassTarget = 0, glassCur = 0, inMap = false;
+  function onScroll() {
+    if (inMap) { glassTarget = 0; return; }
+    var vh = window.innerHeight || 1;
+    var y = window.scrollY || window.pageYOffset || 0;
+    glassTarget = Math.max(0, Math.min(1, (y - vh * 0.42) / (vh * 0.55)));
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
   function resize() {
     DPR = Math.min(window.devicePixelRatio || 1, 1.5);
-    W = stage.clientWidth; H = stage.clientHeight;
+    W = window.innerWidth; H = window.innerHeight;
     if (!W || !H) return;
     canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -276,16 +289,13 @@
     filler.forEach(function (p) { if (!p.x) { p.x = p.hx * W; p.y = p.hy * H; } });
     if (!probe.x) { probe.x = probe.tx = W * 0.5; probe.y = probe.ty = H * 0.45; }
     ctx.fillStyle = '#030209'; ctx.fillRect(0, 0, W, H);
+    onScroll();
   }
   window.addEventListener('resize', resize);
 
-  function toLocal(e) {
-    var r = canvas.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
-  }
+  // The canvas is fixed, so client coordinates are canvas coordinates.
   canvas.addEventListener('pointermove', function (e) {
-    var pt = toLocal(e);
-    probe.tx = pt.x; probe.ty = pt.y; probe.active = true; probe.last = performance.now();
+    probe.tx = e.clientX; probe.ty = e.clientY; probe.active = true; probe.last = performance.now();
   }, { passive: true });
 
   function sample(x, y) {
@@ -296,6 +306,7 @@
       if (d < 210) p.flash = Math.max(p.flash, 1 - d / 210);
     });
   }
+
   // Touch discipline: a touch never navigates by accident. The first
   // tap on a point selects it (nameplate + ring); a second tap on the
   // same point opens it. A mouse click opens directly. A drag is never
@@ -306,23 +317,22 @@
   var downPt = null, downAt = 0, downType = '';
 
   canvas.addEventListener('pointerdown', function (e) {
-    var pt = toLocal(e);
-    probe.tx = pt.x; probe.ty = pt.y; probe.active = true; probe.last = performance.now();
-    downPt = pt; downAt = performance.now(); downType = e.pointerType || 'mouse';
+    probe.tx = e.clientX; probe.ty = e.clientY; probe.active = true; probe.last = performance.now();
+    downPt = { x: e.clientX, y: e.clientY }; downAt = performance.now(); downType = e.pointerType || 'mouse';
   }, { passive: true });
   canvas.addEventListener('pointercancel', function () { downPt = null; probe.last = 0; }, { passive: true });
   canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
   canvas.addEventListener('pointerup', function (e) {
     if (!downPt) return;
-    var pt = toLocal(e);
-    var moved = Math.abs(pt.x - downPt.x) + Math.abs(pt.y - downPt.y);
+    var moved = Math.abs(e.clientX - downPt.x) + Math.abs(e.clientY - downPt.y);
     var dt = performance.now() - downAt;
     var type = downType;
     downPt = null;
     if (moved > 16 || dt > 450) return; // a drag, not a tap
+    if (glassCur > 0.4 && !inMap) return; // the map is glassed over; taps belong to the page
     var best = null, bestD = 1e9;
     items.forEach(function (p) {
-      var dx = p.x - pt.x, dy = p.y - pt.y, d = dx * dx + dy * dy;
+      var dx = p.x - e.clientX, dy = p.y - e.clientY, d = dx * dx + dy * dy;
       if (d < bestD) { bestD = d; best = p; }
     });
     if (best && bestD < hitR * hitR) {
@@ -331,29 +341,40 @@
         return;
       }
       selected = best; selectedAt = performance.now();
-      probe.x = probe.tx = pt.x; probe.y = probe.ty = pt.y;
+      probe.x = probe.tx = e.clientX; probe.y = probe.ty = e.clientY;
       return;
     }
     selected = null;
-    sample(pt.x, pt.y);
+    sample(e.clientX, e.clientY);
   }, { passive: true });
 
-  // Touch ownership (touch devices): the map captures drags by default
-  // (touch-action: none in the stylesheet), so touching the visualizer
-  // never scrolls the page or fights the browser mid-gesture. The chip
-  // hands control back: tap it and drags scroll the page again.
+  // Enter-the-map (touch): inline, the map shares the page — drags
+  // scroll, taps select. Entering hands every drag to the map and locks
+  // the page still; leaving gives the page back.
   var exploreBtn = document.getElementById('latent-explore');
-  if (exploreBtn) {
-    var released = false;
-    exploreBtn.addEventListener('click', function () {
-      released = !released;
-      canvas.style.touchAction = released ? 'pan-y' : 'none';
-      exploreBtn.textContent = released ? 'Explore the map' : 'Scroll the page';
-      exploreBtn.classList.toggle('on', released);
-    });
+  function enterMap() {
+    inMap = true;
+    document.documentElement.classList.add('map-locked');
+    canvas.style.touchAction = 'none';
+    glassTarget = 0;
+    window.scrollTo(0, 0);
+    if (exploreBtn) { exploreBtn.textContent = 'Leave the map'; exploreBtn.classList.add('in-map'); }
   }
+  function leaveMap() {
+    inMap = false;
+    document.documentElement.classList.remove('map-locked');
+    canvas.style.touchAction = '';
+    if (exploreBtn) { exploreBtn.textContent = 'Enter the map'; exploreBtn.classList.remove('in-map'); }
+    onScroll();
+  }
+  if (exploreBtn) {
+    exploreBtn.addEventListener('click', function () { if (inMap) leaveMap(); else enterMap(); });
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && inMap) leaveMap();
+  });
 
-  var running = true, visible = true, raf = null;
+  var running = true, raf = null;
 
   function physics(p, hx, hy, t) {
     var ang = Math.sin(p.x * 0.0016 + t * 0.21) * 1.7 + Math.cos(p.y * 0.0019 - t * 0.17) * 1.7
@@ -387,6 +408,15 @@
 
   function step(now) {
     var t = now * 0.001;
+    // Ease the glass turn; cf is what remains of the map's content.
+    glassCur += (glassTarget - glassCur) * 0.09;
+    if (Math.abs(glassTarget - glassCur) < 0.002) glassCur = glassTarget;
+    var cf = 1 - glassCur;
+    if (glassEl) {
+      glassEl.style.opacity = glassCur.toFixed(3);
+      glassEl.style.visibility = glassCur < 0.01 ? 'hidden' : 'visible';
+    }
+
     ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = 'rgba(3, 2, 9, 0.24)';
     ctx.fillRect(0, 0, W, H);
@@ -401,14 +431,14 @@
     if (attract) {
       probe.tx = W * (0.5 + 0.36 * Math.sin(t * 0.23));
       probe.ty = H * (0.48 + 0.32 * Math.sin(t * 0.17 + 1.4));
-      if (now > nextAuto) { sample(probe.x, probe.y); nextAuto = now + 4200 + Math.random() * 2800; }
+      if (now > nextAuto && glassCur < 0.5) { sample(probe.x, probe.y); nextAuto = now + 4200 + Math.random() * 2800; }
     }
     probe.x += (probe.tx - probe.x) * 0.06;
     probe.y += (probe.ty - probe.y) * 0.06;
     trail.unshift({ x: probe.x, y: probe.y });
     if (trail.length > 26) trail.pop();
 
-    if (!fixate && now > nextFixate) {
+    if (!fixate && now > nextFixate && glassCur < 0.5) {
       fixate = { item: items[Math.floor(Math.random() * items.length)], until: now + 3400, strength: 0 };
       nextFixate = now + 9000 + Math.random() * 7000;
     }
@@ -417,6 +447,8 @@
       if (now > fixate.until) fixate = null;
     }
 
+    // The nebula itself never fades: stars, fog, dust stay alive behind
+    // the glass for the whole page.
     var si, st;
     for (si = 0; si < stars.length; si++) {
       st = stars[si];
@@ -435,8 +467,6 @@
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'lighter';
 
-    var links = [];
-    nearItem = null; nearItemD = 1e9;
     var i, p;
     for (i = 0; i < filler.length; i++) {
       p = filler[i];
@@ -446,162 +476,189 @@
       ctx.globalAlpha = Math.min(1, 0.08 + p.lit * 0.6 + p.flash * 0.55);
       ctx.drawImage(p.sprite, p.x - size / 2, p.y - size / 2, size, size);
     }
-    for (i = 0; i < items.length; i++) {
-      p = items[i];
-      var r2 = DATA.regions[p.region];
-      physics(p, r2.cx + p.dx * W, r2.cy + p.dy * H, t);
-      // The top band is reserved empty nebula for the title bar: content
-      // points are never allowed to drift up into it.
-      if (p.y < H * 0.19) p.vy += (H * 0.19 - p.y) * 0.012;
-      var dx = p.x - probe.x, dy = p.y - probe.y, d = dx * dx + dy * dy;
-      if (d < nearItemD) { nearItemD = d; nearItem = p; }
-      if (p.lit > 0.25 && links.length < 14) links.push(p);
-      var isFix = fixate && fixate.item === p;
-      var tw2 = 0.82 + 0.18 * Math.sin(t * 2.1 + p.ph);
-      var sz = p.size * tw2 * (1 + p.lit * 1.25 + p.flash * 0.7 + (isFix ? 0.55 : 0));
-      ctx.globalAlpha = Math.min(1, 0.5 + p.lit * 0.35 + p.flash * 0.35);
-      ctx.drawImage(p.sprite, p.x - sz * 0.72, p.y - sz * 0.72, sz * 1.44, sz * 1.44);
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.globalAlpha = Math.min(1, 0.55 + p.lit * 0.45 + p.flash * 0.4);
-      ctx.fillStyle = p.css;
-      ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1.6, sz * 0.16), 0, Math.PI * 2); ctx.fill();
-      ctx.globalCompositeOperation = 'lighter';
-      if (isFix) {
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = 0.5 + 0.25 * Math.sin(t * 3);
-        ctx.strokeStyle = p.css;
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(p.x, p.y, sz * 1.25 + Math.sin(t * 3) * 3, 0, Math.PI * 2); ctx.stroke();
-        ctx.globalAlpha = 1;
-        ctx.globalCompositeOperation = 'lighter';
-      }
-      if (selected === p) {
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = 0.55 + 0.3 * Math.sin(t * 3.4);
-        ctx.strokeStyle = p.css;
-        ctx.lineWidth = 1.4;
-        ctx.beginPath(); ctx.arc(p.x, p.y, sz * 1.3 + Math.sin(t * 3.4) * 3, 0, Math.PI * 2); ctx.stroke();
-        ctx.globalAlpha = 1;
-        ctx.globalCompositeOperation = 'lighter';
-      }
-    }
-
-    ctx.lineWidth = 1.5;
-    for (var j = 0; j < links.length; j++) {
-      var lp = links[j];
-      ctx.strokeStyle = 'rgba(' + lp.rgb[0] + ',' + lp.rgb[1] + ',' + lp.rgb[2] + ',' + (0.1 + lp.lit * 0.5).toFixed(3) + ')';
-      ctx.beginPath(); ctx.moveTo(probe.x, probe.y); ctx.lineTo(lp.x, lp.y); ctx.stroke();
-    }
-
-    for (var s2 = trail.length - 1; s2 > 0; s2--) {
-      var a2 = trail[s2], b2 = trail[s2 - 1];
-      ctx.strokeStyle = 'hsla(' + Math.round((t * 46 + s2 * 7) % 360) + ', 95%, 72%, ' + (0.34 * (1 - s2 / trail.length)).toFixed(3) + ')';
-      ctx.lineWidth = 2.2 - s2 * 0.07;
-      ctx.beginPath(); ctx.moveTo(a2.x, a2.y); ctx.lineTo(b2.x, b2.y); ctx.stroke();
-    }
-
-    for (var k = bursts.length - 1; k >= 0; k--) {
-      var rb = bursts[k];
-      rb.r += 12; rb.a *= 0.94;
-      if (rb.a < 0.02) { bursts.splice(k, 1); continue; }
-      var nr = regionKeys[0], nd = 1e9;
-      regionKeys.forEach(function (key) {
-        var rr2 = DATA.regions[key];
-        var ddx = rb.x - rr2.cx, ddy = rb.y - rr2.cy, dd = ddx * ddx + ddy * ddy;
-        if (dd < nd) { nd = dd; nr = key; }
-      });
-      var rc = DATA.regions[nr].rgb;
-      ctx.lineWidth = 1.6;
-      ctx.strokeStyle = 'rgba(94, 234, 212,' + (rb.a * 0.5).toFixed(3) + ')';
-      ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r, 0, Math.PI * 2); ctx.stroke();
-      ctx.strokeStyle = 'rgba(232, 121, 249,' + (rb.a * 0.3).toFixed(3) + ')';
-      ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r * 0.72, 0, Math.PI * 2); ctx.stroke();
-      ctx.strokeStyle = 'rgba(' + rc[0] + ',' + rc[1] + ',' + rc[2] + ',' + (rb.a * 0.4).toFixed(3) + ')';
-      ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r * 0.45, 0, Math.PI * 2); ctx.stroke();
-    }
-
-    if (now > nextComet) {
-      var ang2 = Math.random() * Math.PI * 2;
-      comets.push({ x: Math.random() * W, y: Math.random() * H * 0.7, vx: Math.cos(ang2) * 7 + 4, vy: Math.sin(ang2) * 3 + 2, life: 1 });
-      nextComet = now + 5000 + Math.random() * 6000;
-    }
-    for (var c2 = comets.length - 1; c2 >= 0; c2--) {
-      var cm = comets[c2];
-      cm.x += cm.vx; cm.y += cm.vy; cm.life *= 0.985;
-      if (cm.life < 0.05 || cm.x > W + 60 || cm.y > H + 60) { comets.splice(c2, 1); continue; }
-      ctx.globalAlpha = cm.life * 0.9;
-      ctx.drawImage(cometSprite, cm.x - 13, cm.y - 13, 26, 26);
-      ctx.strokeStyle = 'rgba(45,212,191,' + (cm.life * 0.4).toFixed(3) + ')';
-      ctx.lineWidth = 1.4;
-      ctx.beginPath(); ctx.moveTo(cm.x, cm.y); ctx.lineTo(cm.x - cm.vx * 5, cm.y - cm.vy * 5); ctx.stroke();
-    }
     ctx.globalAlpha = 1;
 
+    // Everything below is the map's content: it fades with the turn.
+    if (cf > 0.01) {
+      var links = [];
+      nearItem = null; nearItemD = 1e9;
+      for (i = 0; i < items.length; i++) {
+        p = items[i];
+        var r2 = DATA.regions[p.region];
+        physics(p, r2.cx + p.dx * W, r2.cy + p.dy * H, t);
+        // The top band is reserved empty nebula for the title bar:
+        // content points are never allowed to drift up into it.
+        if (p.y < H * 0.19) p.vy += (H * 0.19 - p.y) * 0.012;
+        var dx = p.x - probe.x, dy = p.y - probe.y, d = dx * dx + dy * dy;
+        if (d < nearItemD) { nearItemD = d; nearItem = p; }
+        if (p.lit > 0.25 && links.length < 14) links.push(p);
+        var isFix = fixate && fixate.item === p;
+        var tw2 = 0.82 + 0.18 * Math.sin(t * 2.1 + p.ph);
+        var sz = p.size * tw2 * (1 + p.lit * 1.25 + p.flash * 0.7 + (isFix ? 0.55 : 0));
+        ctx.globalAlpha = Math.min(1, 0.5 + p.lit * 0.35 + p.flash * 0.35) * cf;
+        ctx.drawImage(p.sprite, p.x - sz * 0.72, p.y - sz * 0.72, sz * 1.44, sz * 1.44);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = Math.min(1, 0.55 + p.lit * 0.45 + p.flash * 0.4) * cf;
+        ctx.fillStyle = p.css;
+        ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1.6, sz * 0.16), 0, Math.PI * 2); ctx.fill();
+        ctx.globalCompositeOperation = 'lighter';
+        if (isFix) {
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.globalAlpha = (0.5 + 0.25 * Math.sin(t * 3)) * cf;
+          ctx.strokeStyle = p.css;
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(p.x, p.y, sz * 1.25 + Math.sin(t * 3) * 3, 0, Math.PI * 2); ctx.stroke();
+          ctx.globalAlpha = 1;
+          ctx.globalCompositeOperation = 'lighter';
+        }
+        if (selected === p) {
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.globalAlpha = (0.55 + 0.3 * Math.sin(t * 3.4)) * cf;
+          ctx.strokeStyle = p.css;
+          ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.arc(p.x, p.y, sz * 1.3 + Math.sin(t * 3.4) * 3, 0, Math.PI * 2); ctx.stroke();
+          ctx.globalAlpha = 1;
+          ctx.globalCompositeOperation = 'lighter';
+        }
+      }
+
+      ctx.lineWidth = 1.5;
+      for (var j = 0; j < links.length; j++) {
+        var lp = links[j];
+        ctx.strokeStyle = 'rgba(' + lp.rgb[0] + ',' + lp.rgb[1] + ',' + lp.rgb[2] + ',' + ((0.1 + lp.lit * 0.5) * cf).toFixed(3) + ')';
+        ctx.beginPath(); ctx.moveTo(probe.x, probe.y); ctx.lineTo(lp.x, lp.y); ctx.stroke();
+      }
+
+      for (var s2 = trail.length - 1; s2 > 0; s2--) {
+        var a2 = trail[s2], b2 = trail[s2 - 1];
+        ctx.strokeStyle = 'hsla(' + Math.round((t * 46 + s2 * 7) % 360) + ', 95%, 72%, ' + (0.34 * (1 - s2 / trail.length) * cf).toFixed(3) + ')';
+        ctx.lineWidth = 2.2 - s2 * 0.07;
+        ctx.beginPath(); ctx.moveTo(a2.x, a2.y); ctx.lineTo(b2.x, b2.y); ctx.stroke();
+      }
+
+      for (var k = bursts.length - 1; k >= 0; k--) {
+        var rb = bursts[k];
+        rb.r += 12; rb.a *= 0.94;
+        if (rb.a < 0.02) { bursts.splice(k, 1); continue; }
+        var nr = regionKeys[0], nd = 1e9;
+        regionKeys.forEach(function (key) {
+          var rr2 = DATA.regions[key];
+          var ddx = rb.x - rr2.cx, ddy = rb.y - rr2.cy, dd = ddx * ddx + ddy * ddy;
+          if (dd < nd) { nd = dd; nr = key; }
+        });
+        var rc = DATA.regions[nr].rgb;
+        ctx.lineWidth = 1.6;
+        ctx.strokeStyle = 'rgba(94, 234, 212,' + (rb.a * 0.5 * cf).toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = 'rgba(232, 121, 249,' + (rb.a * 0.3 * cf).toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r * 0.72, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = 'rgba(' + rc[0] + ',' + rc[1] + ',' + rc[2] + ',' + (rb.a * 0.4 * cf).toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r * 0.45, 0, Math.PI * 2); ctx.stroke();
+      }
+
+      if (now > nextComet) {
+        var ang2 = Math.random() * Math.PI * 2;
+        comets.push({ x: Math.random() * W, y: Math.random() * H * 0.7, vx: Math.cos(ang2) * 7 + 4, vy: Math.sin(ang2) * 3 + 2, life: 1 });
+        nextComet = now + 5000 + Math.random() * 6000;
+      }
+      for (var c2 = comets.length - 1; c2 >= 0; c2--) {
+        var cm = comets[c2];
+        cm.x += cm.vx; cm.y += cm.vy; cm.life *= 0.985;
+        if (cm.life < 0.05 || cm.x > W + 60 || cm.y > H + 60) { comets.splice(c2, 1); continue; }
+        ctx.globalAlpha = cm.life * 0.9 * cf;
+        ctx.drawImage(cometSprite, cm.x - 13, cm.y - 13, 26, 26);
+        ctx.strokeStyle = 'rgba(45,212,191,' + (cm.life * 0.4 * cf).toFixed(3) + ')';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(cm.x, cm.y); ctx.lineTo(cm.x - cm.vx * 5, cm.y - cm.vy * 5); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = cf;
+      ctx.font = '10px ui-monospace, Menlo, Consolas, monospace';
+      ctx.textAlign = 'center';
+      regionKeys.forEach(function (k) {
+        var r = DATA.regions[k];
+        var wtxt = ctx.measureText(r.label).width;
+        ctx.fillStyle = 'rgba(3,2,9,0.6)';
+        ctx.fillRect(r.cx - wtxt / 2 - 7, r.cy - H * 0.16 - 6, wtxt + 14, 15);
+        ctx.fillStyle = 'rgba(226,240,255,0.66)';
+        ctx.fillText(r.label, r.cx, r.cy - H * 0.16 + 5);
+      });
+
+      if (selected && now - selectedAt > 5000) selected = null;
+      var showItem = selected || ((fixate && now < fixate.until) ? fixate.item : (nearItem && nearItemD < 140 * 140 ? nearItem : null));
+      if (showItem) {
+        var label2 = showItem.title + '  ·  ' + showItem.sub;
+        ctx.font = '11px ui-monospace, Menlo, Consolas, monospace';
+        var w2 = ctx.measureText(label2).width;
+        var lx = Math.max(10, Math.min(W - w2 - 24, showItem.x - w2 / 2));
+        var ly = showItem.y - showItem.size - 30;
+        if (ly < 16) ly = showItem.y + showItem.size + 26;
+        ctx.fillStyle = 'rgba(3,2,9,0.85)';
+        ctx.fillRect(lx - 4, ly - 12, w2 + 16, 19);
+        ctx.fillStyle = '#f4f7fb';
+        ctx.textAlign = 'left';
+        ctx.fillText(label2, lx + 4, ly + 2);
+        ctx.textAlign = 'center';
+      }
+      ctx.globalAlpha = 1;
+
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = cf;
+      var pr = 23 + Math.sin(t * 2.4) * 3;
+      ctx.drawImage(probeSprite, probe.x - pr, probe.y - pr, pr * 2, pr * 2);
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = cf;
+      ctx.strokeStyle = 'rgba(45,212,191,0.9)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(probe.x, probe.y, 14 + Math.sin(t * 2.4) * 1.6, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#2dd4bf';
+      ctx.beginPath(); ctx.arc(probe.x, probe.y, 2.4, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      canvas.style.cursor = (nearItem && nearItemD < 54 * 54) ? 'pointer' : 'crosshair';
+    } else {
+      // Fully glassed: keep the points parked at their homes so the map
+      // is composed when the visitor scrolls back up.
+      for (i = 0; i < items.length; i++) {
+        p = items[i];
+        var r3 = DATA.regions[p.region];
+        physics(p, r3.cx + p.dx * W, r3.cy + p.dy * H, t);
+        p.lit *= 0.9;
+      }
+    }
+
+    // Ambient sparkles belong to the nebula: they shine through glass.
     for (var s3 = 0; s3 < sparks.length; s3++) {
       var sp = sparks[s3];
       var a3 = Math.pow(Math.max(0, Math.sin(t * sp.sp + sp.ph)), 6) * 0.6;
       if (a3 > 0.02) {
+        ctx.globalCompositeOperation = 'lighter';
         ctx.globalAlpha = a3;
         ctx.drawImage(sp.sprite, sp.x - sp.s / 2, sp.y - sp.s / 2, sp.s, sp.s);
       }
     }
     ctx.globalAlpha = 1;
-
     ctx.globalCompositeOperation = 'source-over';
-    ctx.font = '10px ui-monospace, Menlo, Consolas, monospace';
-    ctx.textAlign = 'center';
-    regionKeys.forEach(function (k) {
-      var r = DATA.regions[k];
-      var wtxt = ctx.measureText(r.label).width;
-      ctx.fillStyle = 'rgba(3,2,9,0.6)';
-      ctx.fillRect(r.cx - wtxt / 2 - 7, r.cy - H * 0.16 - 6, wtxt + 14, 15);
-      ctx.fillStyle = 'rgba(226,240,255,0.66)';
-      ctx.fillText(r.label, r.cx, r.cy - H * 0.16 + 5);
-    });
 
-    if (selected && now - selectedAt > 5000) selected = null;
-    var showItem = selected || ((fixate && now < fixate.until) ? fixate.item : (nearItem && nearItemD < 140 * 140 ? nearItem : null));
-    if (showItem) {
-      var label2 = showItem.title + '  ·  ' + showItem.sub;
-      ctx.font = '11px ui-monospace, Menlo, Consolas, monospace';
-      var w2 = ctx.measureText(label2).width;
-      var lx = Math.max(10, Math.min(W - w2 - 24, showItem.x - w2 / 2));
-      var ly = showItem.y - showItem.size - 30;
-      if (ly < 16) ly = showItem.y + showItem.size + 26;
-      ctx.fillStyle = 'rgba(3,2,9,0.85)';
-      ctx.fillRect(lx - 4, ly - 12, w2 + 16, 19);
-      ctx.fillStyle = '#f4f7fb';
-      ctx.textAlign = 'left';
-      ctx.fillText(label2, lx + 4, ly + 2);
-      ctx.textAlign = 'center';
-    }
-
-    ctx.globalCompositeOperation = 'lighter';
-    var pr = 23 + Math.sin(t * 2.4) * 3;
-    ctx.drawImage(probeSprite, probe.x - pr, probe.y - pr, pr * 2, pr * 2);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.strokeStyle = 'rgba(45,212,191,0.9)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath(); ctx.arc(probe.x, probe.y, 14 + Math.sin(t * 2.4) * 1.6, 0, Math.PI * 2); ctx.stroke();
-    ctx.fillStyle = '#2dd4bf';
-    ctx.beginPath(); ctx.arc(probe.x, probe.y, 2.4, 0, Math.PI * 2); ctx.fill();
-
-    canvas.style.cursor = (nearItem && nearItemD < 54 * 54) ? 'pointer' : 'crosshair';
-    if (running && visible) raf = requestAnimationFrame(step);
+    if (running) raf = requestAnimationFrame(step);
   }
 
   function start() {
     if (reduced) return;
     if (raf) cancelAnimationFrame(raf);
-    if (running && visible) raf = requestAnimationFrame(step);
+    if (running) raf = requestAnimationFrame(step);
   }
 
   resize();
+  onScroll();
   if (reduced) {
     regionKeys.forEach(function (k) { var r = DATA.regions[k]; r.cx = r.x; r.cy = r.y; });
     items.forEach(function (p) { var r = DATA.regions[p.region]; p.x = r.x + p.dx * W; p.y = r.y + p.dy * H; });
     filler.forEach(function (p) { p.x = p.hx * W; p.y = p.hy * H; });
     probe.x = W * 0.5; probe.y = H * 0.45;
+    glassCur = glassTarget;
     running = false;
     step(0);
   } else {
@@ -610,12 +667,6 @@
       if (document.hidden) { running = false; if (raf) cancelAnimationFrame(raf); }
       else { running = true; start(); }
     });
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        visible = entries[0].isIntersecting;
-        if (visible) start();
-      }, { threshold: 0.05 }).observe(stage);
-    }
   }
 })();
 </script>
