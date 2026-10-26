@@ -872,12 +872,31 @@ html.latent-live[data-world="golden"] .slice-cap { background: rgba(24, 14, 4, 0
 html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.38); }
 
 /* ---------- Latent Sitemap ---------- */
-.latent-head { margin-bottom: 14px; }
-.latent-head h1 { font-size: 28px; color: #f4f7fb; }
+.latent-topbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 16px;
+  pointer-events: none;
+}
+.latent-topbar h1 { font-size: 17px; letter-spacing: 0.04em; color: #f4f7fb; white-space: nowrap; }
+.latent-topbar .tb-hint {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(226, 240, 255, 0.78);
+  text-align: right;
+}
 .latent-stage {
   position: relative;
-  height: 80vh;
-  min-height: 520px;
+  height: 86vh;
+  min-height: 560px;
   border-radius: 18px;
   overflow: hidden;
   background: #030209;
@@ -938,5 +957,7 @@ html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.3
 .map-group li a { color: #a7b3c7; text-decoration: none; }
 .map-group li a:hover, .map-group h3 a:hover { color: #f4f7fb; }
 @media (max-width: 720px) {
-  .latent-stage { height: 64vh; min-height: 430px; }
-  }
+  .latent-stage { height: 78vh; min-height: 430px; }
+  .latent-topbar { flex-direction: column; align-items: flex-start; gap: 3px; }
+  .latent-topbar .tb-hint { text-align: left; }
+}
