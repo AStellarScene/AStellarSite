@@ -119,6 +119,16 @@
   // stay the tap layer and the fallback; any failure leaves the page
   // unchanged.
   //
+  // v3.1: the exit stutter. On close the band teleports from its
+  // fixed full-screen spot back to its in-flow position lower on
+  // the page -- a one-frame drop the expansion can't mask on the
+  // way out. FLIP it: at the close mutation, counter-shift the
+  // band by the measured drop (transform only) and ease the shift
+  // to zero on the same clock, so the world glides down into
+  // place. And while an ease is in flight, resize retargets are
+  // queued instead of shifting the targets mid-motion (iOS URL
+  // bar breathing was doing exactly that).
+  //
   // v3 mapping model -- per-world STAGES. v1/v2 cover-fit each
   // texture to the whole band and cut it at the seam, which framed
   // the closed split badly (subjects clipped by the frame edges)
@@ -307,6 +317,9 @@
   var splitCur = 0.5, splitTarget = 0.5;
   var aspectCur = 1, aspectTarget = 1;
   var TAU = 0.19;
+  var bandOffset = 0;      // FLIP counter-shift for the close drop
+  var fixedTop = 0;        // band's viewport top while open (recorded)
+  var needsRetarget = false;
 
   function resize() {
     bandW = band.clientWidth; bandH = band.clientHeight;
@@ -329,24 +342,33 @@
     if (band.classList.contains('open')) {
       var active = band.querySelector('.slice.active');
       splitTarget = (active === slices[1]) ? 0.0005 : 0.9995;
+      fixedTop = band.getBoundingClientRect().top;
     } else {
       splitTarget = 0.5;
     }
+  }
+  function animating() {
+    return Math.abs(splitTarget - splitCur) > 0.0008 ||
+           Math.abs(aspectTarget - aspectCur) > 0.002 ||
+           bandOffset !== 0;
   }
   var resizeTimer = 0;
   if (window.ResizeObserver) {
     new ResizeObserver(function () {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
+        if (animating()) { needsRetarget = true; return; }
         stepIdx = 0;
-        var wasOpen = band.classList.contains('open');
         resize(); retarget();
-        if (!wasOpen && !band.classList.contains('open')) { /* rotation while closed: snap */ splitCur = splitTarget; aspectCur = aspectTarget; }
+        if (!band.classList.contains('open')) { /* rotation while closed: snap */ splitCur = splitTarget; aspectCur = aspectTarget; }
         if (mq.matches) drawStatic();
       }, 120);
     }).observe(band);
   }
-  window.addEventListener('resize', function () { resize(); retarget(); if (mq.matches) drawStatic(); });
+  window.addEventListener('resize', function () {
+    if (animating()) { needsRetarget = true; return; }
+    resize(); retarget(); if (mq.matches) drawStatic();
+  });
 
   function layoutSplit() {
     // Reduced-motion / initial state only: read the live flex layout.
@@ -391,11 +413,26 @@
     var k = 1 - Math.exp(-dt / TAU);
     splitCur += (splitTarget - splitCur) * k;
     aspectCur += (aspectTarget - aspectCur) * k;
+    if (bandOffset !== 0) {
+      bandOffset += (0 - bandOffset) * k;
+      if (Math.abs(bandOffset) < 0.15) {
+        bandOffset = 0;
+        band.style.transform = '';
+        band.style.willChange = '';
+      } else {
+        band.style.transform = 'translateY(' + (-bandOffset).toFixed(1) + 'px)';
+      }
+    }
     draw(tSec, splitCur, aspectCur);
+    if (!animating() && needsRetarget) {
+      needsRetarget = false;
+      stepIdx = 0;
+      resize(); retarget();
+    }
     // Adaptive quality: sustained slow frames step the DPR cap down.
     if (dt > 0) { ftSum += dt * 1000; ftCount++; }
     if (ftCount >= 90) {
-      if (ftSum / ftCount > 26 && stepIdx < dprSteps.length - 1) { stepIdx++; resize(); }
+      if (ftSum / ftCount > 26 && stepIdx < dprSteps.length - 1 && !animating()) { stepIdx++; resize(); }
       ftSum = 0; ftCount = 0;
     }
   }
@@ -450,6 +487,23 @@
   // with frozen-time redraws.
   var rmTimer = null;
   new MutationObserver(function () {
+    var nowOpen = band.classList.contains('open');
+    if (!nowOpen && fixedTop && !mq.matches && ready) {
+      // The band just teleported back into flow: counter-shift it
+      // so this frame renders exactly where the fixed band was,
+      // then the tick eases the shift away.
+      var drop = band.getBoundingClientRect().top - fixedTop;
+      if (drop > 1) {
+        bandOffset = drop;
+        band.style.willChange = 'transform';
+        band.style.transform = 'translateY(' + (-drop) + 'px)';
+      }
+    }
+    if (nowOpen) {
+      bandOffset = 0;
+      band.style.transform = '';
+      band.style.willChange = '';
+    }
     retarget();
     if (!mq.matches || !ready) return;
     var until = performance.now() + 950;
@@ -479,6 +533,7 @@
     splitCur = splitTarget; aspectCur = aspectTarget;
     draw(0.001, splitCur, aspectCur);
     // First successful frame drawn: reveal the canvas over the DOM.
+    band.style.transform = '';
     band.classList.add('gl-live');
     document.documentElement.classList.add('gl-on');
     canvas.style.opacity = '1';
