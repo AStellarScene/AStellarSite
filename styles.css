@@ -668,6 +668,10 @@ html.latent-live[data-world] .site-header {
 html.latent-live[data-world="golden"] .site-header { background: rgba(26, 16, 5, 0.38); }
 html.latent-live[data-world="ember"] .site-header { background: rgba(22, 9, 5, 0.38); }
 
+/* When a world opens, the text above it fades away entirely */
+html.latent-live .latent-head { transition: opacity 0.7s ease; }
+html.latent-live[data-world] .latent-head { opacity: 0; pointer-events: none; }
+
 /* Opening a world re-skins the whole page in its colors */
 html.latent-live body,
 html.latent-live .site-header,
@@ -802,32 +806,6 @@ html.latent-live[data-world="ember"] .world-ambient {
   }
 }
 
-/* Glass behind the words: the title block and the opened world's
-   caption get a frosted backing that fades in over the zoom's duration
-   (tinted by whichever world is open) and fades back out on return.
-   Padding is constant so the text never shifts when the glass arrives. */
-html.latent-live .latent-head .label,
-html.latent-live .latent-head h2,
-html.latent-live .latent-head .section-note {
-  border-radius: 12px;
-  transition: background-color 0.9s ease, box-shadow 0.9s ease;
-}
-.latent-head .label { display: inline-block; padding: 5px 10px; margin-left: -10px; }
-.latent-head h2 { display: inline-block; padding: 12px 16px; margin-left: -16px; }
-.latent-head .section-note { padding: 10px 14px; margin-left: -14px; }
-html.latent-live[data-world] .latent-head .label,
-html.latent-live[data-world] .latent-head h2,
-html.latent-live[data-world] .latent-head .section-note {
-  backdrop-filter: blur(10px) saturate(1.3);
-  -webkit-backdrop-filter: blur(10px) saturate(1.3);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-}
-html.latent-live[data-world="golden"] .latent-head .label,
-html.latent-live[data-world="golden"] .latent-head h2,
-html.latent-live[data-world="golden"] .latent-head .section-note { background: rgba(24, 14, 4, 0.36); }
-html.latent-live[data-world="ember"] .latent-head .label,
-html.latent-live[data-world="ember"] .latent-head h2,
-html.latent-live[data-world="ember"] .latent-head .section-note { background: rgba(18, 8, 5, 0.38); }
 .slice-cap {
   left: 14px;
   bottom: 14px;
