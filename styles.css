@@ -942,6 +942,7 @@ html.latent-live[data-world="ember"] .slice-cap { background: rgba(18, 8, 5, 0.3
    on iOS treated as a browser-owned gesture and the light never
    followed a finger. */
 body.sitemap-body, body.sitemap-body * { touch-action: pan-y; }
+body.sitemap-body { overscroll-behavior: none; }
 #latent-map {
   position: fixed;
   inset: 0;
