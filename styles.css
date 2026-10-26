@@ -1028,8 +1028,7 @@ body.sitemap-body .site-header {
    scrollable surface -- this page's bottom-sheet peek. Full width,
    flush to the bottom edge (it has to reach the screen edges, not
    stop at the content column), 64px plus the safe-area inset, with
-   the sheet's signals: a handle pill, a label naming where it
-   goes, and the chevron. Dragging on it scrolls natively
+   the label naming where it goes and the chevron centered in it. Dragging on it scrolls natively
    (touch-action: pan-y beats the generic button rule on
    specificity); tapping it scrolls to the list. */
 body.sitemap-body .latent-scrollzone {
@@ -1042,7 +1041,7 @@ body.sitemap-body .latent-scrollzone {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 5px;
   min-height: 64px;
   padding: 9px 16px calc(9px + env(safe-area-inset-bottom, 0px));
   border: 0;
@@ -1058,12 +1057,6 @@ body.sitemap-body .latent-scrollzone {
   transition: opacity 0.35s ease;
 }
 .latent-scrollzone.cue-gone { opacity: 0; pointer-events: none; }
-.zone-handle {
-  width: 36px;
-  height: 5px;
-  border-radius: 999px;
-  background: rgba(226, 240, 255, 0.38);
-}
 .zone-label {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 11px;
