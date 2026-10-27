@@ -178,7 +178,7 @@ home_body = """  <section class="hero">
   <section id="latent">
     <p class="label">Dreamscape</p>
     <h2>Worlds imagined by computers</h2>
-    <p><a href="dreams.html"><img class="teaser-img" src="art/golden-city.jpg" alt="A golden city of spires and bridges in the clouds, built around a glowing ring"></a></p>
+    <p><a href="dreams.html"><img class="teaser-img" src="art/drowned-bells.jpg" alt="A cathedral-city drowned in a black sea, its windows still lit"></a></p>
     <p><a href="dreams.html">Enter Dreamscape &#8599;</a></p>
   </section>
 
