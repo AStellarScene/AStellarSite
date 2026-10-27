@@ -348,8 +348,8 @@ function initDreamGL(band, canvas) {
   }
   function loadTextures() {
     loaded = 0; texA = null; texB = null;
-    var imgA = new Image(); imgA.onload = onLoad(0, imgA); imgA.src = 'art/golden-city.jpg';
-    var imgB = new Image(); imgB.onload = onLoad(1, imgB); imgB.src = 'art/obsidian-dragon.jpg';
+    var imgA = new Image(); imgA.onload = onLoad(0, imgA); imgA.src = slices[0].querySelector('img').src;
+    var imgB = new Image(); imgB.onload = onLoad(1, imgB); imgB.src = slices[1].querySelector('img').src;
   }
   loadTextures();
 
