@@ -1155,7 +1155,7 @@ LATENT_MAP_JS = r"""<script>
   var comets = [];
   var nextComet = 4000, nextAuto = 5000, nextFixate = 8000;
   var fixate = null;
-  var attached = null, probeVx = 0, probeVy = 0;
+  var probeVx = 0, probeVy = 0;
   var nearItem = null, nearItemD = 1e9;
 
   // The glass turn: scroll position drives a target; the render loop
@@ -1261,9 +1261,16 @@ LATENT_MAP_JS = r"""<script>
       downPt = null;
       if (glassCur > 0.4) return; // the map is glassed over; taps belong to the page
       if (moved > 16 || dt > 450) {
-        // A drag, not a tap: if it ended riding a point, that point
-        // stays selected -- its name was already showing.
-        if (attached) { selected = attached; selectedAt = performance.now(); }
+        // A drag, not a tap: it selects only if it came to rest
+        // right on a point (within tap range of the release point).
+        // Passing over points while browsing selects nothing -- the
+        // names that lit up on the way were just the browse.
+        var rest = null, restD = 1e9;
+        items.forEach(function (p) {
+          var dx = p.x - e.clientX, dy = p.y - e.clientY, d = dx * dx + dy * dy;
+          if (d < restD) { restD = d; rest = p; }
+        });
+        if (rest && restD < hitR * hitR) { selected = rest; selectedAt = performance.now(); }
         return;
       }
       var best = null, bestD = 1e9;
@@ -1383,27 +1390,20 @@ LATENT_MAP_JS = r"""<script>
       probe.ty = H * (0.48 + 0.32 * Math.sin(t * 0.17 + 1.4));
       if (now > nextAuto && glassCur < 0.5) { sample(probe.x, probe.y); nextAuto = now + 4200 + Math.random() * 2800; }
     }
-    // Magnetic probe, tuned responsive: drifting near a point, the
-    // probe leans toward it like surface tension; inside capture
-    // range it rides the point; release needs a wider radius than
-    // capture, so letting go has a little elastic stretch to it.
+    // A whisper of magnetism, visual only: the probe light leans a
+    // few pixels toward a point it drifts near -- enough to feel
+    // the field breathe, never enough to steer the browse. No
+    // capture, no lock-on, no riding: the pointer goes exactly
+    // where it is put, and points are chosen deliberately.
     var pTx = probe.tx, pTy = probe.ty;
-    if (!attract && glassCur < 0.5) {
-      if (attached) {
-        var adx = attached.x - probe.tx, ady = attached.y - probe.ty;
-        if (adx * adx + ady * ady > 128 * 128) attached = null;
+    if (!attract && glassCur < 0.5 && nearItem) {
+      var ndx = nearItem.x - probe.tx, ndy = nearItem.y - probe.ty;
+      var nd = Math.sqrt(ndx * ndx + ndy * ndy);
+      if (nd < 170 && nd > 1) {
+        var pull = (1 - nd / 170) * 0.16;
+        pTx = probe.tx + ndx * pull; pTy = probe.ty + ndy * pull;
       }
-      if (!attached && nearItem) {
-        var ndx = nearItem.x - probe.tx, ndy = nearItem.y - probe.ty;
-        if (ndx * ndx + ndy * ndy < 220 * 220) attached = nearItem;
-      }
-      if (attached) {
-        var cdx = attached.x - probe.tx, cdy = attached.y - probe.ty;
-        var cd = Math.sqrt(cdx * cdx + cdy * cdy);
-        if (cd < 92) { pTx = attached.x + attached.vx * 6; pTy = attached.y + attached.vy * 6; }
-        else { var pull = (1 - cd / 220) * 0.6; pTx = probe.tx + cdx * pull; pTy = probe.ty + cdy * pull; }
-      }
-    } else { attached = null; }
+    }
     var sprK = attract ? 0.05 : 0.22, sprD = attract ? 0.80 : 0.62;
     probeVx = (probeVx + (pTx - probe.x) * sprK) * sprD;
     probeVy = (probeVy + (pTy - probe.y) * sprK) * sprD;
@@ -1635,7 +1635,7 @@ LATENT_MAP_JS = r"""<script>
 
       // Selection persists: a point you stopped on stays identified
       // until you choose another or tap empty space.
-      var showItem = selected || attached || ((fixate && now < fixate.until) ? fixate.item : (nearItem && nearItemD < 140 * 140 ? nearItem : null));
+      var showItem = selected || ((fixate && now < fixate.until) ? fixate.item : (nearItem && nearItemD < 140 * 140 ? nearItem : null));
       if (showItem) {
         var label2 = showItem.title + '  ·  ' + showItem.sub;
         ctx.font = '11px ui-monospace, Menlo, Consolas, monospace';
