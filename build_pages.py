@@ -109,13 +109,14 @@ PERSON_LD = """<script type="application/ld+json">
 </script>
 """
 
-WORK_DESC = "Projects by Adam Laloge: BenchLab, Pace, Rotation, and Slip \u2014 software built in the open, with an honest status line on each."
+WORK_DESC = "Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, and Lucent Launcher \u2014 software built in the open, with an honest status line on each."
 ABOUT_DESC = "About Adam Laloge: an engineering test technician in a medical-device lab who builds test software, is finishing a UX degree, photographs sunsets, and reads dark fantasy."
 PROJ_DESCS = {
     "benchlab.html": "BenchLab, a testing simulator by Adam Laloge: a visual test builder, an in-browser simulated device, and traceability reports generated from the tests themselves.",
     "pace.html": "Pace, by Adam Laloge: a planner for self-paced degree programs. Enter your courses and a target finish date; get a week-by-week plan with an ahead-or-behind readout.",
     "rotation.html": "Rotation, by Adam Laloge: a five-day packed-lunch rotation as a tool \u2014 pick the week's meals and get the grocery list, checked against what you already have at home.",
     "slip.html": "Slip, by Adam Laloge: a pause before small purchases. Enter a price and how often it recurs; Slip translates it into days of delay on your savings targets. Local data only.",
+    "lucent.html": "Lucent Launcher, by Adam Laloge: a native Minecraft launcher in Rust and GTK4, with a vendored core that installs Vanilla, Fabric, Quilt, Forge, and NeoForge.",
 }
 
 # ---------- Home ----------
@@ -157,6 +158,12 @@ home_body = """  <section class="hero">
         <p class="status">Now: Planned, not started</p>
         <p>A pause before small purchases. Enter a price and how often it recurs, and see it as days of delay on a savings target instead of dollars.</p>
         <p><a class="card-link" href="slip.html">View project &#8599;</a></p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Lucent Launcher</p>
+        <p class="status">Now: In development</p>
+        <p>A native Minecraft launcher in Rust and GTK4. Its vendored core installs Vanilla, Fabric, Quilt, Forge, and NeoForge, builds the launch command, and runs the game.</p>
+        <p><a class="card-link" href="lucent.html">View project &#8599;</a></p>
       </article>
     </div>
   </section>
@@ -227,6 +234,12 @@ work_body = """  <section id="work">
         <p>A pause before small purchases. Enter a price and how often it recurs, and see the cost as days of delay on a savings target. There is a 48-hour hold list for undecided items. Local data only, no bank connection.</p>
         <p><a class="card-link" href="slip.html">View project &#8599;</a></p>
       </article>
+      <article class="card">
+        <p class="label card-label">Lucent Launcher</p>
+        <p class="status">Now: In development</p>
+        <p>A native Minecraft launcher in Rust and GTK4. Its vendored core installs Vanilla, Fabric, Quilt, Forge, and NeoForge, builds the launch command, and runs the game.</p>
+        <p><a class="card-link" href="lucent.html">View project &#8599;</a></p>
+      </article>
     </div>
   </section>"""
 page("work.html", "Projects — Adam Laloge", WORK_DESC, "work.html", work_body)
@@ -274,6 +287,15 @@ project("slip.html", "Slip", "Planned, not started",
     ["Price and frequency in, days of delay out",
      "A 48-hour park-it hold list for undecided purchases",
      "A running total of delay avoided"])
+
+project("lucent.html", "Lucent Launcher", "In development",
+    ["A native Minecraft launcher written in Rust with GTK4 and Libadwaita. The interface is declared in GtkBuilder XML; installation, metadata handling, launch-command construction, and process prep run in Rust worker code, off the UI thread.",
+     "The launcher core is vendored in the repo (mc-launcher-core), so backend fixes don't wait on a registry release. It installs Vanilla, Fabric, Quilt, Forge, and NeoForge, merges version metadata and libraries, and constructs the Java launch command. The core's 38 tests pass.",
+     "Where it stands: working in bursts, not released. The most recent work added resource-pack installation and management, Flatpak packaging, and a readiness-aware launch flow. Development happens in the open: <a href=\"https://github.com/AStellarScene/lucent-launcher\">github.com/AStellarScene/lucent-launcher</a>."],
+    ["Install and launch Vanilla, Fabric, Quilt, Forge, and NeoForge",
+     "Profiles with stable IDs and atomic saves",
+     "Modrinth discovery and profile-scoped content, including resource packs",
+     "Microsoft sign-in held in the system keyring"])
 
 # ---------- About ----------
 about_body = """  <section id="about">

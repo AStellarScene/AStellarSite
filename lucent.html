@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucent Launcher — Adam Laloge</title>
+<meta name="description" content="Lucent Launcher, by Adam Laloge: a native Minecraft launcher in Rust and GTK4, with a vendored core that installs Vanilla, Fabric, Quilt, Forge, and NeoForge.">
+<link rel="canonical" href="https://adamlaloge.com/lucent.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Adam Laloge">
+<meta property="og:title" content="Lucent Launcher — Adam Laloge">
+<meta property="og:description" content="Lucent Launcher, by Adam Laloge: a native Minecraft launcher in Rust and GTK4, with a vendored core that installs Vanilla, Fabric, Quilt, Forge, and NeoForge.">
+<meta property="og:url" content="https://adamlaloge.com/lucent.html">
+<meta property="og:image" content="https://adamlaloge.com/art/obsidian-dragon.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lucent Launcher — Adam Laloge">
+<meta name="twitter:description" content="Lucent Launcher, by Adam Laloge: a native Minecraft launcher in Rust and GTK4, with a vendored core that installs Vanilla, Fabric, Quilt, Forge, and NeoForge.">
+<meta name="twitter:image" content="https://adamlaloge.com/art/obsidian-dragon.jpg">
+<meta name="theme-color" content="#070b16">
+<link rel="stylesheet" href="styles.css?v=58">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">Adam Laloge</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
+    <nav id="site-nav">
+      <a href="index.html">Home</a>
+      <a href="work.html" class="active">Projects</a>
+      <a href="resume.html">Resume</a>
+      <a href="about.html">About</a>
+      <a href="photography.html">Photography</a>
+      <a href="bookshelf.html">Bookshelf</a>
+      <a href="dreams.html">Dreamscape</a>
+      <a href="latent-sitemap.html">Atlas</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section>
+    <p class="label">Projects</p>
+    <h2>Lucent Launcher</h2>
+    <p class="status">Now: In development</p>
+    <p>A native Minecraft launcher written in Rust with GTK4 and Libadwaita. The interface is declared in GtkBuilder XML; installation, metadata handling, launch-command construction, and process prep run in Rust worker code, off the UI thread.</p>
+    <p>The launcher core is vendored in the repo (mc-launcher-core), so backend fixes don't wait on a registry release. It installs Vanilla, Fabric, Quilt, Forge, and NeoForge, merges version metadata and libraries, and constructs the Java launch command. The core's 38 tests pass.</p>
+    <p>Where it stands: working in bursts, not released. The most recent work added resource-pack installation and management, Flatpak packaging, and a readiness-aware launch flow. Development happens in the open: <a href="https://github.com/AStellarScene/lucent-launcher">github.com/AStellarScene/lucent-launcher</a>.</p>
+    <h3>What it does</h3>
+    <ul>
+      <li>Install and launch Vanilla, Fabric, Quilt, Forge, and NeoForge</li>
+      <li>Profiles with stable IDs and atomic saves</li>
+      <li>Modrinth discovery and profile-scoped content, including resource packs</li>
+      <li>Microsoft sign-in held in the system keyring</li>
+    </ul>
+    <p><a href="work.html">&#8592; All projects</a></p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span><strong>Adam Laloge</strong></span>
+    <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a> &middot; <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a></span>
+  </div>
+</footer>
+<script>
+(function () {
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('site-nav');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+
+</body>
+</html>
