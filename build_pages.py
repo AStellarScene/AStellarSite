@@ -41,7 +41,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="https://adamlaloge.com/art/obsidian-dragon.jpg">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=58">
+{schema}<link rel="stylesheet" href="styles.css?v=59">
 </head>
 <body>
 """
