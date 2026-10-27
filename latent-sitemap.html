@@ -99,6 +99,8 @@
         <ul>
         <li><a href="dreams.html">The Golden City</a></li>
         <li><a href="dreams.html">Obsidian Dragon</a></li>
+        <li><a href="dreams.html">The Drowned Bells</a></li>
+        <li><a href="dreams.html">The Far Shore</a></li>
         </ul>
       </div>
       <div class="map-group">
@@ -129,7 +131,7 @@
   // a point here, colored by a measured feature of itself. The canvas is
   // a fixed full-page background; scrolling fades the map's content out
   // and raises a frosted-glass layer with the plain list on it.
-  var DATA = {"regions": {"photography": {"label": "PHOTOGRAPHY", "fx": 0.3, "fy": 0.44, "rgb": [34, 190, 205]}, "bookshelf": {"label": "BOOKSHELF", "fx": 0.76, "fy": 0.4, "rgb": [216, 96, 158]}, "worlds": {"label": "DREAMSCAPE", "fx": 0.24, "fy": 0.8, "rgb": [228, 96, 52]}, "projects": {"label": "PROJECTS", "fx": 0.74, "fy": 0.79, "rgb": [226, 182, 92]}}, "items": [{"kind": "photo", "title": "Sunset Through the Grass", "sub": "sunsets", "rgb": [215, 168, 128], "size": 19, "dx": -0.0116, "dy": -0.0981, "region": "photography", "href": "photography.html#photo-sunset-through-the-grass"}, {"kind": "photo", "title": "Sun Over Open Water", "sub": "sunsets", "rgb": [215, 133, 24], "size": 19, "dx": 0.022, "dy": -0.0555, "region": "photography", "href": "photography.html#photo-sun-over-open-water"}, {"kind": "photo", "title": "The Pier", "sub": "shoreline", "rgb": [205, 211, 215], "size": 19, "dx": 0.1141, "dy": -0.0258, "region": "photography", "href": "photography.html#photo-the-pier"}, {"kind": "photo", "title": "From the Bluff", "sub": "shoreline", "rgb": [182, 215, 197], "size": 19, "dx": 0.0565, "dy": -0.0162, "region": "photography", "href": "photography.html#photo-from-the-bluff"}, {"kind": "photo", "title": "Juniper Berries", "sub": "details", "rgb": [198, 215, 167], "size": 19, "dx": -0.1184, "dy": -0.0162, "region": "photography", "href": "photography.html#photo-juniper-berries"}, {"kind": "photo", "title": "Acorn", "sub": "details", "rgb": [215, 189, 133], "size": 19, "dx": -0.1098, "dy": -0.014, "region": "photography", "href": "photography.html#photo-acorn"}, {"kind": "photo", "title": "Pine, Backlit", "sub": "details", "rgb": [215, 176, 130], "size": 19, "dx": -0.0894, "dy": -0.0032, "region": "photography", "href": "photography.html#photo-pine-backlit"}, {"kind": "photo", "title": "Sun Through the Trees", "sub": "sunsets", "rgb": [215, 160, 111], "size": 19, "dx": -0.0326, "dy": -0.0866, "region": "photography", "href": "photography.html#photo-sun-through-the-trees"}, {"kind": "photo", "title": "The Meadow", "sub": "sunsets", "rgb": [141, 168, 148], "size": 19, "dx": 0.0229, "dy": -0.0741, "region": "photography", "href": "photography.html#photo-the-meadow"}, {"kind": "photo", "title": "Winter Path", "sub": "sunsets", "rgb": [162, 182, 184], "size": 19, "dx": 0.0052, "dy": -0.0427, "region": "photography", "href": "photography.html#photo-winter-path"}, {"kind": "photo", "title": "The Field Tree", "sub": "landscape", "rgb": [184, 196, 198], "size": 19, "dx": 0.0759, "dy": -0.009, "region": "photography", "href": "photography.html#photo-the-field-tree"}, {"kind": "photo", "title": "The Dunes", "sub": "shoreline", "rgb": [153, 215, 199], "size": 19, "dx": 0.1198, "dy": 0.0077, "region": "photography", "href": "photography.html#photo-the-dunes"}, {"kind": "photo", "title": "Reeds on the Lake", "sub": "shoreline", "rgb": [189, 215, 151], "size": 19, "dx": 0.0638, "dy": -0.0038, "region": "photography", "href": "photography.html#photo-reeds-on-the-lake"}, {"kind": "photo", "title": "Over the Harbor", "sub": "shoreline", "rgb": [189, 215, 95], "size": 19, "dx": 0.0971, "dy": 0.0347, "region": "photography", "href": "photography.html#photo-over-the-harbor"}, {"kind": "photo", "title": "The Wake", "sub": "shoreline", "rgb": [97, 189, 215], "size": 19, "dx": 0.1135, "dy": -0.0343, "region": "photography", "href": "photography.html#photo-the-wake"}, {"kind": "photo", "title": "Ferry Flag", "sub": "shoreline", "rgb": [164, 189, 215], "size": 19, "dx": 0.0698, "dy": -0.0038, "region": "photography", "href": "photography.html#photo-ferry-flag"}, {"kind": "photo", "title": "The Long Bridge", "sub": "shoreline", "rgb": [137, 177, 215], "size": 19, "dx": 0.1022, "dy": -0.0024, "region": "photography", "href": "photography.html#photo-the-long-bridge"}, {"kind": "photo", "title": "Autumn Woods", "sub": "landscape", "rgb": [215, 169, 76], "size": 19, "dx": 0.0912, "dy": 0.024, "region": "photography", "href": "photography.html#photo-autumn-woods"}, {"kind": "photo", "title": "Beach at Dusk", "sub": "sunsets", "rgb": [215, 188, 167], "size": 19, "dx": 0.0049, "dy": -0.0738, "region": "photography", "href": "photography.html#photo-beach-at-dusk"}, {"kind": "book", "title": "Between Two Fires", "sub": "The bar \u00b7 Christopher Buehlman", "rgb": [135, 107, 107], "size": 18, "dx": 0.0, "dy": -0.055, "region": "bookshelf", "href": "bookshelf.html#book-between-two-fires"}, {"kind": "book", "title": "The Shadow of the Gods", "sub": "Up next \u00b7 John Gwynne", "rgb": [107, 114, 131], "size": 18, "dx": -0.0352, "dy": -0.0486, "region": "bookshelf", "href": "bookshelf.html#book-the-shadow-of-the-gods"}, {"kind": "book", "title": "The Rage of Dragons", "sub": "Up next \u00b7 Evan Winter", "rgb": [146, 116, 101], "size": 18, "dx": 0.0181, "dy": -0.0534, "region": "bookshelf", "href": "bookshelf.html#book-the-rage-of-dragons"}, {"kind": "book", "title": "The Ruin of Kings", "sub": "Up next \u00b7 Jenn Lyons", "rgb": [117, 107, 126], "size": 18, "dx": 0.0622, "dy": -0.0308, "region": "bookshelf", "href": "bookshelf.html#book-the-ruin-of-kings"}, {"kind": "book", "title": "Of Blood and Fire", "sub": "Up next \u00b7 Ryan Cahill", "rgb": [157, 121, 97], "size": 18, "dx": 0.0743, "dy": 0.0077, "region": "bookshelf", "href": "bookshelf.html#book-of-blood-and-fire"}, {"kind": "book", "title": "Gardens of the Moon", "sub": "Up next \u00b7 Steven Erikson", "rgb": [105, 115, 111], "size": 18, "dx": 0.0482, "dy": 0.0421, "region": "bookshelf", "href": "bookshelf.html#book-gardens-of-the-moon"}, {"kind": "book", "title": "The Darkness That Comes Before", "sub": "Up next \u00b7 R. Scott Bakker", "rgb": [101, 99, 97], "size": 18, "dx": -0.0026, "dy": 0.055, "region": "bookshelf", "href": "bookshelf.html#book-the-darkness-that-comes-before"}, {"kind": "world", "title": "The Golden City", "sub": "Dreamscape", "rgb": [215, 146, 84], "size": 33, "dx": -0.045, "dy": 0.0, "region": "worlds", "href": "dreams.html"}, {"kind": "world", "title": "Obsidian Dragon", "sub": "Dreamscape", "rgb": [157, 109, 113], "size": 33, "dx": 0.045, "dy": 0.0, "region": "worlds", "href": "dreams.html"}, {"kind": "project", "title": "BenchLab", "sub": "Prototype built, first usability test running", "rgb": [119, 237, 218], "size": 22, "dx": 0.0049, "dy": 0.0499, "region": "projects", "href": "benchlab.html"}, {"kind": "project", "title": "Pace", "sub": "In development", "rgb": [139, 239, 224], "size": 22, "dx": 0.0329, "dy": -0.0441, "region": "projects", "href": "pace.html"}, {"kind": "project", "title": "Rotation", "sub": "In development", "rgb": [134, 239, 222], "size": 22, "dx": -0.0061, "dy": 0.0498, "region": "projects", "href": "rotation.html"}, {"kind": "project", "title": "Slip", "sub": "Planned, not started", "rgb": [171, 244, 232], "size": 22, "dx": 0.07, "dy": -0.0017, "region": "projects", "href": "slip.html"}]};
+  var DATA = {"regions": {"photography": {"label": "PHOTOGRAPHY", "fx": 0.3, "fy": 0.44, "rgb": [34, 190, 205]}, "bookshelf": {"label": "BOOKSHELF", "fx": 0.76, "fy": 0.4, "rgb": [216, 96, 158]}, "worlds": {"label": "DREAMSCAPE", "fx": 0.24, "fy": 0.8, "rgb": [228, 96, 52]}, "projects": {"label": "PROJECTS", "fx": 0.74, "fy": 0.79, "rgb": [226, 182, 92]}}, "items": [{"kind": "photo", "title": "Sunset Through the Grass", "sub": "sunsets", "rgb": [215, 168, 128], "size": 19, "dx": -0.0232, "dy": -0.1204, "region": "photography", "href": "photography.html#photo-sunset-through-the-grass"}, {"kind": "photo", "title": "Sun Over Open Water", "sub": "sunsets", "rgb": [215, 133, 24], "size": 19, "dx": 0.0231, "dy": -0.0617, "region": "photography", "href": "photography.html#photo-sun-over-open-water"}, {"kind": "photo", "title": "The Pier", "sub": "shoreline", "rgb": [205, 211, 215], "size": 19, "dx": 0.1437, "dy": -0.0171, "region": "photography", "href": "photography.html#photo-the-pier"}, {"kind": "photo", "title": "From the Bluff", "sub": "shoreline", "rgb": [182, 215, 197], "size": 19, "dx": 0.0542, "dy": -0.0213, "region": "photography", "href": "photography.html#photo-from-the-bluff"}, {"kind": "photo", "title": "Juniper Berries", "sub": "details", "rgb": [198, 215, 167], "size": 19, "dx": -0.1775, "dy": -0.0167, "region": "photography", "href": "photography.html#photo-juniper-berries"}, {"kind": "photo", "title": "Acorn", "sub": "details", "rgb": [215, 189, 133], "size": 19, "dx": -0.1451, "dy": -0.0122, "region": "photography", "href": "photography.html#photo-acorn"}, {"kind": "photo", "title": "Pine, Backlit", "sub": "details", "rgb": [215, 176, 130], "size": 19, "dx": -0.1184, "dy": 0.0088, "region": "photography", "href": "photography.html#photo-pine-backlit"}, {"kind": "photo", "title": "Sun Through the Trees", "sub": "sunsets", "rgb": [215, 160, 111], "size": 19, "dx": -0.0531, "dy": -0.1041, "region": "photography", "href": "photography.html#photo-sun-through-the-trees"}, {"kind": "photo", "title": "The Meadow", "sub": "sunsets", "rgb": [141, 168, 148], "size": 19, "dx": 0.0253, "dy": -0.0945, "region": "photography", "href": "photography.html#photo-the-meadow"}, {"kind": "photo", "title": "Winter Path", "sub": "sunsets", "rgb": [162, 182, 184], "size": 19, "dx": -0.0068, "dy": -0.0455, "region": "photography", "href": "photography.html#photo-winter-path"}, {"kind": "photo", "title": "The Field Tree", "sub": "landscape", "rgb": [184, 196, 198], "size": 19, "dx": 0.1077, "dy": -0.0213, "region": "photography", "href": "photography.html#photo-the-field-tree"}, {"kind": "photo", "title": "The Dunes", "sub": "shoreline", "rgb": [153, 215, 199], "size": 19, "dx": 0.1528, "dy": 0.0196, "region": "photography", "href": "photography.html#photo-the-dunes"}, {"kind": "photo", "title": "Reeds on the Lake", "sub": "shoreline", "rgb": [189, 215, 151], "size": 19, "dx": 0.0611, "dy": 0.0254, "region": "photography", "href": "photography.html#photo-reeds-on-the-lake"}, {"kind": "photo", "title": "Over the Harbor", "sub": "shoreline", "rgb": [189, 215, 95], "size": 19, "dx": 0.1219, "dy": 0.0617, "region": "photography", "href": "photography.html#photo-over-the-harbor"}, {"kind": "photo", "title": "The Wake", "sub": "shoreline", "rgb": [97, 189, 215], "size": 19, "dx": 0.137, "dy": -0.0497, "region": "photography", "href": "photography.html#photo-the-wake"}, {"kind": "photo", "title": "Ferry Flag", "sub": "shoreline", "rgb": [164, 189, 215], "size": 19, "dx": 0.0806, "dy": -0.0007, "region": "photography", "href": "photography.html#photo-ferry-flag"}, {"kind": "photo", "title": "The Long Bridge", "sub": "shoreline", "rgb": [137, 177, 215], "size": 19, "dx": 0.1211, "dy": 0.0085, "region": "photography", "href": "photography.html#photo-the-long-bridge"}, {"kind": "photo", "title": "Autumn Woods", "sub": "landscape", "rgb": [215, 169, 76], "size": 19, "dx": 0.1006, "dy": 0.0352, "region": "photography", "href": "photography.html#photo-autumn-woods"}, {"kind": "photo", "title": "Beach at Dusk", "sub": "sunsets", "rgb": [215, 188, 167], "size": 19, "dx": -0.0079, "dy": -0.0871, "region": "photography", "href": "photography.html#photo-beach-at-dusk"}, {"kind": "book", "title": "Between Two Fires", "sub": "The bar \u00b7 Christopher Buehlman", "rgb": [135, 107, 107], "size": 18, "dx": -0.0122, "dy": -0.0683, "region": "bookshelf", "href": "bookshelf.html#book-between-two-fires"}, {"kind": "book", "title": "The Shadow of the Gods", "sub": "Up next \u00b7 John Gwynne", "rgb": [107, 114, 131], "size": 18, "dx": -0.0528, "dy": -0.0596, "region": "bookshelf", "href": "bookshelf.html#book-the-shadow-of-the-gods"}, {"kind": "book", "title": "The Rage of Dragons", "sub": "Up next \u00b7 Evan Winter", "rgb": [146, 116, 101], "size": 18, "dx": 0.0216, "dy": -0.0655, "region": "bookshelf", "href": "bookshelf.html#book-the-rage-of-dragons"}, {"kind": "book", "title": "The Ruin of Kings", "sub": "Up next \u00b7 Jenn Lyons", "rgb": [117, 107, 126], "size": 18, "dx": 0.0738, "dy": -0.0365, "region": "bookshelf", "href": "bookshelf.html#book-the-ruin-of-kings"}, {"kind": "book", "title": "Of Blood and Fire", "sub": "Reading now \u00b7 Ryan Cahill", "rgb": [157, 121, 97], "size": 18, "dx": 0.0895, "dy": 0.0136, "region": "bookshelf", "href": "bookshelf.html#book-of-blood-and-fire"}, {"kind": "book", "title": "Gardens of the Moon", "sub": "Up next \u00b7 Steven Erikson", "rgb": [105, 115, 111], "size": 18, "dx": 0.0556, "dy": 0.0583, "region": "bookshelf", "href": "bookshelf.html#book-gardens-of-the-moon"}, {"kind": "book", "title": "The Darkness That Comes Before", "sub": "Up next \u00b7 R. Scott Bakker", "rgb": [101, 99, 97], "size": 18, "dx": -0.0105, "dy": 0.0751, "region": "bookshelf", "href": "bookshelf.html#book-the-darkness-that-comes-before"}, {"kind": "world", "title": "The Golden City", "sub": "Dreamscape", "rgb": [215, 146, 84], "size": 33, "dx": -0.0927, "dy": -0.052, "region": "worlds", "href": "dreams.html"}, {"kind": "world", "title": "Obsidian Dragon", "sub": "Dreamscape", "rgb": [157, 109, 113], "size": 33, "dx": -0.0309, "dy": 0.052, "region": "worlds", "href": "dreams.html"}, {"kind": "world", "title": "The Drowned Bells", "sub": "Dreamscape", "rgb": [51, 101, 126], "size": 33, "dx": 0.0309, "dy": -0.052, "region": "worlds", "href": "dreams.html"}, {"kind": "world", "title": "The Far Shore", "sub": "Dreamscape", "rgb": [86, 197, 215], "size": 33, "dx": 0.0927, "dy": 0.052, "region": "worlds", "href": "dreams.html"}, {"kind": "project", "title": "BenchLab", "sub": "Prototype built, first usability test running", "rgb": [119, 237, 218], "size": 22, "dx": 0.0085, "dy": 0.0609, "region": "projects", "href": "benchlab.html"}, {"kind": "project", "title": "Pace", "sub": "In development", "rgb": [139, 239, 224], "size": 22, "dx": 0.0351, "dy": -0.0614, "region": "projects", "href": "pace.html"}, {"kind": "project", "title": "Rotation", "sub": "In development", "rgb": [134, 239, 222], "size": 22, "dx": -0.0254, "dy": 0.0606, "region": "projects", "href": "rotation.html"}, {"kind": "project", "title": "Slip", "sub": "Planned, not started", "rgb": [171, 244, 232], "size": 22, "dx": 0.0834, "dy": -0.0063, "region": "projects", "href": "slip.html"}]};
   var canvas = document.getElementById('latent-map');
   var glassEl = document.querySelector('.latent-glass-layer');
   var hit = document.getElementById('latent-hit');
@@ -158,45 +160,6 @@
     g.fillStyle = grad; g.fillRect(0, 0, 64, 64);
     return c;
   }
-  function makeFog(rgb) {
-    var c = document.createElement('canvas'); c.width = c.height = 256;
-    var g = c.getContext('2d');
-    g.globalCompositeOperation = 'lighter';
-    var fs = 13579;
-    function frnd() { fs = (fs * 1103515245 + 12345) & 0x7fffffff; return fs / 0x7fffffff; }
-    for (var i = 0; i < 16; i++) {
-      var bx = 128 + (frnd() - 0.5) * 130, by = 128 + (frnd() - 0.5) * 130;
-      var br = 34 + frnd() * 62;
-      var grad = g.createRadialGradient(bx, by, 0, bx, by, br);
-      grad.addColorStop(0, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + (0.028 + frnd() * 0.055).toFixed(3) + ')');
-      grad.addColorStop(1, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0)');
-      g.fillStyle = grad;
-      g.beginPath(); g.arc(bx, by, br, 0, Math.PI * 2); g.fill();
-    }
-    g.globalCompositeOperation = 'destination-in';
-    var mask = g.createRadialGradient(128, 128, 40, 128, 128, 128);
-    mask.addColorStop(0, 'rgba(0,0,0,1)');
-    mask.addColorStop(0.7, 'rgba(0,0,0,0.75)');
-    mask.addColorStop(1, 'rgba(0,0,0,0)');
-    g.fillStyle = mask; g.fillRect(0, 0, 256, 256);
-    // Smooth the cloud (downscale round trip), then bake in a whisper of
-    // monochrome dither: together they keep the fog from lumping or
-    // banding into stripes on 1x displays.
-    var small = document.createElement('canvas'); small.width = small.height = 56;
-    var sg = small.getContext('2d');
-    sg.drawImage(c, 0, 0, 56, 56);
-    g.globalCompositeOperation = 'source-over';
-    g.clearRect(0, 0, 256, 256);
-    g.drawImage(small, 0, 0, 256, 256);
-    var imgData = g.getImageData(0, 0, 256, 256);
-    var px = imgData.data;
-    for (var q = 0; q < px.length; q += 4) {
-      var nz = (Math.random() + Math.random() - 1) * 2.4;
-      px[q] += nz; px[q + 1] += nz; px[q + 2] += nz;
-    }
-    g.putImageData(imgData, 0, 0);
-    return c;
-  }
   function makeSpark(rgb) {
     var c = document.createElement('canvas'); c.width = c.height = 48;
     var g = c.getContext('2d');
@@ -214,6 +177,145 @@
   }
   var probeSprite = makeGlow([45, 212, 191]);
   var cometSprite = makeSpark([45, 212, 191]);
+
+  // The dynamic nebula (the demo's Improved recipe, dropped in as
+  // the site's fog): each region owns tinted copies of two seeded
+  // value-noise fields, colorized by value -- deep parts dim hue,
+  // body the hue itself, heart running hot toward white. Stamps of
+  // those fields ride the same wander current the points obey, so
+  // the gas is weather, drawn live, never a picture.
+  function makeField(seed) {
+    var S = 192, c = document.createElement('canvas'); c.width = c.height = S;
+    var g = c.getContext('2d');
+    var img = g.createImageData(S, S);
+    var gs = seed >>> 0;
+    function grnd() { gs = (gs * 1103515245 + 12345) & 0x7fffffff; return gs / 0x7fffffff; }
+    var oct = [];
+    [4, 8, 16, 32].forEach(function (n) {
+      var lat = [];
+      for (var i = 0; i < (n + 1) * (n + 1); i++) lat.push(grnd());
+      oct.push({ n: n, lat: lat });
+    });
+    function noise(x, y) {
+      var v = 0, amp = 0.55, tot = 0;
+      for (var o = 0; o < oct.length; o++) {
+        var n = oct[o].n, lat = oct[o].lat;
+        var fx = x * n, fy = y * n;
+        var ix = Math.floor(fx), iy = Math.floor(fy);
+        var tx = fx - ix, ty = fy - iy;
+        var sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty);
+        var i00 = lat[iy * (n + 1) + ix], i10 = lat[iy * (n + 1) + ix + 1];
+        var i01 = lat[(iy + 1) * (n + 1) + ix], i11 = lat[(iy + 1) * (n + 1) + ix + 1];
+        v += ((i00 + (i10 - i00) * sx) + ((i01 + (i11 - i01) * sx) - (i00 + (i10 - i00) * sx)) * sy) * amp;
+        tot += amp; amp *= 0.55;
+      }
+      return v / tot;
+    }
+    for (var py = 0; py < S; py++) {
+      for (var px = 0; px < S; px++) {
+        var u = px / S, w = py / S;
+        var f = noise(u, w);
+        var r1 = 1 - Math.abs(noise(u + 0.37, w + 0.11) * 2 - 1);
+        var field = Math.max(0, Math.min(1, f * 0.78 + r1 * r1 * 0.34 - 0.08));
+        var du = u - 0.5, dv = w - 0.5;
+        var fall = Math.max(0, 1 - Math.sqrt(du * du + dv * dv) * 2);
+        fall = fall * fall * (3 - 2 * fall);
+        var idx = (py * S + px) * 4;
+        var gv = Math.round(255 * field * fall);
+        img.data[idx] = img.data[idx + 1] = img.data[idx + 2] = gv;
+        img.data[idx + 3] = 255;
+      }
+    }
+    g.putImageData(img, 0, 0);
+    return c;
+  }
+  function tintField(fieldCv, rgb) {
+    var S = fieldCv.width;
+    var c = document.createElement('canvas'); c.width = c.height = S;
+    var g = c.getContext('2d');
+    g.drawImage(fieldCv, 0, 0);
+    var img = g.getImageData(0, 0, S, S);
+    for (var q = 0; q < img.data.length; q += 4) {
+      var v = img.data[q] / 255;
+      var a = Math.max(0, Math.min(1, (v - 0.10) / 0.9));
+      a = Math.pow(a, 1.5);
+      var hot = Math.max(0, Math.min(1, (v - 0.5) / 0.5)) * 0.8;
+      img.data[q] = Math.round(rgb[0] + (255 - rgb[0]) * hot);
+      img.data[q + 1] = Math.round(rgb[1] + (255 - rgb[1]) * hot);
+      img.data[q + 2] = Math.round(rgb[2] + (255 - rgb[2]) * hot);
+      img.data[q + 3] = Math.round(255 * a);
+    }
+    g.putImageData(img, 0, 0);
+    return c;
+  }
+  var fogFields = [makeField(20261027), makeField(77031)];
+  var fogSprites = {};
+  Object.keys(DATA.regions).forEach(function (k) {
+    fogSprites[k] = [tintField(fogFields[0], DATA.regions[k].rgb),
+                     tintField(fogFields[1], DATA.regions[k].rgb)];
+  });
+  // A soft dark ribbon sprite for the dust lanes.
+  var dustSprite = (function () {
+    var c = document.createElement('canvas'); c.width = 256; c.height = 128;
+    var g = c.getContext('2d');
+    var grad = g.createRadialGradient(128, 64, 4, 128, 64, 128);
+    grad.addColorStop(0, 'rgba(2,2,7,0.85)');
+    grad.addColorStop(0.55, 'rgba(2,2,7,0.38)');
+    grad.addColorStop(1, 'rgba(2,2,7,0)');
+    g.fillStyle = grad;
+    g.save(); g.translate(128, 64); g.scale(1, 0.5); g.translate(-128, -64);
+    g.fillRect(0, -64, 256, 256);
+    g.restore();
+    return c;
+  })();
+  // Stamp physics: advect on the wander field under a soft home
+  // spring; the probe stirs and lifts the gas it passes through;
+  // shockwaves shove stamps with the points' own band math.
+  function stampStep(s, t) {
+    var r = DATA.regions[s.region];
+    var hx = r.cx + s.hx * W, hy = r.cy + s.hy * H;
+    if (!s.x) { s.x = hx; s.y = hy; }
+    var ang = Math.sin(s.x * 0.0016 + t * 0.21) * 1.7 + Math.cos(s.y * 0.0019 - t * 0.17) * 1.7
+            + Math.sin((s.x + s.y) * 0.0006 + t * 0.07) * 0.9;
+    s.vx += Math.cos(ang) * 0.006 + (hx - s.x) * 0.0009;
+    s.vy += Math.sin(ang) * 0.006 + (hy - s.y) * 0.0009;
+    var pdx = s.x - probe.x, pdy = s.y - probe.y;
+    var pd = Math.sqrt(pdx * pdx + pdy * pdy);
+    s.lift = 0;
+    if (probe.active && pd < 220 && pd > 4) {
+      var pf = (1 - pd / 220);
+      s.lift = pf;
+      s.vx += probeVx * pf * 0.014 + (pdx / pd) * pf * 0.03;
+      s.vy += probeVy * pf * 0.014 + (pdy / pd) * pf * 0.03;
+    }
+    for (var b = 0; b < bursts.length; b++) {
+      var bu = bursts[b];
+      var bdx = s.x - bu.x, bdy = s.y - bu.y, bd = Math.sqrt(bdx * bdx + bdy * bdy) || 1;
+      var band = Math.abs(bd - bu.r);
+      if (band < 46 && bd > 4) {
+        var push = (1 - band / 46) * 0.22 * bu.a;
+        s.vx += (bdx / bd) * push; s.vy += (bdy / bd) * push;
+      }
+    }
+    s.vx *= 0.94; s.vy *= 0.94;
+    s.x += s.vx; s.y += s.vy;
+    s.rot += s.vr;
+  }
+
+  // Living grain: four noise tiles cycled at 1:1 -- the researched
+  // counter to 8-bit banding in the painting's smooth gradients.
+  var grainTiles = [], grainPats = null;
+  for (var gi = 0; gi < 4; gi++) {
+    var gc = document.createElement('canvas'); gc.width = gc.height = 140;
+    var gg = gc.getContext('2d');
+    var gid = gg.createImageData(140, 140);
+    for (var gq = 0; gq < gid.data.length; gq += 4) {
+      var gv = 116 + Math.floor(Math.random() * 24);
+      gid.data[gq] = gid.data[gq + 1] = gid.data[gq + 2] = gv; gid.data[gq + 3] = 255;
+    }
+    gg.putImageData(gid, 0, 0);
+    grainTiles.push(gc);
+  }
 
   var regionKeys = Object.keys(DATA.regions);
   regionKeys.forEach(function (k, i) {
@@ -241,13 +343,38 @@
     list.forEach(function (p) { r[0] += p.rgb[0]; r[1] += p.rgb[1]; r[2] += p.rgb[2]; });
     DATA.regions[k].rgb = [Math.round(r[0] / list.length), Math.round(r[1] / list.length), Math.round(r[2] / list.length)];
   });
-  var fogs = [];
-  regionKeys.forEach(function (k, i) {
-    var spr = makeFog(DATA.regions[k].rgb);
-    fogs.push({ sprite: spr, ph: i * 2.1 + 0.7, sp: 0.05 + i * 0.013, region: k, ox: -0.1, oy: 0.03, sc: 0.8 });
-    fogs.push({ sprite: spr, ph: i * 2.1 + 2.6, sp: 0.041 + i * 0.011, region: k, ox: 0.09, oy: -0.04, sc: 0.58 });
-    fogs.push({ sprite: spr, ph: i * 2.1 + 4.4, sp: 0.033 + i * 0.009, region: k, ox: 0.01, oy: 0.09, sc: 0.42 });
-  });
+  // Fog stamps: nine per region plus one wide ambient wash. Homes
+  // ring the region centre -- a few sit near the borders, so when
+  // the current carries them across, neighbouring hues mix.
+  var stamps = [];
+  var dusts = [];
+  (function () {
+    var ss = 4451;
+    function srnd() { ss = (ss * 1103515245 + 12345) & 0x7fffffff; return ss / 0x7fffffff; }
+    Object.keys(DATA.regions).forEach(function (k, ri) {
+      for (var si2 = 0; si2 < 9; si2++) {
+        var ang = (si2 / 9) * Math.PI * 2 + ri * 1.3 + (srnd() - 0.5) * 0.7;
+        var rad = si2 === 0 ? 0 : 0.10 + srnd() * 0.20;
+        stamps.push({
+          region: k, spr: fogSprites[k][si2 % 2], flip: si2 % 3 === 0,
+          hx: Math.cos(ang) * rad, hy: Math.sin(ang) * rad * 0.8,
+          x: 0, y: 0, vx: 0, vy: 0, lift: 0,
+          sc: si2 === 0 ? 1.15 : 0.8 + srnd() * 1.1,
+          a: si2 === 0 ? 0.26 : 0.16 + srnd() * 0.10,
+          rot: srnd() * Math.PI * 2, vr: (srnd() - 0.5) * 0.0022,
+          ph: srnd() * Math.PI * 2
+        });
+      }
+      stamps.push({ region: k, spr: fogSprites[k][0], flip: false, hx: 0, hy: 0,
+                    x: 0, y: 0, vx: 0, vy: 0, lift: 0, sc: 2.6, a: 0.065,
+                    rot: 0, vr: 0.0006, ph: ri * 2.1 });
+    });
+    for (var di = 0; di < 7; di++) {
+      dusts.push({ hx: srnd(), hy: 0.12 + srnd() * 0.76, w: 0.5 + srnd() * 0.45,
+                   h: 0.10 + srnd() * 0.10, rot: (srnd() - 0.5) * 1.2,
+                   sp: 0.0016 + srnd() * 0.002, a: 0.30 + srnd() * 0.25, ph: srnd() * 9 });
+    }
+  })();
 
   var filler = [];
   var seed = 987654321;
@@ -307,6 +434,7 @@
   var comets = [];
   var nextComet = 4000, nextAuto = 5000, nextFixate = 8000;
   var fixate = null;
+  var attached = null, probeVx = 0, probeVy = 0;
   var nearItem = null, nearItemD = 1e9;
 
   // The glass turn: scroll position drives a target; the render loop
@@ -361,10 +489,11 @@
   }
   window.addEventListener('resize', resize);
 
-  // Touch discipline: a touch never navigates by accident. The first
-  // tap on a point selects it (nameplate + ring); a second tap on the
-  // same point opens it. A mouse click opens directly. A drag is never
-  // a tap, so exploring can't fire a link.
+  // Interaction discipline: exploring never navigates by accident.
+  // Hovering or dragging brings the magnetic probe onto a point and
+  // its name shows on its own; stopping there selects it; tapping or
+  // clicking the selected point again opens it. A drag never opens,
+  // so browsing can't fire a link.
   var coarse = window.matchMedia('(pointer: coarse)').matches;
   var hitR = coarse ? 74 : 54;
   var selected = null, selectedAt = 0;
@@ -409,15 +538,22 @@
       var dt = performance.now() - downAt;
       var type = downType;
       downPt = null;
-      if (moved > 16 || dt > 450) return; // a drag, not a tap
       if (glassCur > 0.4) return; // the map is glassed over; taps belong to the page
+      if (moved > 16 || dt > 450) {
+        // A drag, not a tap: if it ended riding a point, that point
+        // stays selected -- its name was already showing.
+        if (attached) { selected = attached; selectedAt = performance.now(); }
+        return;
+      }
       var best = null, bestD = 1e9;
       items.forEach(function (p) {
         var dx = p.x - e.clientX, dy = p.y - e.clientY, d = dx * dx + dy * dy;
         if (d < bestD) { bestD = d; best = p; }
       });
       if (best && bestD < hitR * hitR) {
-        if (type === 'mouse' || (selected === best && performance.now() - selectedAt < 3500)) {
+        // First contact selects; tapping the selected point again
+        // opens it -- one model for mouse and touch alike.
+        if (selected === best) {
           window.location.href = best.href;
           return;
         }
@@ -483,7 +619,7 @@
     p.x += p.vx; p.y += p.vy;
     var dx = p.x - probe.x, dy = p.y - probe.y, d2 = dx * dx + dy * dy;
     var target = d2 < 19600 ? 1 - Math.sqrt(d2) / 140 : 0;
-    p.lit += (target - p.lit) * 0.13;
+    p.lit += (target - p.lit) * (target > p.lit ? 0.28 : 0.08);
     p.flash *= 0.94;
   }
 
@@ -520,8 +656,32 @@
       probe.ty = H * (0.48 + 0.32 * Math.sin(t * 0.17 + 1.4));
       if (now > nextAuto && glassCur < 0.5) { sample(probe.x, probe.y); nextAuto = now + 4200 + Math.random() * 2800; }
     }
-    probe.x += (probe.tx - probe.x) * 0.06;
-    probe.y += (probe.ty - probe.y) * 0.06;
+    // Magnetic probe, tuned responsive: drifting near a point, the
+    // probe leans toward it like surface tension; inside capture
+    // range it rides the point; release needs a wider radius than
+    // capture, so letting go has a little elastic stretch to it.
+    var pTx = probe.tx, pTy = probe.ty;
+    if (!attract && glassCur < 0.5) {
+      if (attached) {
+        var adx = attached.x - probe.tx, ady = attached.y - probe.ty;
+        if (adx * adx + ady * ady > 128 * 128) attached = null;
+      }
+      if (!attached && nearItem) {
+        var ndx = nearItem.x - probe.tx, ndy = nearItem.y - probe.ty;
+        if (ndx * ndx + ndy * ndy < 220 * 220) attached = nearItem;
+      }
+      if (attached) {
+        var cdx = attached.x - probe.tx, cdy = attached.y - probe.ty;
+        var cd = Math.sqrt(cdx * cdx + cdy * cdy);
+        if (cd < 92) { pTx = attached.x + attached.vx * 6; pTy = attached.y + attached.vy * 6; }
+        else { var pull = (1 - cd / 220) * 0.6; pTx = probe.tx + cdx * pull; pTy = probe.ty + cdy * pull; }
+      }
+    } else { attached = null; }
+    var sprK = attract ? 0.05 : 0.22, sprD = attract ? 0.80 : 0.62;
+    probeVx = (probeVx + (pTx - probe.x) * sprK) * sprD;
+    probeVy = (probeVy + (pTy - probe.y) * sprK) * sprD;
+    probe.x += probeVx;
+    probe.y += probeVy;
     trail.unshift({ x: probe.x, y: probe.y });
     if (trail.length > 26) trail.pop();
 
@@ -536,6 +696,46 @@
 
     // The nebula itself never fades: stars, fog, dust stay alive behind
     // the glass for the whole page.
+    // The dynamic nebula, live: stamps in screen blend (overlaps
+    // mix hues where regions meet), then the dust lanes over them.
+    ctx.globalCompositeOperation = 'screen';
+    stamps.forEach(function (s) {
+      stampStep(s, t);
+      var ws = Math.max(W, H) * s.sc * (1 + 0.06 * Math.sin(t * 0.13 + s.ph));
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.rot);
+      if (s.flip) ctx.scale(-1, 1);
+      ctx.globalAlpha = Math.min(1, s.a * (1 + (s.lift || 0) * 0.7));
+      ctx.drawImage(s.spr, -ws / 2, -ws / 2, ws, ws);
+      ctx.restore();
+    });
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    dusts.forEach(function (d) {
+      var dxp = ((((d.hx + t * d.sp) % 1) + 1) % 1) * W;
+      var dyp = d.hy * H + Math.sin(t * 0.05 + d.ph) * 10;
+      ctx.save();
+      ctx.translate(dxp, dyp);
+      ctx.rotate(d.rot);
+      ctx.globalAlpha = d.a;
+      ctx.drawImage(dustSprite, -d.w * W / 2, -d.h * H / 2, d.w * W, d.h * H);
+      ctx.restore();
+    });
+    ctx.globalAlpha = 1;
+      // The probe's wake: light dragged through the gas, decaying
+      // along the trail the probe leaves behind it.
+      ctx.globalCompositeOperation = 'lighter';
+      for (var wi = trail.length - 1; wi >= 0; wi--) {
+        var wpk = trail[wi];
+        var wa = (1 - wi / trail.length) * (probe.active && now - probe.last < 3000 ? 0.15 : 0.05);
+        if (wa < 0.012) continue;
+        var wr = 130 - wi * 3.5;
+        ctx.globalAlpha = wa;
+        ctx.drawImage(probeSprite, wpk.x - wr, wpk.y - wr, wr * 2, wr * 2);
+      }
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
     var si, st;
     for (si = 0; si < stars.length; si++) {
       st = stars[si];
@@ -543,15 +743,6 @@
       ctx.fillStyle = 'rgba(' + st.tint + ',' + sa.toFixed(3) + ')';
       ctx.fillRect(st.hx * W, st.hy * H, st.s, st.s);
     }
-    fogs.forEach(function (w) {
-      var r = DATA.regions[w.region];
-      var wx = r.cx + w.ox * W + Math.sin(t * w.sp * 2 + w.ph) * W * 0.03;
-      var wy = r.cy + w.oy * H + Math.cos(t * w.sp * 1.6 + w.ph) * H * 0.03;
-      var ws = Math.max(W, H) * w.sc * (1 + 0.07 * Math.sin(t * 0.13 + w.ph));
-      ctx.globalAlpha = 0.62;
-      ctx.drawImage(w.sprite, wx - ws / 2, wy - ws / 2, ws, ws);
-    });
-    ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'lighter';
 
     var i, p;
@@ -683,8 +874,9 @@
         ctx.fillText(r.label, r.cx, r.cy - H * 0.16 + 5);
       });
 
-      if (selected && now - selectedAt > 5000) selected = null;
-      var showItem = selected || ((fixate && now < fixate.until) ? fixate.item : (nearItem && nearItemD < 140 * 140 ? nearItem : null));
+      // Selection persists: a point you stopped on stays identified
+      // until you choose another or tap empty space.
+      var showItem = selected || attached || ((fixate && now < fixate.until) ? fixate.item : (nearItem && nearItemD < 140 * 140 ? nearItem : null));
       if (showItem) {
         var label2 = showItem.title + '  ·  ' + showItem.sub;
         ctx.font = '11px ui-monospace, Menlo, Consolas, monospace';
@@ -746,6 +938,18 @@
     if (glassCur > 0.01) {
       ctx.fillStyle = 'rgba(3, 4, 10,' + (glassCur * 0.38).toFixed(3) + ')';
       ctx.fillRect(0, 0, W, H);
+    }
+    if (!reduced && grainTiles.length) {
+      if (!grainPats) grainPats = grainTiles.map(function (tc) { return ctx.createPattern(tc, 'repeat'); });
+      var gPat = grainPats[Math.floor(now / 90) % 4];
+      if (gPat) {
+        ctx.globalCompositeOperation = 'overlay';
+        ctx.globalAlpha = 0.05;
+        ctx.fillStyle = gPat;
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      }
     }
 
     if (running) raf = requestAnimationFrame(step);
