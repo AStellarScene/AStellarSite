@@ -919,7 +919,7 @@ LATENT_MAP_JS = r"""<script>
       var v = img.data[q] / 255;
       var a = Math.max(0, Math.min(1, (v - 0.10) / 0.9));
       a = Math.pow(a, 1.5);
-      var hot = Math.max(0, Math.min(1, (v - 0.5) / 0.5)) * 0.8;
+      var hot = Math.max(0, Math.min(1, (v - 0.58) / 0.42)) * 0.65;
       img.data[q] = Math.round(rgb[0] + (255 - rgb[0]) * hot);
       img.data[q + 1] = Math.round(rgb[1] + (255 - rgb[1]) * hot);
       img.data[q + 2] = Math.round(rgb[2] + (255 - rgb[2]) * hot);
@@ -938,14 +938,13 @@ LATENT_MAP_JS = r"""<script>
   var dustSprite = (function () {
     var c = document.createElement('canvas'); c.width = 256; c.height = 128;
     var g = c.getContext('2d');
-    var grad = g.createRadialGradient(128, 64, 4, 128, 64, 128);
-    grad.addColorStop(0, 'rgba(2,2,7,0.85)');
-    grad.addColorStop(0.55, 'rgba(2,2,7,0.38)');
+    g.translate(128, 64); g.scale(128, 64);
+    var grad = g.createRadialGradient(0, 0, 0, 0, 0, 1);
+    grad.addColorStop(0, 'rgba(2,2,7,0.9)');
+    grad.addColorStop(0.55, 'rgba(2,2,7,0.4)');
     grad.addColorStop(1, 'rgba(2,2,7,0)');
     g.fillStyle = grad;
-    g.save(); g.translate(128, 64); g.scale(1, 0.5); g.translate(-128, -64);
-    g.fillRect(0, -64, 256, 256);
-    g.restore();
+    g.beginPath(); g.arc(0, 0, 1, 0, Math.PI * 2); g.fill();
     return c;
   })();
   // Stamp physics: advect on the wander field under a soft home
@@ -1040,13 +1039,13 @@ LATENT_MAP_JS = r"""<script>
           hx: Math.cos(ang) * rad, hy: Math.sin(ang) * rad * 0.8,
           x: 0, y: 0, vx: 0, vy: 0, lift: 0,
           sc: si2 === 0 ? 1.15 : 0.8 + srnd() * 1.1,
-          a: si2 === 0 ? 0.26 : 0.16 + srnd() * 0.10,
+          a: si2 === 0 ? 0.24 : 0.13 + srnd() * 0.09,
           rot: srnd() * Math.PI * 2, vr: (srnd() - 0.5) * 0.0022,
           ph: srnd() * Math.PI * 2
         });
       }
       stamps.push({ region: k, spr: fogSprites[k][0], flip: false, hx: 0, hy: 0,
-                    x: 0, y: 0, vx: 0, vy: 0, lift: 0, sc: 2.6, a: 0.065,
+                    x: 0, y: 0, vx: 0, vy: 0, lift: 0, sc: 2.6, a: 0.05,
                     rot: 0, vr: 0.0006, ph: ri * 2.1 });
     });
     for (var di = 0; di < 7; di++) {
@@ -1320,8 +1319,14 @@ LATENT_MAP_JS = r"""<script>
       if (cueEl) cueEl.classList.toggle('cue-gone', glassCur > 0.05);
     }
 
+    // Full repaint every frame. The old translucent fade fill let
+    // screen-blended fog integrate upward frame over frame into a
+    // pastel white-out; the base now goes down opaque and the whole
+    // field is drawn fresh. (The probe's trail is an explicit
+    // polyline, so nothing the map needs came from the residue.)
     ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = 'rgba(3, 2, 9, 0.24)';
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#030209';
     ctx.fillRect(0, 0, W, H);
 
     regionKeys.forEach(function (k) {
@@ -1398,7 +1403,7 @@ LATENT_MAP_JS = r"""<script>
       ctx.save();
       ctx.translate(dxp, dyp);
       ctx.rotate(d.rot);
-      ctx.globalAlpha = d.a;
+      ctx.globalAlpha = d.a * 0.4;
       ctx.drawImage(dustSprite, -d.w * W / 2, -d.h * H / 2, d.w * W, d.h * H);
       ctx.restore();
     });
