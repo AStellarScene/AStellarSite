@@ -182,6 +182,14 @@ home_body = """  <section class="hero">
     <p><a href="dreams.html">Enter Dreamscape &#8599;</a></p>
   </section>
 
+  <section id="atlas">
+    <p class="label">Atlas</p>
+    <h2>The site, drawn as a galaxy</h2>
+    <p><a href="latent-sitemap.html"><img class="teaser-img" src="art/atlas.jpg" alt="Atlas: this site's pages as points of light in a living nebula of teal, rose, ember, and gold"></a></p>
+    <p>Every photo, book, world, and project here is a point of light in a living nebula, drifting near the things it belongs with &mdash; a sitemap built like latent space, and generated from the site itself.</p>
+    <p><a href="latent-sitemap.html">Explore Atlas &#8599;</a></p>
+  </section>
+
   <section id="contact">
     <p class="label">Contact</p>
     <h2>Get in touch</h2>
