@@ -139,6 +139,7 @@
   var stars = [], sparkles = [], blobs = [], bursts = [], meteor = null;
   var nextMeteorAt = 5000 + Math.random() * 7000;
   var running = true, inView = true, raf = null, lastT = 0;
+  var animT = 0, heroOffTop = 0, heroOffLeft = 0;
 
   // Pre-rendered glow sprites: drawImage of a sprite is cheap; per-frame
   // radial gradients and shadowBlur are not. That discipline is the point.
@@ -189,6 +190,8 @@
 
   function build() {
     var rect = hero.getBoundingClientRect();
+    heroOffTop = rect.top + window.scrollY;
+    heroOffLeft = rect.left + window.scrollX;
     W = Math.max(320, rect.width);
     H = Math.max(240, rect.height);
     pointer.x = pointer.sx = W / 2;
@@ -233,6 +236,44 @@
     }
   }
 
+  // Resize path (fix 1): iOS fires resize when its URL bar collapses
+  // mid-scroll, and the hero's size does not change then -- rebuilding on
+  // those events re-rolled the whole starfield (the teleport) and blanked
+  // the canvas (the flash). Only a genuine size change touches anything
+  // now, and a genuine change scales the existing field to the new box
+  // instead of re-rolling it: same stars, same layout, no flash.
+  function resizeSky() {
+    var rect = hero.getBoundingClientRect();
+    heroOffTop = rect.top + window.scrollY;
+    heroOffLeft = rect.left + window.scrollX;
+    var nW = Math.max(320, rect.width), nH = Math.max(240, rect.height);
+    if (nW === W && nH === H) return;
+    var sx = nW / W, sy = nH / H;
+    stars.forEach(function (st) { st.x *= sx; st.y *= sy; });
+    sparkles.forEach(function (sp) { sp.x *= sx; sp.y *= sy; });
+    bursts.forEach(function (p) { p.x *= sx; p.y *= sy; });
+    if (meteor) { meteor.x *= sx; meteor.y *= sy; }
+    pointer.sx *= sx; pointer.sy *= sy;
+    W = nW; H = nH;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    neb.width = Math.max(80, Math.round(W / 6));
+    neb.height = Math.max(60, Math.round(H / 6));
+  }
+
+  // One owner for the loop's start/stop (fix 3): both controllers
+  // (visibility, intersection) go through here, and a restart re-bases
+  // lastT so the first resumed frame steps one frame's worth.
+  function start() {
+    if (raf || reduced || !running || !inView) return;
+    lastT = performance.now();
+    raf = requestAnimationFrame(frame);
+  }
+  function stop() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+  }
+
   function drawSparkle(x, y, s, alpha, spr) {
     ctx.save();
     ctx.globalAlpha = alpha;
@@ -248,18 +289,24 @@
     ctx.restore();
   }
 
-  function frame(t) {
-    var dt = Math.min(50, t - lastT || 16);
-    lastT = t;
+  function frame(now) {
+    var dt = Math.min(50, now - lastT || 16);
+    lastT = now;
+    // One clock (fix 2): the phases (twinkle, nebula, sparkles, meteor
+    // timing) read the same accumulated time the drift integrates, so a
+    // pause stops the whole sky together instead of letting the glow
+    // state leap forward by the paused duration on resume. While the
+    // loop runs, animT advances at wall-clock rate -- identical motion.
+    animT += dt;
+    var t = animT;
     ctx.clearRect(0, 0, W, H);
 
     // Pointer response: ease on a time constant, not per frame, so
     // 120Hz and 60Hz displays feel the same; and an influence value
     // fades the whole effect in and out, so entering or leaving the
     // hero never makes the field jump.
-    var heroRect = hero.getBoundingClientRect();
-    pointer.x = pointer.cx - heroRect.left;
-    pointer.y = pointer.cy - heroRect.top;
+    pointer.x = pointer.cx - (heroOffLeft - window.scrollX);
+    pointer.y = pointer.cy - (heroOffTop - window.scrollY);
     var kp = 1 - Math.exp(-dt / 80);
     pointer.sx += (pointer.x - pointer.sx) * kp;
     pointer.sy += (pointer.y - pointer.sy) * kp;
@@ -370,6 +417,7 @@
     // One composed still frame for reduced-motion visitors.
     build();
     lastT = 0;
+    animT = 1150;
     var keepRunning = running;
     running = false;
     frame(1200);
@@ -395,9 +443,8 @@
     if (!pointer.active) {
       // Entering: seed the light at the cursor while its influence is
       // still 0, then let the fade bring it in. No visible jump.
-      var r0 = hero.getBoundingClientRect();
-      pointer.sx = pointer.x = e.clientX - r0.left;
-      pointer.sy = pointer.y = e.clientY - r0.top;
+      pointer.sx = pointer.x = e.clientX - (heroOffLeft - window.scrollX);
+      pointer.sy = pointer.y = e.clientY - (heroOffTop - window.scrollY);
     }
     pointer.active = true;
   });
@@ -406,33 +453,30 @@
     pointer.touch = e.pointerType === 'touch';
     pointer.cx = e.clientX; pointer.cy = e.clientY;
     pointer.active = true;
-    var r = hero.getBoundingClientRect();
-    burstAt(e.clientX - r.left, e.clientY - r.top);
+    burstAt(e.clientX - (heroOffLeft - window.scrollX), e.clientY - (heroOffTop - window.scrollY));
   });
 
   var resizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () { build(); if (reduced) drawStatic(); }, 180);
+    resizeTimer = setTimeout(function () { if (reduced) drawStatic(); else resizeSky(); }, 180);
   });
   document.addEventListener('visibilitychange', function () {
     running = !document.hidden;
-    if (running && inView && !reduced && !raf) raf = requestAnimationFrame(frame);
-    if (!running && raf) { cancelAnimationFrame(raf); raf = null; }
+    if (running) start(); else stop();
   });
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (entries) {
       inView = entries[0].isIntersecting;
-      if (inView && running && !reduced && !raf) raf = requestAnimationFrame(frame);
-      if (!inView && raf) { cancelAnimationFrame(raf); raf = null; }
-    }, { threshold: 0.02 }).observe(hero);
+      if (inView) start(); else stop();
+    }, { rootMargin: '120px 0px 120px 0px', threshold: 0 }).observe(hero);
   }
 
   build();
   if (reduced) {
     drawStatic();
   } else {
-    raf = requestAnimationFrame(frame);
+    start();
   }
 })();
 </script>
