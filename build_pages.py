@@ -304,7 +304,7 @@ latent_body = """  <div class="world-ambient" aria-hidden="true"></div>
       <span class="slice-title">The Golden City</span>
       <span class="slice-cap">
         <strong>The Golden City</strong>
-        <span>A city in the clouds, built around a ring of light.</span>
+        <span>A city that climbed into the clouds and never came back down.</span>
         <span class="slice-hint">Tap again to come back</span>
       </span>
     </button>
@@ -314,7 +314,7 @@ latent_body = """  <div class="world-ambient" aria-hidden="true"></div>
       <span class="slice-title">Obsidian Dragon</span>
       <span class="slice-cap">
         <strong>Obsidian Dragon</strong>
-        <span>Obsidian and lava over a burning valley. The render my avatar was cut from.</span>
+        <span>Stone that woke up burning, over a valley that never cools.</span>
         <span class="slice-hint">Tap again to come back</span>
       </span>
     </button>
