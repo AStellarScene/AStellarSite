@@ -698,7 +698,7 @@ ul.plain { list-style: none; padding-left: 0; }
    the fallback. The band needs a positioning context for the canvas;
    .latent-band.open (higher specificity) still wins when open. */
 .latent-band { position: relative; }
-#dream-gl {
+.dream-gl {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -719,8 +719,9 @@ ul.plain { list-style: none; padding-left: 0; }
    shader's targets get re-read in steps -- a staircase the eye sees
    as stutter. With it off, both directions snap the box and let the
    eased seam + reframing carry the visible motion, symmetrically.
-   The no-GL fallback keeps its transition (rule is gl-on scoped). */
-html.gl-on .latent-band { transition: none; }
+   The no-GL fallback keeps its transition (rule is gl-live
+   scoped, per band). */
+.latent-band.gl-live { transition: none; }
 .slice-title { z-index: 3; }
 /* Room for the words to breathe */
 .latent-head { padding-bottom: 20px; }
@@ -807,8 +808,12 @@ html.latent-live[data-world] .site-header::after {
 html.latent-live[data-world] .header-inner { position: relative; z-index: 1; }
 html.latent-live[data-world="golden"] .site-header::before { background-image: url("art/golden-city.jpg"); }
 html.latent-live[data-world="ember"] .site-header::before { background-image: url("art/obsidian-dragon.jpg"); }
+html.latent-live[data-world="abyss"] .site-header::before { background-image: url("art/drowned-bells.jpg"); }
+html.latent-live[data-world="shore"] .site-header::before { background-image: url("art/far-shore.jpg"); }
 html.latent-live[data-world="golden"] .site-header::after { background: rgba(26, 16, 5, 0.38); }
 html.latent-live[data-world="ember"] .site-header::after { background: rgba(22, 9, 5, 0.38); }
+html.latent-live[data-world="abyss"] .site-header::after { background: rgba(3, 16, 18, 0.42); }
+html.latent-live[data-world="shore"] .site-header::after { background: rgba(6, 18, 10, 0.42); }
 
 /* When a world opens, the text above it fades away entirely */
 html.latent-live .latent-head { transition: opacity 0.7s ease; }
@@ -842,6 +847,26 @@ html.latent-live[data-world="ember"] {
   --panel: rgba(255, 110, 50, 0.06);
   --panel-border: rgba(255, 110, 50, 0.22);
 }
+html.latent-live[data-world="abyss"] {
+  --base: #04120f;
+  --heading: #dcf5ec;
+  --body: #aacfc4;
+  --dim: #71948a;
+  --teal: #46e8c0;
+  --gold: #ffb36b;
+  --panel: rgba(70, 232, 192, 0.06);
+  --panel-border: rgba(70, 232, 192, 0.22);
+}
+html.latent-live[data-world="shore"] {
+  --base: #07130a;
+  --heading: #eaf7dc;
+  --body: #bfd6b2;
+  --dim: #8aa87f;
+  --teal: #4fe3ae;
+  --gold: #ffd968;
+  --panel: rgba(110, 230, 160, 0.06);
+  --panel-border: rgba(110, 230, 160, 0.22);
+}
 
 /* The world's ambient light: fixed glow layers in the image's colors,
    crossfaded in over the page's stock nebula when a world opens */
@@ -868,6 +893,22 @@ html.latent-live[data-world="ember"] .world-ambient {
     radial-gradient(820px 560px at 92% 2%, rgba(110, 130, 255, 0.12), transparent 62%),
     radial-gradient(900px 700px at 85% 90%, rgba(255, 60, 30, 0.10), transparent 62%),
     #0e0605;
+}
+html.latent-live[data-world="abyss"] .world-ambient {
+  opacity: 1;
+  background:
+    radial-gradient(720px 480px at 14% -4%, rgba(64, 120, 180, 0.16), transparent 62%),
+    radial-gradient(820px 560px at 92% 2%, rgba(122, 84, 180, 0.13), transparent 62%),
+    radial-gradient(900px 700px at 85% 90%, rgba(38, 224, 188, 0.16), transparent 62%),
+    #04120f;
+}
+html.latent-live[data-world="shore"] .world-ambient {
+  opacity: 1;
+  background:
+    radial-gradient(720px 480px at 14% -4%, rgba(64, 200, 140, 0.18), transparent 62%),
+    radial-gradient(820px 560px at 92% 2%, rgba(70, 160, 255, 0.14), transparent 62%),
+    radial-gradient(900px 700px at 85% 90%, rgba(150, 230, 90, 0.10), transparent 62%),
+    #07130a;
 }
 @media (prefers-reduced-motion: reduce) {
   .slice img { animation: none; }

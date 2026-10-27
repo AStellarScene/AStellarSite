@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="AI artwork directed by Adam Laloge. Images sit in two-image splits. Open one and it fills the screen while the page takes on its colors.">
 <meta name="twitter:image" content="https://astellar.site/art/obsidian-dragon.jpg">
 <meta name="theme-color" content="#070b16">
-<link rel="stylesheet" href="styles.css?v=57">
+<link rel="stylesheet" href="styles.css?v=58">
 </head>
 <body>
 <header class="site-header">
@@ -46,7 +46,7 @@
   </section>
 
   <div class="latent-band" id="latent-band">
-    <canvas id="dream-gl" aria-hidden="true"></canvas>
+    <canvas class="dream-gl" aria-hidden="true"></canvas>
     <button type="button" class="slice" data-world="golden" aria-expanded="false" aria-label="Open The Golden City">
       <img src="art/golden-city.jpg" alt="A golden city of spires and bridges in the clouds, built around a glowing ring" draggable="false">
       <span class="slice-title">The Golden City</span>
@@ -70,6 +70,29 @@
 
   <p class="flow-hint">Tap a world to step inside &middot; tap again to come back</p>
 
+  <div class="latent-band" id="latent-band-2">
+    <canvas class="dream-gl" aria-hidden="true"></canvas>
+    <button type="button" class="slice" data-world="abyss" aria-expanded="false" aria-label="Open The Drowned Bells">
+      <img src="art/drowned-bells.jpg" alt="A gothic cathedral-city half-drowned in a black ocean at night, its towers above the waterline and glowing teal ruins beneath the surface" draggable="false">
+      <span class="slice-title">The Drowned Bells</span>
+      <span class="slice-cap">
+        <strong>The Drowned Bells</strong>
+        <span>A cathedral-city drowned in a black sea. The windows are still lit.</span>
+        <span class="slice-hint">Tap again to come back</span>
+      </span>
+    </button>
+    <button type="button" class="slice" data-world="shore" aria-expanded="false" aria-label="Open The Far Shore">
+      <span class="seam" aria-hidden="true"></span>
+      <img src="art/far-shore.jpg" alt="A lone traveler on a grassy clifftop path above a calm alien sea, beneath a vast green ringed planet and a bright nebula sky" draggable="false">
+      <span class="slice-title">The Far Shore</span>
+      <span class="slice-cap">
+        <strong>The Far Shore</strong>
+        <span>A green world under a ringed giant, seen for the first time.</span>
+        <span class="slice-hint">Tap again to come back</span>
+      </span>
+    </button>
+  </div>
+
   <section>
     <p class="section-note">More worlds arrive as I make them.</p>
   </section>
@@ -83,48 +106,57 @@
 </footer>
 <script>
 (function () {
-  var band = document.getElementById('latent-band');
-  if (!band) return;
-  var slices = Array.prototype.slice.call(band.querySelectorAll('.slice'));
-  var openIdx = -1;
+  var bands = Array.prototype.slice.call(document.querySelectorAll('.latent-band'));
+  if (!bands.length) return;
   document.documentElement.classList.add('latent-live');
   // The opened band starts below the top bar; CSS needs the bar's real
   // height so the image is sized to the space under it, fully in view.
+  // One world can be open at a time across all bands: opening a world
+  // in another pair closes the current one first.
   var header = document.querySelector('.site-header');
+  var openBand = null, openIdx = -1;
   function setBar() {
     if (!header) return;
     var h = header.offsetHeight;
     document.documentElement.style.setProperty('--bar-h', h + 'px');
     document.documentElement.style.setProperty('--bar-half', (h / 2) + 'px');
   }
-  window.addEventListener('resize', function () { if (openIdx >= 0) setBar(); });
-  function toggle(idx) {
-    if (openIdx === idx) {
-      openIdx = -1;
-      band.classList.remove('open');
-      slices.forEach(function (s) { s.classList.remove('active'); s.setAttribute('aria-expanded', 'false'); });
-      document.documentElement.removeAttribute('data-world');
-      document.documentElement.classList.remove('world-lock');
-      document.documentElement.style.removeProperty('--bar-h');
-      document.documentElement.style.removeProperty('--bar-half');
-    } else {
-      setBar();
-      openIdx = idx;
-      band.classList.add('open');
-      slices.forEach(function (s, i) {
-        s.classList.toggle('active', i === idx);
-        s.setAttribute('aria-expanded', i === idx ? 'true' : 'false');
-      });
-      document.documentElement.setAttribute('data-world', slices[idx].getAttribute('data-world'));
-      document.documentElement.classList.add('world-lock');
-    }
+  window.addEventListener('resize', function () { if (openBand) setBar(); });
+  function closeOpen() {
+    if (!openBand) return;
+    var b = openBand;
+    openBand = null; openIdx = -1;
+    b.classList.remove('open');
+    Array.prototype.forEach.call(b.querySelectorAll('.slice'), function (s) {
+      s.classList.remove('active'); s.setAttribute('aria-expanded', 'false');
+    });
+    document.documentElement.removeAttribute('data-world');
+    document.documentElement.classList.remove('world-lock');
+    document.documentElement.style.removeProperty('--bar-h');
+    document.documentElement.style.removeProperty('--bar-half');
   }
-  slices.forEach(function (s, i) { s.addEventListener('click', function () { toggle(i); }); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && openIdx >= 0) toggle(openIdx); });
+  function toggle(band, slices, idx) {
+    if (openBand === band && openIdx === idx) { closeOpen(); return; }
+    closeOpen();
+    setBar();
+    openBand = band; openIdx = idx;
+    band.classList.add('open');
+    slices.forEach(function (s, i) {
+      s.classList.toggle('active', i === idx);
+      s.setAttribute('aria-expanded', i === idx ? 'true' : 'false');
+    });
+    document.documentElement.setAttribute('data-world', slices[idx].getAttribute('data-world'));
+    document.documentElement.classList.add('world-lock');
+  }
+  bands.forEach(function (band) {
+    var slices = Array.prototype.slice.call(band.querySelectorAll('.slice'));
+    slices.forEach(function (s, i) { s.addEventListener('click', function () { toggle(band, slices, i); }); });
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && openBand) closeOpen(); });
 })();
 </script>
 <script>
-(function () {
+function initDreamGL(band, canvas) {
   // Dreamscape liquid-dimensional seam v3: vanilla WebGL1 shader
   // displacement over the two artworks (research report:
   // research_notes/dreamscape-liquid-dimensional-ripple). DOM slices
@@ -141,6 +173,13 @@
   // queued instead of shifting the targets mid-motion (iOS URL
   // bar breathing was doing exactly that).
   //
+  // v4 (multi-band): the v3.1 engine, instantiated once per band so
+  // each pair of worlds gets its own seam, textures and render loop.
+  // Bands pause when off-screen (IntersectionObserver gate inside),
+  // so a second band costs nothing while it is out of view. The old
+  // page-global gl-on class is gone; the transition freeze is now
+  // scoped to each band's own gl-live class in CSS.
+  //
   // v3 mapping model -- per-world STAGES. v1/v2 cover-fit each
   // texture to the whole band and cut it at the seam, which framed
   // the closed split badly (subjects clipped by the frame edges)
@@ -152,8 +191,6 @@
   // split opens. Split and band aspect are both eased in JS on one
   // exponential clock (tau ~190ms, the research's interaction spec),
   // so framing and seam move as a single smooth motion.
-  var band = document.getElementById('latent-band');
-  var canvas = document.getElementById('dream-gl');
   if (!band || !canvas) return;
   var slices = band.querySelectorAll('.slice');
   if (slices.length !== 2) return;
@@ -531,7 +568,6 @@
     stopLoop();
     ready = false;
     band.classList.remove('gl-live');
-    document.documentElement.classList.remove('gl-on');
     canvas.style.opacity = '0';
   });
   canvas.addEventListener('webglcontextrestored', function () {
@@ -547,11 +583,13 @@
     // First successful frame drawn: reveal the canvas over the DOM.
     band.style.transform = '';
     band.classList.add('gl-live');
-    document.documentElement.classList.add('gl-on');
     canvas.style.opacity = '1';
     gate();
   }
-})();
+}
+document.querySelectorAll('.latent-band').forEach(function (band) {
+  initDreamGL(band, band.querySelector('canvas.dream-gl'));
+});
 
 </script>
 <script>
