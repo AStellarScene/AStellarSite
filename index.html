@@ -139,6 +139,7 @@
   var stars = [], sparkles = [], blobs = [], bursts = [], meteor = null;
   var nextMeteorAt = 5000 + Math.random() * 7000;
   var running = true, inView = true, raf = null, lastT = 0;
+  var lastScrollAt = -1e9, heroOffTop = 0, heroOffLeft = 0;
 
   // Pre-rendered glow sprites: drawImage of a sprite is cheap; per-frame
   // radial gradients and shadowBlur are not. That discipline is the point.
@@ -189,6 +190,8 @@
 
   function build() {
     var rect = hero.getBoundingClientRect();
+    heroOffTop = rect.top + window.scrollY;
+    heroOffLeft = rect.left + window.scrollX;
     W = Math.max(320, rect.width);
     H = Math.max(240, rect.height);
     pointer.x = pointer.sx = W / 2;
@@ -251,15 +254,22 @@
   function frame(t) {
     var dt = Math.min(50, t - lastT || 16);
     lastT = t;
+    // While a scroll is in flight, hold the current frame: the canvas
+    // sits inside the scrolling hero, so a frozen sky scrolls with the
+    // page on the compositor instead of fighting it for the main
+    // thread. Motion resumes as soon as scrolling settles.
+    if (running && t - lastScrollAt < 150) {
+      raf = requestAnimationFrame(frame);
+      return;
+    }
     ctx.clearRect(0, 0, W, H);
 
     // Pointer response: ease on a time constant, not per frame, so
     // 120Hz and 60Hz displays feel the same; and an influence value
     // fades the whole effect in and out, so entering or leaving the
     // hero never makes the field jump.
-    var heroRect = hero.getBoundingClientRect();
-    pointer.x = pointer.cx - heroRect.left;
-    pointer.y = pointer.cy - heroRect.top;
+    pointer.x = pointer.cx - (heroOffLeft - window.scrollX);
+    pointer.y = pointer.cy - (heroOffTop - window.scrollY);
     var kp = 1 - Math.exp(-dt / 80);
     pointer.sx += (pointer.x - pointer.sx) * kp;
     pointer.sy += (pointer.y - pointer.sy) * kp;
@@ -390,7 +400,8 @@
   }
 
   hero.addEventListener('pointermove', function (e) {
-    pointer.touch = e.pointerType === 'touch';
+    if (e.pointerType === 'touch') return;
+    pointer.touch = false;
     pointer.cx = e.clientX; pointer.cy = e.clientY;
     if (!pointer.active) {
       // Entering: seed the light at the cursor while its influence is
@@ -410,6 +421,7 @@
     burstAt(e.clientX - r.left, e.clientY - r.top);
   });
 
+  window.addEventListener('scroll', function () { lastScrollAt = performance.now(); }, { passive: true });
   var resizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
