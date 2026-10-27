@@ -149,7 +149,7 @@ home_body = """  <section class="hero">
       <article class="card">
         <p class="label card-label">Rotation</p>
         <p class="status">Now: In development</p>
-        <p>My five-day packed-lunch rotation, turned into a tool anyone can use. Pick the week's meals and get the grocery list, checked against what's already at home.</p>
+        <p>A five-day packed-lunch rotation, turned into a tool anyone can use. Pick the week's meals and get the grocery list, checked against what's already at home.</p>
         <p><a class="card-link" href="rotation.html">View project &#8599;</a></p>
       </article>
       <article class="card">
@@ -211,7 +211,7 @@ work_body = """  <section id="work">
       <article class="card">
         <p class="label card-label">Rotation</p>
         <p class="status">Now: In development</p>
-        <p>My five-day packed-lunch rotation, turned into a tool anyone can use. Pick the week's meals and get the grocery list, checked against what you already have at home.</p>
+        <p>A five-day packed-lunch rotation, turned into a tool anyone can use. Pick the week's meals and get the grocery list, checked against what you already have at home.</p>
         <p><a class="card-link" href="rotation.html">View project &#8599;</a></p>
       </article>
       <article class="card">
@@ -255,7 +255,7 @@ project("pace.html", "Pace", "In development",
      "Replans when a course slips, instead of pretending it didn't"])
 
 project("rotation.html", "Rotation", "In development",
-    ["My five-day packed-lunch rotation, turned into a tool anyone can use. I run this system every week; Rotation is the version that doesn't live in my head.",
+    ["A five-day packed-lunch rotation, turned into a tool anyone can use. It's the rotation I'm adopting myself; Rotation is the version that doesn't live in my head.",
      "Pick the week's meals and get the grocery list for them, checked against what you already have at home so you don't buy a second bag of rice."],
     ["A five-day lunch rotation you can change to your own meals",
      "Grocery list generated from the week's picks",
