@@ -858,127 +858,199 @@ LATENT_MAP_JS = r"""<script>
   var probeSprite = makeGlow([45, 212, 191]);
   var cometSprite = makeSpark([45, 212, 191]);
 
-  // The dynamic nebula (the demo's Improved recipe, dropped in as
-  // the site's fog): each region owns tinted copies of two seeded
-  // value-noise fields, colorized by value -- deep parts dim hue,
-  // body the hue itself, heart running hot toward white. Stamps of
-  // those fields ride the same wander current the points obey, so
-  // the gas is weather, drawn live, never a picture.
-  function makeField(seed) {
-    var S = 192, c = document.createElement('canvas'); c.width = c.height = S;
-    var g = c.getContext('2d');
-    var img = g.createImageData(S, S);
-    var gs = seed >>> 0;
-    function grnd() { gs = (gs * 1103515245 + 12345) & 0x7fffffff; return gs / 0x7fffffff; }
-    var oct = [];
-    [4, 8, 16, 32].forEach(function (n) {
-      var lat = [];
-      for (var i = 0; i < (n + 1) * (n + 1); i++) lat.push(grnd());
-      oct.push({ n: n, lat: lat });
+  // The dynamic nebula: the demo's Improved implementation, lifted
+  // whole. Shared periodic fbm + ridge fields are sampled as ALPHA
+  // MASKS and colorized by a three-stop palette per region (deep,
+  // anchor, hot). Density throws the field's bottom third away
+  // (smoothstep 0.36-0.80) -- that is where the contrast lives:
+  // transparent depths, structured bodies, hot filaments.
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function clampF(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function lerpF(a, b, t) { return a + (b - a) * t; }
+  function smoothstepF(a, b, x) { var t = clampF((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+  function paletteAt(pal, t) {
+    var c1 = t < 0.5 ? pal[0] : pal[1], c2 = t < 0.5 ? pal[1] : pal[2], u = t < 0.5 ? t * 2 : (t - 0.5) * 2;
+    return [lerpF(c1[0], c2[0], u), lerpF(c1[1], c2[1], u), lerpF(c1[2], c2[2], u)];
+  }
+  var PALS = {
+    photography: [[36, 84, 186], [34, 190, 205], [178, 246, 240]],
+    bookshelf: [[146, 62, 198], [216, 96, 158], [255, 198, 226]],
+    worlds: [[166, 34, 46], [228, 96, 52], [255, 216, 148]],
+    projects: [[216, 118, 36], [226, 182, 92], [255, 242, 198]]
+  };
+  var fbmField = null, ridgeField = null, distArr = null, angBinArr = null;
+  var improvedSprites = {}, filamentSprites = {}, dustFieldSprite = null, improvedReady = false;
+  function makePeriodicNoise(freq, seed) {
+    var r = mulberry32(seed), grid = [];
+    for (var i = 0; i < freq * freq; i++) grid.push(r());
+    return function (u, v) {
+      var x = u * freq, y = v * freq;
+      var x0 = Math.floor(x), y0 = Math.floor(y);
+      var fx = x - x0, fy = y - y0;
+      var sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+      function at(a, b) { return grid[(((b % freq) + freq) % freq) * freq + (((a % freq) + freq) % freq)]; }
+      return lerpF(lerpF(at(x0, y0), at(x0 + 1, y0), sx), lerpF(at(x0, y0 + 1), at(x0 + 1, y0 + 1), sx), sy);
+    };
+  }
+  function buildFields(size) {
+    var octF = [makePeriodicNoise(3, 11), makePeriodicNoise(6, 23), makePeriodicNoise(12, 37), makePeriodicNoise(24, 51)];
+    var octR = [makePeriodicNoise(3, 71), makePeriodicNoise(6, 83), makePeriodicNoise(12, 97)];
+    fbmField = new Float32Array(size * size); ridgeField = new Float32Array(size * size);
+    var gains = [1, 0.5, 0.25, 0.125], rGains = [1, 0.5, 0.25];
+    for (var y = 0; y < size; y++) for (var x = 0; x < size; x++) {
+      var u = x / size, v = y / size, f = 0, rg = 0, i;
+      for (i = 0; i < 4; i++) f += gains[i] * octF[i](u, v); f /= 1.875;
+      for (i = 0; i < 3; i++) { var n = octR[i](u, v); rg += rGains[i] * (1 - Math.abs(2 * n - 1)); } rg /= 1.75;
+      fbmField[y * size + x] = f; ridgeField[y * size + x] = rg;
+    }
+  }
+  function buildGeom(size) {
+    distArr = new Float32Array(size * size); angBinArr = new Uint16Array(size * size);
+    var half = size / 2;
+    for (var y = 0; y < size; y++) for (var x = 0; x < size; x++) {
+      var i = y * size + x, dx = (x - half) / half, dy = (y - half) / half;
+      distArr[i] = Math.sqrt(dx * dx + dy * dy);
+      angBinArr[i] = Math.floor((Math.atan2(dy, dx) + Math.PI) / (2 * Math.PI) * 719.99);
+    }
+  }
+  function edgeTable(ph1, ph2) {
+    var e = new Float32Array(720);
+    for (var b = 0; b < 720; b++) { var ang = b / 720 * 2 * Math.PI - Math.PI; e[b] = 0.86 + 0.16 * Math.sin(ang * 3 + ph1) + 0.12 * Math.sin(ang * 5 + ph2) + 0.08 * Math.sin(ang * 8 + ph1 * 2); }
+    return e;
+  }
+  function wrappedIdx(size, off) { var a = new Int32Array(size); for (var i = 0; i < size; i++) { var v = i + off; a[i] = v >= size ? v - size : (v < 0 ? v + size : v); } return a; }
+  function buildImprovedSprite(pal, fx, fy, spriteIdx, size) {
+    var c = document.createElement('canvas'); c.width = c.height = size; var g = c.getContext('2d');
+    var img = g.createImageData(size, size), d = img.data;
+    var ox = (spriteIdx * 67 + (pal[0][0] % 40)) % size, oy = (spriteIdx * 41 + 13) % size, ox2 = (ox * 2) % size;
+    var colIdx = wrappedIdx(size, ox), rowIdx = wrappedIdx(size, oy), colIdx2 = wrappedIdx(size, ox2);
+    var edge = edgeTable(spriteIdx * 1.93 + fx * 9, spriteIdx * 3.71 + fy * 7);
+    for (var y = 0; y < size; y++) {
+      var rowBase = rowIdx[y] * size, rowBaseSrc = y * size;
+      for (var x = 0; x < size; x++) {
+        var i = rowBaseSrc + x, pi = i * 4;
+        var v = fbmField[rowBase + colIdx[x]];
+        var rd = ridgeField[rowBase + colIdx2[x]];
+        var fall = smoothstepF(edge[angBinArr[i]], edge[angBinArr[i]] - 0.55, distArr[i]);
+        if (fall <= 0.001) { d[pi + 3] = 0; continue; }
+        var dens = smoothstepF(0.36, 0.80, v);
+        var alpha = clampF(dens * 1.15 - 0.08, 0, 1) * fall;
+        var fil = smoothstepF(0.72, 0.95, rd) * fall;
+        var t = clampF(dens + 0.35 * fil, 0, 1);
+        var col = paletteAt(pal, t);
+        alpha = clampF(alpha + fil * 0.25, 0, 1);
+        if (alpha <= 0.003) { d[pi + 3] = 0; continue; }
+        for (var ch = 0; ch < 3; ch++) {
+          var cv = col[ch]; var cf = Math.min(1, cv, 255 - cv); if (cf < 0) cf = 0;
+          d[pi + ch] = clampF(cv + (Math.random() + Math.random() - 1) * cf, 0, 255);
+        }
+        d[pi + 3] = alpha * 255;
+      }
+    }
+    g.putImageData(img, 0, 0); return c;
+  }
+  function buildFilamentSprite(pal, idx, size) {
+    var c = document.createElement('canvas'); c.width = c.height = size; var g = c.getContext('2d');
+    var img = g.createImageData(size, size), d = img.data;
+    var colIdx = wrappedIdx(size, (idx * 89 + 31) % size), rowIdx = wrappedIdx(size, (idx * 53 + 7) % size);
+    for (var y = 0; y < size; y++) {
+      var rowBase = rowIdx[y] * size, rowBaseSrc = y * size;
+      for (var x = 0; x < size; x++) {
+        var i = rowBaseSrc + x, pi = i * 4;
+        var rd = ridgeField[rowBase + colIdx[x]];
+        var fall = smoothstepF(1.0, 0.35, distArr[i]);
+        var a = smoothstepF(0.78, 0.97, rd) * fall;
+        if (a <= 0.01) { d[pi + 3] = 0; continue; }
+        var col = paletteAt(pal, 0.65 + 0.35 * a);
+        d[pi] = col[0]; d[pi + 1] = col[1]; d[pi + 2] = col[2]; d[pi + 3] = a * 255;
+      }
+    }
+    g.putImageData(img, 0, 0); return c;
+  }
+  function buildDustSprite(size) {
+    var c = document.createElement('canvas'); c.width = c.height = size; var g = c.getContext('2d');
+    var img = g.createImageData(size, size), d = img.data;
+    var colIdx = wrappedIdx(size, 120 % size), rowIdx = wrappedIdx(size, 45 % size);
+    for (var y = 0; y < size; y++) {
+      var rowBase = rowIdx[y] * size, rowBaseSrc = y * size;
+      for (var x = 0; x < size; x++) {
+        var i = rowBaseSrc + x, pi = i * 4;
+        var rd = ridgeField[rowBase + colIdx[x]];
+        var fall = smoothstepF(1.05, 0.3, distArr[i]);
+        var a = smoothstepF(0.74, 0.96, rd) * fall;
+        d[pi] = 255; d[pi + 1] = 255; d[pi + 2] = 255; d[pi + 3] = a * 255;
+      }
+    }
+    g.putImageData(img, 0, 0); return c;
+  }
+  function generateImproved() {
+    var size = 256;
+    buildFields(size); buildGeom(size);
+    var t0 = performance.now();
+    var probeSet = [];
+    for (var k = 0; k < 4; k++) probeSet.push(buildImprovedSprite(PALS.photography, 0.30, 0.44, k, size));
+    if ((performance.now() - t0) * 4.2 > 200) { size = 192; buildFields(size); buildGeom(size); probeSet = null; }
+    Object.keys(DATA.regions).forEach(function (k) {
+      var r = DATA.regions[k], pal = PALS[k], a = [], f = [];
+      for (var i2 = 0; i2 < 4; i2++) a.push(probeSet && k === 'photography' ? probeSet[i2] : buildImprovedSprite(pal, r.fx, r.fy, i2, size));
+      for (var j2 = 0; j2 < 2; j2++) f.push(buildFilamentSprite(pal, j2, size));
+      improvedSprites[k] = a; filamentSprites[k] = f;
     });
-    function noise(x, y) {
-      var v = 0, amp = 0.55, tot = 0;
-      for (var o = 0; o < oct.length; o++) {
-        var n = oct[o].n, lat = oct[o].lat;
-        var fx = x * n, fy = y * n;
-        var ix = Math.floor(fx), iy = Math.floor(fy);
-        var tx = fx - ix, ty = fy - iy;
-        var sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty);
-        var i00 = lat[iy * (n + 1) + ix], i10 = lat[iy * (n + 1) + ix + 1];
-        var i01 = lat[(iy + 1) * (n + 1) + ix], i11 = lat[(iy + 1) * (n + 1) + ix + 1];
-        v += ((i00 + (i10 - i00) * sx) + ((i01 + (i11 - i01) * sx) - (i00 + (i10 - i00) * sx)) * sy) * amp;
-        tot += amp; amp *= 0.55;
-      }
-      return v / tot;
-    }
-    for (var py = 0; py < S; py++) {
-      for (var px = 0; px < S; px++) {
-        var u = px / S, w = py / S;
-        var f = noise(u, w);
-        var r1 = 1 - Math.abs(noise(u + 0.37, w + 0.11) * 2 - 1);
-        var field = Math.max(0, Math.min(1, f * 0.78 + r1 * r1 * 0.34 - 0.08));
-        var du = u - 0.5, dv = w - 0.5;
-        var fall = Math.max(0, 1 - Math.sqrt(du * du + dv * dv) * 2);
-        fall = fall * fall * (3 - 2 * fall);
-        var idx = (py * S + px) * 4;
-        var gv = Math.round(255 * field * fall);
-        img.data[idx] = img.data[idx + 1] = img.data[idx + 2] = gv;
-        img.data[idx + 3] = 255;
-      }
-    }
-    g.putImageData(img, 0, 0);
-    return c;
+    dustFieldSprite = buildDustSprite(size);
+    improvedReady = true;
   }
-  function tintField(fieldCv, rgb) {
-    var S = fieldCv.width;
-    var c = document.createElement('canvas'); c.width = c.height = S;
-    var g = c.getContext('2d');
-    g.drawImage(fieldCv, 0, 0);
-    var img = g.getImageData(0, 0, S, S);
-    for (var q = 0; q < img.data.length; q += 4) {
-      var v = img.data[q] / 255;
-      var a = Math.max(0, Math.min(1, (v - 0.10) / 0.9));
-      a = Math.pow(a, 1.5);
-      var hot = Math.max(0, Math.min(1, (v - 0.58) / 0.42)) * 0.65;
-      img.data[q] = Math.round(rgb[0] + (255 - rgb[0]) * hot);
-      img.data[q + 1] = Math.round(rgb[1] + (255 - rgb[1]) * hot);
-      img.data[q + 2] = Math.round(rgb[2] + (255 - rgb[2]) * hot);
-      img.data[q + 3] = Math.round(255 * a);
-    }
-    g.putImageData(img, 0, 0);
-    return c;
+  // Living weather: 9 advecting stamps + 1 huge faint ambient wash
+  // per region. Centres ride the same wander current the points use,
+  // held by a soft home spring weak enough that border stamps stray
+  // into neighbouring hues -- screen overlaps mix the intermediate
+  // colours on their own. Homes themselves orbit slowly.
+  var fogStamps = {}, allStamps = [], fogTime = -1;
+  function buildFogStamps() {
+    fogStamps = {}; allStamps = [];
+    var r = mulberry32(2027);
+    Object.keys(DATA.regions).forEach(function (k) {
+      var arr = [];
+      arr.push({ key: k, wash: true, bx: (r() * 2 - 1) * 0.08, by: (r() * 2 - 1) * 0.08, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 2.9, alpha: 0.065, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * 0.0009, ph: r() * 6.283, sp: 0.4 + r() * 0.5, spr: 1, bright: 0, orbit: 14 });
+      for (var k2 = 0; k2 < 9; k2++) {
+        var ang = r() * 6.283, rad = Math.pow(r(), 0.65);
+        arr.push({ key: k, wash: false, bx: Math.cos(ang) * rad * 0.36, by: Math.sin(ang) * rad * 0.32, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 1.25 + r() * 0.75, alpha: 0.16 + r() * 0.10, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * (0.0006 + r() * 0.0012), ph: r() * 6.283, sp: 0.5 + r() * 0.7, spr: k2 % 4, bright: 0, orbit: 30 + r() * 110 });
+      }
+      fogStamps[k] = arr;
+      for (var j = 0; j < arr.length; j++) allStamps.push(arr[j]);
+    });
   }
-  var fogFields = [makeField(20261027), makeField(77031)];
-  var fogSprites = {};
-  Object.keys(DATA.regions).forEach(function (k) {
-    fogSprites[k] = [tintField(fogFields[0], DATA.regions[k].rgb),
-                     tintField(fogFields[1], DATA.regions[k].rgb)];
-  });
-  // A soft dark ribbon sprite for the dust lanes.
-  var dustSprite = (function () {
-    var c = document.createElement('canvas'); c.width = 256; c.height = 128;
-    var g = c.getContext('2d');
-    g.translate(128, 64); g.scale(128, 64);
-    var grad = g.createRadialGradient(0, 0, 0, 0, 0, 1);
-    grad.addColorStop(0, 'rgba(2,2,7,0.9)');
-    grad.addColorStop(0.55, 'rgba(2,2,7,0.4)');
-    grad.addColorStop(1, 'rgba(2,2,7,0)');
-    g.fillStyle = grad;
-    g.beginPath(); g.arc(0, 0, 1, 0, Math.PI * 2); g.fill();
-    return c;
-  })();
-  // Stamp physics: advect on the wander field under a soft home
-  // spring; the probe stirs and lifts the gas it passes through;
-  // shockwaves shove stamps with the points' own band math.
-  function stampStep(s, t) {
-    var r = DATA.regions[s.region];
-    var hx = r.cx + s.hx * W, hy = r.cy + s.hy * H;
-    if (!s.x) { s.x = hx; s.y = hy; }
-    var ang = Math.sin(s.x * 0.0016 + t * 0.21) * 1.7 + Math.cos(s.y * 0.0019 - t * 0.17) * 1.7
-            + Math.sin((s.x + s.y) * 0.0006 + t * 0.07) * 0.9;
-    s.vx += Math.cos(ang) * 0.006 + (hx - s.x) * 0.0009;
-    s.vy += Math.sin(ang) * 0.006 + (hy - s.y) * 0.0009;
-    var pdx = s.x - probe.x, pdy = s.y - probe.y;
-    var pd = Math.sqrt(pdx * pdx + pdy * pdy);
-    s.lift = 0;
-    if (probe.active && pd < 220 && pd > 4) {
-      var pf = (1 - pd / 220);
-      s.lift = pf;
-      s.vx += probeVx * pf * 0.014 + (pdx / pd) * pf * 0.03;
-      s.vy += probeVy * pf * 0.014 + (pdy / pd) * pf * 0.03;
-    }
-    for (var b = 0; b < bursts.length; b++) {
-      var bu = bursts[b];
-      var bdx = s.x - bu.x, bdy = s.y - bu.y, bd = Math.sqrt(bdx * bdx + bdy * bdy) || 1;
-      var band = Math.abs(bd - bu.r);
-      if (band < 46 && bd > 4) {
-        var push = (1 - band / 46) * 0.22 * bu.a;
-        s.vx += (bdx / bd) * push; s.vy += (bdy / bd) * push;
+  function stepFogStamps(dt, tSec) {
+    if (!allStamps.length) return;
+    if (fogTime < 0) fogTime = tSec; else fogTime += dt;
+    var minWH = Math.min(W, H), f60 = dt * 60;
+    for (var si = 0; si < allStamps.length; si++) {
+      var s = allStamps[si], reg = DATA.regions[s.key];
+      var hx = reg.cx + s.bx * minWH + Math.sin(fogTime * 0.017 * s.sp + s.ph) * s.orbit;
+      var hy = reg.cy + s.by * minWH + Math.cos(fogTime * 0.013 * s.sp + s.ph * 1.3) * s.orbit * 0.8;
+      if (s.x < 0) { s.x = hx; s.y = hy; }
+      if (dt > 0) {
+        var ang = Math.sin(s.x * 0.0016 + fogTime * 0.21) * 1.7 + Math.cos(s.y * 0.0019 - fogTime * 0.17) * 1.7 + Math.sin((s.x + s.y) * 0.0006 + fogTime * 0.07) * 0.9;
+        var adv = s.wash ? 0.004 : 0.009;
+        s.vx += Math.cos(ang) * adv * f60; s.vy += Math.sin(ang) * adv * f60;
+        s.vx += (hx - s.x) * 0.00015 * f60; s.vy += (hy - s.y) * 0.00015 * f60;
+        var dampF2 = Math.pow(0.95, f60);
+        s.vx *= dampF2; s.vy *= dampF2;
+        s.x += s.vx * f60 + s.wx * f60; s.y += s.vy * f60 + s.wy * f60;
+        var wakeDamp = Math.pow(0.955, f60);
+        s.wx *= wakeDamp; s.wy *= wakeDamp;
+        s.rot += s.rotV * dt;
+        var bTarget = 0;
+        if (probe.active && probe.x > -500) {
+          var pdx = s.x - probe.x, pdy = s.y - probe.y, pd2 = Math.sqrt(pdx * pdx + pdy * pdy);
+          if (pd2 < 200) {
+            var fall = 1 - pd2 / 200;
+            s.wx += probeVx * 60 * dt * fall * 0.5; s.wy += probeVy * 60 * dt * fall * 0.5;
+            bTarget = fall;
+          }
+        }
+        s.bright += (bTarget - s.bright) * Math.min(1, dt * (bTarget > s.bright ? 6 : 2));
       }
     }
-    s.vx *= 0.94; s.vy *= 0.94;
-    s.x += s.vx; s.y += s.vy;
-    s.rot += s.vr;
   }
 
   // Living grain: four noise tiles cycled at 1:1 -- the researched
@@ -1022,38 +1094,8 @@ LATENT_MAP_JS = r"""<script>
     list.forEach(function (p) { r[0] += p.rgb[0]; r[1] += p.rgb[1]; r[2] += p.rgb[2]; });
     DATA.regions[k].rgb = [Math.round(r[0] / list.length), Math.round(r[1] / list.length), Math.round(r[2] / list.length)];
   });
-  // Fog stamps: nine per region plus one wide ambient wash. Homes
-  // ring the region centre -- a few sit near the borders, so when
-  // the current carries them across, neighbouring hues mix.
-  var stamps = [];
-  var dusts = [];
-  (function () {
-    var ss = 4451;
-    function srnd() { ss = (ss * 1103515245 + 12345) & 0x7fffffff; return ss / 0x7fffffff; }
-    Object.keys(DATA.regions).forEach(function (k, ri) {
-      for (var si2 = 0; si2 < 9; si2++) {
-        var ang = (si2 / 9) * Math.PI * 2 + ri * 1.3 + (srnd() - 0.5) * 0.7;
-        var rad = si2 === 0 ? 0 : 0.10 + srnd() * 0.20;
-        stamps.push({
-          region: k, spr: fogSprites[k][si2 % 2], flip: si2 % 3 === 0,
-          hx: Math.cos(ang) * rad, hy: Math.sin(ang) * rad * 0.8,
-          x: 0, y: 0, vx: 0, vy: 0, lift: 0,
-          sc: si2 === 0 ? 1.15 : 0.8 + srnd() * 1.1,
-          a: si2 === 0 ? 0.24 : 0.13 + srnd() * 0.09,
-          rot: srnd() * Math.PI * 2, vr: (srnd() - 0.5) * 0.0022,
-          ph: srnd() * Math.PI * 2
-        });
-      }
-      stamps.push({ region: k, spr: fogSprites[k][0], flip: false, hx: 0, hy: 0,
-                    x: 0, y: 0, vx: 0, vy: 0, lift: 0, sc: 2.6, a: 0.05,
-                    rot: 0, vr: 0.0006, ph: ri * 2.1 });
-    });
-    for (var di = 0; di < 7; di++) {
-      dusts.push({ hx: srnd(), hy: 0.12 + srnd() * 0.76, w: 0.5 + srnd() * 0.45,
-                   h: 0.10 + srnd() * 0.10, rot: (srnd() - 0.5) * 1.2,
-                   sp: 0.0016 + srnd() * 0.002, a: 0.30 + srnd() * 0.25, ph: srnd() * 9 });
-    }
-  })();
+  generateImproved();
+  buildFogStamps();
 
   var filler = [];
   var seed = 987654321;
@@ -1381,33 +1423,65 @@ LATENT_MAP_JS = r"""<script>
 
     // The nebula itself never fades: stars, fog, dust stay alive behind
     // the glass for the whole page.
-    // The dynamic nebula, live: stamps in screen blend (overlaps
-    // mix hues where regions meet), then the dust lanes over them.
-    ctx.globalCompositeOperation = 'screen';
-    stamps.forEach(function (s) {
-      stampStep(s, t);
-      var ws = Math.max(W, H) * s.sc * (1 + 0.06 * Math.sin(t * 0.13 + s.ph));
-      ctx.save();
-      ctx.translate(s.x, s.y);
-      ctx.rotate(s.rot);
-      if (s.flip) ctx.scale(-1, 1);
-      ctx.globalAlpha = Math.min(1, s.a * (1 + (s.lift || 0) * 0.7));
-      ctx.drawImage(s.spr, -ws / 2, -ws / 2, ws, ws);
-      ctx.restore();
-    });
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
-    dusts.forEach(function (d) {
-      var dxp = ((((d.hx + t * d.sp) % 1) + 1) % 1) * W;
-      var dyp = d.hy * H + Math.sin(t * 0.05 + d.ph) * 10;
-      ctx.save();
-      ctx.translate(dxp, dyp);
-      ctx.rotate(d.rot);
-      ctx.globalAlpha = d.a * 0.4;
-      ctx.drawImage(dustSprite, -d.w * W / 2, -d.h * H / 2, d.w * W, d.h * H);
-      ctx.restore();
-    });
-    ctx.globalAlpha = 1;
+    // The dynamic nebula, live (the demo's Improved draw): stamps
+    // in screen blend, filaments and a 'lighter' hot core per
+    // region, then dust lanes carved with destination-out.
+    if (improvedReady) {
+      var tt = t * 1000;
+      var dtF = Math.min(0.05, Math.max(0.001, t - (stepFogStamps._lt === undefined ? t - 1 / 60 : stepFogStamps._lt)));
+      stepFogStamps._lt = t;
+      stepFogStamps(dtF, t);
+      var minWH = Math.min(W, H), R = minWH * 0.60, regionSize = minWH * 0.52;
+      ctx.globalCompositeOperation = 'screen';
+      regionKeys.forEach(function (k, ridx) {
+        var r = DATA.regions[k], cx = r.cx, cy = r.cy;
+        var arr = fogStamps[k] || [];
+        for (var k3 = 0; k3 < arr.length; k3++) {
+          var s = arr[k3];
+          if (s.x < 0) continue;
+          var breathe = Math.sin(tt * 0.00045 * s.sp + s.ph);
+          var size2 = R * s.sizeMul * (1 + 0.06 * breathe);
+          var spr = improvedSprites[k][s.spr % improvedSprites[k].length];
+          ctx.save();
+          ctx.globalAlpha = clampF(s.alpha * (1 + 0.18 * breathe) + 0.11 * s.bright, 0, 0.52);
+          ctx.translate(s.x, s.y);
+          ctx.rotate(s.rot);
+          ctx.scale(1, 0.75 + 0.25 * Math.sin(s.ph));
+          ctx.drawImage(spr, -size2 / 2, -size2 / 2, size2, size2);
+          ctx.restore();
+        }
+        for (var f = 0; f < 2; f++) {
+          var fs = filamentSprites[k][f];
+          var fsize = regionSize * (1.05 + f * 0.2) * (1 + 0.04 * Math.sin(tt * 0.0004 + f * 2 + ridx));
+          ctx.save(); ctx.globalAlpha = 0.13 + 0.03 * Math.sin(tt * 0.0005 + f + ridx * 2);
+          ctx.translate(cx + Math.sin(tt * 0.0001 + f * 3 + ridx) * 16, cy + Math.cos(tt * 0.00009 + f * 2) * 12);
+          ctx.rotate(f * 1.7 + ridx + tt * 0.000015); ctx.scale(1, 0.42);
+          ctx.drawImage(fs, -fsize / 2, -fsize / 2, fsize, fsize); ctx.restore();
+        }
+        ctx.globalCompositeOperation = 'lighter';
+        var core = improvedSprites[k][0];
+        var cs = regionSize * 0.42 * (1 + 0.05 * Math.sin(tt * 0.0006 + ridx * 2));
+        ctx.save(); ctx.globalAlpha = 0.42;
+        ctx.translate(cx, cy); ctx.drawImage(core, -cs / 2, -cs / 2, cs, cs); ctx.restore();
+        ctx.globalCompositeOperation = 'screen';
+      });
+      ctx.globalCompositeOperation = 'destination-out';
+      var lanes = [
+        { x: 0.50 * W, y: 0.55 * H, s: R * 2.4, rot: 0.7, a: 0.68, ph: 0.0 },
+        { x: DATA.regions.photography.cx, y: DATA.regions.photography.cy, s: R * 1.7, rot: 2.2, a: 0.55, ph: 1.7 },
+        { x: 0.52 * W, y: 0.18 * H, s: R * 1.9, rot: 1.4, a: 0.5, ph: 3.1 },
+        { x: DATA.regions.projects.cx, y: DATA.regions.projects.cy, s: R * 1.5, rot: 0.2, a: 0.48, ph: 4.4 },
+        { x: 0.60 * W, y: 0.62 * H, s: R * 2.0, rot: 1.05, a: 0.52, ph: 5.6 }
+      ];
+      lanes.forEach(function (L) {
+        var lx = L.x + Math.sin(tt * 0.00007 + L.ph) * 20;
+        var ly = L.y + Math.cos(tt * 0.00006 + L.ph) * 14;
+        ctx.save(); ctx.globalAlpha = L.a;
+        ctx.translate(lx, ly); ctx.rotate(L.rot + Math.sin(tt * 0.00005 + L.ph) * 0.08); ctx.scale(1, 0.45);
+        ctx.drawImage(dustFieldSprite, -L.s / 2, -L.s / 2, L.s, L.s); ctx.restore();
+      });
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    }
       // The probe's wake: light dragged through the gas, decaying
       // along the trail the probe leaves behind it.
       ctx.globalCompositeOperation = 'lighter';
