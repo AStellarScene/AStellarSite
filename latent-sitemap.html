@@ -158,40 +158,50 @@
     g.fillStyle = grad; g.fillRect(0, 0, 64, 64);
     return c;
   }
-  function makeFog(rgb) {
-    var c = document.createElement('canvas'); c.width = c.height = 256;
+  function makeFog(rgb, seed) {
+    // One smooth cloud field, baked once at 512px. Smoothness is
+    // structural, not a filter: many large soft blobs average the
+    // lumps away, two downscale round trips melt what's left, and
+    // a whisper of baked monochrome grain keeps the shallow
+    // gradients from stepping into bands on screen. All of it
+    // happens here, at init -- the per-frame draw is untouched.
+    var S = 512, C = S / 2;
+    var c = document.createElement('canvas'); c.width = c.height = S;
     var g = c.getContext('2d');
     g.globalCompositeOperation = 'lighter';
-    var fs = 13579;
+    var fs = 13579 + (seed || 0) * 7919;
     function frnd() { fs = (fs * 1103515245 + 12345) & 0x7fffffff; return fs / 0x7fffffff; }
-    for (var i = 0; i < 16; i++) {
-      var bx = 128 + (frnd() - 0.5) * 130, by = 128 + (frnd() - 0.5) * 130;
-      var br = 34 + frnd() * 62;
+    for (var i = 0; i < 44; i++) {
+      var bx = C + (frnd() + frnd() - 1) * 165, by = C + (frnd() + frnd() - 1) * 165;
+      var br = 80 + frnd() * 130;
       var grad = g.createRadialGradient(bx, by, 0, bx, by, br);
-      grad.addColorStop(0, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + (0.028 + frnd() * 0.055).toFixed(3) + ')');
+      grad.addColorStop(0, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + (0.016 + frnd() * 0.034).toFixed(3) + ')');
       grad.addColorStop(1, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0)');
       g.fillStyle = grad;
       g.beginPath(); g.arc(bx, by, br, 0, Math.PI * 2); g.fill();
     }
     g.globalCompositeOperation = 'destination-in';
-    var mask = g.createRadialGradient(128, 128, 40, 128, 128, 128);
+    var mask = g.createRadialGradient(C, C, 80, C, C, C);
     mask.addColorStop(0, 'rgba(0,0,0,1)');
     mask.addColorStop(0.7, 'rgba(0,0,0,0.75)');
     mask.addColorStop(1, 'rgba(0,0,0,0)');
-    g.fillStyle = mask; g.fillRect(0, 0, 256, 256);
-    // Smooth the cloud (downscale round trip), then bake in a whisper of
-    // monochrome dither: together they keep the fog from lumping or
-    // banding into stripes on 1x displays.
-    var small = document.createElement('canvas'); small.width = small.height = 56;
+    g.fillStyle = mask; g.fillRect(0, 0, S, S);
+    // Melt: two downscale round trips strip the mid-frequency
+    // structure that read as quilting, keeping the broad shape.
+    var small = document.createElement('canvas'); small.width = small.height = 160;
     var sg = small.getContext('2d');
-    sg.drawImage(c, 0, 0, 56, 56);
-    g.globalCompositeOperation = 'source-over';
-    g.clearRect(0, 0, 256, 256);
-    g.drawImage(small, 0, 0, 256, 256);
-    var imgData = g.getImageData(0, 0, 256, 256);
+    for (var pass = 0; pass < 2; pass++) {
+      sg.clearRect(0, 0, 160, 160);
+      sg.drawImage(c, 0, 0, 160, 160);
+      g.globalCompositeOperation = 'source-over';
+      g.clearRect(0, 0, S, S);
+      g.drawImage(small, 0, 0, S, S);
+    }
+    // Baked grain: triangular noise, gentler where the fog is thin.
+    var imgData = g.getImageData(0, 0, S, S);
     var px = imgData.data;
     for (var q = 0; q < px.length; q += 4) {
-      var nz = (Math.random() + Math.random() - 1) * 2.4;
+      var nz = (Math.random() + Math.random() - 1) * 5.5 * (0.3 + 0.7 * (px[q + 3] / 255));
       px[q] += nz; px[q + 1] += nz; px[q + 2] += nz;
     }
     g.putImageData(imgData, 0, 0);
@@ -243,10 +253,14 @@
   });
   var fogs = [];
   regionKeys.forEach(function (k, i) {
-    var spr = makeFog(DATA.regions[k].rgb);
-    fogs.push({ sprite: spr, ph: i * 2.1 + 0.7, sp: 0.05 + i * 0.013, region: k, ox: -0.1, oy: 0.03, sc: 0.8 });
-    fogs.push({ sprite: spr, ph: i * 2.1 + 2.6, sp: 0.041 + i * 0.011, region: k, ox: 0.09, oy: -0.04, sc: 0.58 });
-    fogs.push({ sprite: spr, ph: i * 2.1 + 4.4, sp: 0.033 + i * 0.009, region: k, ox: 0.01, oy: 0.09, sc: 0.42 });
+    // Three DISTINCT clouds per region: reusing one sprite at three
+    // scales repeated the same lumps, which read as quilting.
+    var sprA = makeFog(DATA.regions[k].rgb, i * 3 + 1);
+    var sprB = makeFog(DATA.regions[k].rgb, i * 3 + 2);
+    var sprC = makeFog(DATA.regions[k].rgb, i * 3 + 3);
+    fogs.push({ sprite: sprA, ph: i * 2.1 + 0.7, sp: 0.05 + i * 0.013, region: k, ox: -0.1, oy: 0.03, sc: 0.8 });
+    fogs.push({ sprite: sprB, ph: i * 2.1 + 2.6, sp: 0.041 + i * 0.011, region: k, ox: 0.09, oy: -0.04, sc: 0.58 });
+    fogs.push({ sprite: sprC, ph: i * 2.1 + 4.4, sp: 0.033 + i * 0.009, region: k, ox: 0.01, oy: 0.09, sc: 0.42 });
   });
 
   var filler = [];
