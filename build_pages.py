@@ -35,11 +35,11 @@ HEAD = """<!DOCTYPE html>
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="{url}">
-<meta property="og:image" content="https://astellar.site/art/obsidian-dragon.jpg">
+<meta property="og:image" content="https://adamlaloge.com/art/obsidian-dragon.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{title}">
 <meta name="twitter:description" content="{desc}">
-<meta name="twitter:image" content="https://astellar.site/art/obsidian-dragon.jpg">
+<meta name="twitter:image" content="https://adamlaloge.com/art/obsidian-dragon.jpg">
 <meta name="theme-color" content="#070b16">
 {schema}<link rel="stylesheet" href="styles.css?v=58">
 </head>
@@ -95,7 +95,7 @@ NAV_JS = """<script>
 """
 
 def page(fname, title, desc, active, body, extra_js="", schema=""):
-    url = "https://astellar.site/" + ("" if fname == "index.html" else fname)
+    url = "https://adamlaloge.com/" + ("" if fname == "index.html" else fname)
     html = (HEAD.format(title=title, desc=desc, url=url, schema=schema) + header(active)
             + '\n<main class="wrap">\n' + body + '\n</main>\n' + FOOTER
             + extra_js + NAV_JS + "\n</body>\n</html>\n")
@@ -105,7 +105,7 @@ def page(fname, title, desc, active, body, extra_js="", schema=""):
 DESC = "Personal site of Adam Laloge: software projects, photography, and what I'm building lately."
 
 PERSON_LD = """<script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Person", "name": "Adam Laloge", "url": "https://astellar.site/", "image": "https://astellar.site/art/obsidian-dragon.jpg", "email": "mailto:hello@adamlaloge.com", "jobTitle": "Engineering Test Technician", "worksFor": {"@type": "Organization", "name": "Baxter International"}, "sameAs": ["https://github.com/AStellarScene"]}
+{"@context": "https://schema.org", "@type": "Person", "name": "Adam Laloge", "url": "https://adamlaloge.com/", "image": "https://adamlaloge.com/art/obsidian-dragon.jpg", "email": "mailto:hello@adamlaloge.com", "jobTitle": "Engineering Test Technician", "worksFor": {"@type": "Organization", "name": "Baxter International"}, "sameAs": ["https://github.com/AStellarScene"]}
 </script>
 """
 
