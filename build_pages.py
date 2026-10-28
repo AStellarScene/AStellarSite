@@ -465,6 +465,7 @@ latent_js = "<script>\n" + r'''(function () {
     'precision mediump float;',
     'varying vec2 vUv;',
     'uniform sampler2D uAtlas;',
+    'uniform vec2 uAtlasSize;',
     'uniform float uTime;',
     'uniform float uBand;',
     'uniform float uQA;', // quilt aspect (width / height, CSS px)
@@ -474,6 +475,9 @@ latent_js = "<script>\n" + r'''(function () {
     'uniform float uTA[' + MAXC + '];', // texture aspect per cell
     'uniform vec4 uNbr[' + MAXC + '];', // neighbour cell index per side (L, R, T, B), -1 none
     'uniform vec4 uAct[' + MAXC + '];', // seam activity per side (L, R, T, B)
+    'uniform vec4 uPhase[' + MAXC + '];', // per-edge wave phase per side -- an edge property,
+    'uniform vec4 uTempo[' + MAXC + '];', // per-edge tempo per side -- identical from both
+    'uniform vec4 uAmp[' + MAXC + '];', // per-edge amplitude per side -- sides or seams tear
     'vec2 coverUv(vec2 local, float ta, float va){',
     '  vec2 f = vec2(0.5, 0.68);',
     '  float r = va / ta;',
@@ -482,19 +486,38 @@ latent_js = "<script>\n" + r'''(function () {
     '  else { u = vec2(f.x * (1.0 - r) + local.x * r, local.y); }',
     '  return f + (u - f) / 1.15;',
     '}',
-    'float wave(float s, float t){',
-    '  return 0.011 * sin(6.9 * s - t * 0.70)',
-    '       + 0.006 * sin(13.7 * s + t * 0.42 + 1.7)',
-    '       + 0.0025 * sin(27.0 * s - t * 0.24 + 4.1);',
+    // Per-cell CLAMP_TO_EDGE inside the atlas. v3/v4 gave each world
+    // its own texture, so samples pushed past the edge by the wave,
+    // drift or refraction clamped to the world's edge pixels -- that
+    // clamp IS the melt. In the atlas, past a cell's sub-rect lies
+    // empty padding (black), which showed as a dark band at every
+    // seam. Clamping the final sample to the sub-rect restores it.
+    'vec3 sampleCell(vec2 uv, vec4 rect){',
+    '  vec2 suv = uv * rect.xy + rect.zw;',
+    '  vec2 pad = vec2(0.6) / uAtlasSize;',
+    '  suv = clamp(suv, rect.zw + pad, rect.zw + rect.xy - pad);',
+    '  return texture2D(uAtlas, suv).rgb;',
     '}',
-    'float slope(float s, float t){',
-    '  return 0.011 * 6.9 * cos(6.9 * s - t * 0.70)',
-    '       + 0.006 * 13.7 * cos(13.7 * s + t * 0.42 + 1.7)',
-    '       + 0.0025 * 27.0 * cos(27.0 * s - t * 0.24 + 4.1);',
+    // The v3 waveform, unchanged -- but each edge runs it with its own
+    // phase and tempo, so the seams no longer crest in lockstep. The
+    // parameters belong to the EDGE (the unordered pair of cells), so
+    // both sides compute the identical line and the seam cannot tear.
+    'float waveP(float s, float t, float ph, float tm){',
+    '  float tt = t * tm;',
+    '  return 0.011 * sin(6.9 * s - tt * 0.70 + ph)',
+    '       + 0.006 * sin(13.7 * s + tt * 0.42 + 1.7 + ph)',
+    '       + 0.0025 * sin(27.0 * s - tt * 0.24 + 4.1 + ph);',
+    '}',
+    'float slopeP(float s, float t, float ph, float tm){',
+    '  float tt = t * tm;',
+    '  return 0.011 * 6.9 * cos(6.9 * s - tt * 0.70 + ph)',
+    '       + 0.006 * 13.7 * cos(13.7 * s + tt * 0.42 + 1.7 + ph)',
+    '       + 0.0025 * 27.0 * cos(27.0 * s - tt * 0.24 + 4.1 + ph);',
     '}',
     'vec2 driftFor(float idx, float t){',
-    '  if (mod(idx, 2.0) < 0.5) return vec2(sin(t * 0.33), sin(t * 0.23 + 1.3)) * 0.020;',
-    '  return vec2(sin(t * 0.19 + 2.1), sin(t * 0.27 + 0.4)) * 0.012;',
+    '  float ph = idx * 1.93;', // per-world phase: diagonal twins no longer drift together
+    '  if (mod(idx, 2.0) < 0.5) return vec2(sin(t * 0.33 + ph), sin(t * 0.23 + 1.3 + ph)) * 0.020;',
+    '  return vec2(sin(t * 0.19 + 2.1 + ph), sin(t * 0.27 + 0.4 + ph)) * 0.012;',
     '}',
     'void main(){',
     '  vec2 p = vec2(vUv.x, 1.0 - vUv.y);', // page space: y down
@@ -502,11 +525,13 @@ latent_js = "<script>\n" + r'''(function () {
     '  int ci = -1;',
     '  vec4 cr = vec4(0.0); vec4 cuv = vec4(0.0); float cta = 1.0;',
     '  vec4 nbr = vec4(-1.0); vec4 act4 = vec4(0.0);',
+    '  vec4 phT = vec4(0.0); vec4 tmT = vec4(1.0); vec4 amT = vec4(1.0);',
     '  for (int i = 0; i < ' + MAXC + '; i++) {',
     '    if (float(i) >= uCount) break;',
     '    vec4 r = uRect[i];',
     '    if (p.x >= r.x && p.x <= r.z && p.y >= r.y && p.y <= r.w) {',
     '      ci = i; cr = r; cuv = uUVR[i]; cta = uTA[i]; nbr = uNbr[i]; act4 = uAct[i];',
+    '      phT = uPhase[i]; tmT = uTempo[i]; amT = uAmp[i];',
     '    }',
     '  }',
     '  if (ci < 0) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }',
@@ -525,13 +550,13 @@ latent_js = "<script>\n" + r'''(function () {
   // Geometry mirrors v3: for a vertical seam the wave runs on uv.y
   // (GL-up, hence 1.0 - p.y), for a horizontal seam on uv.x.
   var GEO = [
-    { pre: 'lnS = cr.x + wave(1.0 - p.y, t) * actS; dS = p.x - lnS; slS = slope(1.0 - p.y, t);',
+    { pre: 'lnS = cr.x + waveP(1.0 - p.y, t, phS, tmS) * actS * amS; dS = p.x - lnS; slS = slopeP(1.0 - p.y, t, phS, tmS) * amS;',
       post: 'rfS = vec2(-slS * 0.012 * bFS, 0.0);' },
-    { pre: 'lnS = cr.z + wave(1.0 - p.y, t) * actS; dS = lnS - p.x; slS = slope(1.0 - p.y, t);',
+    { pre: 'lnS = cr.z + waveP(1.0 - p.y, t, phS, tmS) * actS * amS; dS = lnS - p.x; slS = slopeP(1.0 - p.y, t, phS, tmS) * amS;',
       post: 'rfS = vec2(slS * 0.012 * bFS, 0.0);' },
-    { pre: 'lnS = cr.y + wave(p.x, t) * actS; dS = p.y - lnS; slS = slope(p.x, t);',
+    { pre: 'lnS = cr.y + waveP(p.x, t, phS, tmS) * actS * amS; dS = p.y - lnS; slS = slopeP(p.x, t, phS, tmS) * amS;',
       post: 'rfS = vec2(0.0, slS * 0.012 * bFS);' },
-    { pre: 'lnS = cr.w + wave(p.x, t) * actS; dS = lnS - p.y; slS = slope(p.x, t);',
+    { pre: 'lnS = cr.w + waveP(p.x, t, phS, tmS) * actS * amS; dS = lnS - p.y; slS = slopeP(p.x, t, phS, tmS) * amS;',
       post: 'rfS = vec2(0.0, -slS * 0.012 * bFS);' }
   ];
   function subS(str, s) { return str.split('S').join(String(s)); }
@@ -539,6 +564,9 @@ latent_js = "<script>\n" + r'''(function () {
     F.push(
       '  float nj' + s + ' = nbr.' + COMP[s] + ';',
       '  float act' + s + ' = act4.' + COMP[s] + ';',
+      '  float ph' + s + ' = phT.' + COMP[s] + ';',
+      '  float tm' + s + ' = tmT.' + COMP[s] + ';',
+      '  float am' + s + ' = amT.' + COMP[s] + ';',
       '  vec4 nr' + s + ' = vec4(0.0); vec4 nuv' + s + ' = vec4(0.0); float nta' + s + ' = 1.0; float has' + s + ' = 0.0;',
       '  for (int j = 0; j < ' + MAXC + '; j++) {',
       '    if (float(j) >= uCount) break;',
@@ -557,7 +585,7 @@ latent_js = "<script>\n" + r'''(function () {
     '  vec2 drift = driftFor(float(ci), t);',
     '  float va = cellSize.x * uQA / cellSize.y;',
     '  vec2 ouv = coverUv(local, cta, va) + drift + refrSum * breathe;',
-    '  vec3 col = texture2D(uAtlas, ouv * cuv.xy + cuv.zw).rgb;'
+    '  vec3 col = sampleCell(ouv, cuv);'
   );
   for (var s2 = 0; s2 < 4; s2++) {
     F.push(
@@ -566,7 +594,7 @@ latent_js = "<script>\n" + r'''(function () {
       '    vec2 nl' + s2 + ' = vec2((p.x - nr' + s2 + '.x) / nsz' + s2 + '.x, 1.0 - (p.y - nr' + s2 + '.y) / nsz' + s2 + '.y);',
       '    float nva' + s2 + ' = nsz' + s2 + '.x * uQA / nsz' + s2 + '.y;',
       '    vec2 nuv2_' + s2 + ' = coverUv(nl' + s2 + ', nta' + s2 + ', nva' + s2 + ') + driftFor(nj' + s2 + ', t) + rf' + s2 + ' * 1.6 * breathe;',
-      '    vec3 ncol' + s2 + ' = texture2D(uAtlas, nuv2_' + s2 + ' * nuv' + s2 + '.xy + nuv' + s2 + '.zw).rgb;',
+      '    vec3 ncol' + s2 + ' = sampleCell(nuv2_' + s2 + ', nuv' + s2 + ');',
       '    col = mix(ncol' + s2 + ', col, smoothstep(-0.0015, 0.0015, d' + s2 + '));',
       '    col += clamp(sl' + s2 + ', -1.0, 1.0) * bF' + s2 + ' * 0.13;',
       '    col += exp(-abs(d' + s2 + ') * 220.0) * 0.08 * act' + s2 + ';',
@@ -599,7 +627,7 @@ latent_js = "<script>\n" + r'''(function () {
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   var U = {};
-  ['uAtlas', 'uTime', 'uBand', 'uQA', 'uCount'].forEach(function (name) {
+  ['uAtlas', 'uAtlasSize', 'uTime', 'uBand', 'uQA', 'uCount'].forEach(function (name) {
     U[name] = gl.getUniformLocation(prog, name);
   });
   U.uRect = gl.getUniformLocation(prog, 'uRect[0]');
@@ -607,6 +635,9 @@ latent_js = "<script>\n" + r'''(function () {
   U.uTA = gl.getUniformLocation(prog, 'uTA[0]');
   U.uNbr = gl.getUniformLocation(prog, 'uNbr[0]');
   U.uAct = gl.getUniformLocation(prog, 'uAct[0]');
+  U.uPhase = gl.getUniformLocation(prog, 'uPhase[0]');
+  U.uTempo = gl.getUniformLocation(prog, 'uTempo[0]');
+  U.uAmp = gl.getUniformLocation(prog, 'uAmp[0]');
   gl.uniform1i(U.uAtlas, 0);
   gl.uniform1f(U.uBand, 0.055);
   gl.uniform1f(U.uCount, N);
@@ -675,6 +706,7 @@ latent_js = "<script>\n" + r'''(function () {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         if (anisoExt && maxAniso > 1) gl.texParameteri(gl.TEXTURE_2D, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(16, maxAniso));
         gl.generateMipmap(gl.TEXTURE_2D);
+        gl.uniform2f(U.uAtlasSize, best.AW, best.AH);
         return true;
       }
       cellMax = Math.floor(cellMax / 2);
@@ -712,6 +744,9 @@ latent_js = "<script>\n" + r'''(function () {
         if (Math.abs(a[1] - b[3]) < 0.01 && ovX > 0.05) nbrs[i][2] = j; // j above i
       }
     }
+    if (!quilt.classList.contains('open')) {
+      gridNbrs = nbrs.map(function (r) { return r.slice(); });
+    }
     return true;
   }
   function computeTargets() {
@@ -745,6 +780,34 @@ latent_js = "<script>\n" + r'''(function () {
   function smoothstepJS(e0, e1, x) {
     var t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
     return t * t * (3 - 2 * t);
+  }
+  // Per-edge character: an edge is the unordered pair of cells, so a
+  // hash of the pair gives both sides the same phase/tempo/amplitude
+  // (the seam line is one physical thing, computed identically from
+  // either cell). Tap impulses ride on top: poking a world swells its
+  // edges, decaying over ~2s like a disturbed membrane settling.
+  function edgeKey(i, j) { return Math.min(i, j) * 16 + Math.max(i, j); }
+  function edgeHash(key, salt) {
+    var h = Math.sin(key * 127.1 + salt * 311.7) * 43758.5453;
+    return h - Math.floor(h);
+  }
+  function edgeParams(i, j) {
+    var key = edgeKey(i, j);
+    return {
+      key: key,
+      ph: edgeHash(key, 1) * 6.2832,
+      tm: 0.92 + edgeHash(key, 2) * 0.16,
+      amp: 0.85 + edgeHash(key, 3) * 0.3
+    };
+  }
+  var impulses = {}; // edgeKey -> tSec of last poke
+  var lastOpenIdx = -1;
+  var gridNbrs = []; // adjacency from the closed layout (the true grid)
+  function pokeEdges(cellIdx) {
+    if (cellIdx < 0 || !gridNbrs[cellIdx]) return;
+    gridNbrs[cellIdx].forEach(function (j) {
+      if (j >= 0) impulses[edgeKey(cellIdx, j)] = tSec;
+    });
   }
   function activities() {
     // Per side: the seam calms as either side's across-extent parks at
@@ -807,6 +870,9 @@ latent_js = "<script>\n" + r'''(function () {
   var taBuf = new Float32Array(MAXC);
   var nbrBuf = new Float32Array(MAXC * 4);
   var actBuf = new Float32Array(MAXC * 4);
+  var phaseBuf = new Float32Array(MAXC * 4);
+  var tempoBuf = new Float32Array(MAXC * 4);
+  var ampBuf = new Float32Array(MAXC * 4);
   function draw(time) {
     if (!atlasTex || !cur.length) return;
     var i, c;
@@ -814,7 +880,25 @@ latent_js = "<script>\n" + r'''(function () {
       for (c = 0; c < 4; c++) {
         rectBuf[i * 4 + c] = cur[i][c];
         uvBuf[i * 4 + c] = cellUV[i][c];
-        nbrBuf[i * 4 + c] = nbrs[i] ? nbrs[i][c] : -1;
+        var j = nbrs[i] ? nbrs[i][c] : -1;
+        nbrBuf[i * 4 + c] = j;
+        if (j >= 0) {
+          var ep = edgeParams(i, j);
+          var amp = ep.amp;
+          var t0 = impulses[ep.key];
+          if (t0 !== undefined) {
+            var age = time - t0;
+            if (age < 2.5) amp *= 1 + 1.5 * Math.exp(-age / 0.6);
+            else delete impulses[ep.key];
+          }
+          phaseBuf[i * 4 + c] = ep.ph;
+          tempoBuf[i * 4 + c] = ep.tm;
+          ampBuf[i * 4 + c] = amp;
+        } else {
+          phaseBuf[i * 4 + c] = 0;
+          tempoBuf[i * 4 + c] = 1;
+          ampBuf[i * 4 + c] = 0;
+        }
       }
       taBuf[i] = cellTA[i];
     }
@@ -827,6 +911,9 @@ latent_js = "<script>\n" + r'''(function () {
     gl.uniform1fv(U.uTA, taBuf);
     gl.uniform4fv(U.uNbr, nbrBuf);
     gl.uniform4fv(U.uAct, actBuf);
+    gl.uniform4fv(U.uPhase, phaseBuf);
+    gl.uniform4fv(U.uTempo, tempoBuf);
+    gl.uniform4fv(U.uAmp, ampBuf);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
   function drawStatic() {
@@ -925,6 +1012,7 @@ latent_js = "<script>\n" + r'''(function () {
       cur = target.map(function (r) { return r.slice(); });
     }
     if (mq.matches) drawStatic();
+    else if (ready) draw(tSec); // same cleared-canvas guard as open/close
   }
   if (window.ResizeObserver) {
     new ResizeObserver(function () {
@@ -953,7 +1041,18 @@ latent_js = "<script>\n" + r'''(function () {
       quilt.style.transform = '';
       quilt.style.willChange = '';
     }
+    // Physical feedback: opening or closing a world disturbs the
+    // membrane along its edges; the swell decays in draw().
+    var ai = -1;
+    slices.forEach(function (el, i) { if (el.classList.contains('active')) ai = i; });
+    if (nowOpen && ai >= 0) { pokeEdges(ai); lastOpenIdx = ai; }
+    if (!nowOpen && lastOpenIdx >= 0) { pokeEdges(lastOpenIdx); lastOpenIdx = -1; }
     retarget();
+    // Flicker fix: retarget may have resized (cleared) the canvas for
+    // the new fixed/in-flow geometry. Repaint synchronously, before
+    // the browser composites, so the cleared canvas never shows as a
+    // black frame mid-gesture.
+    if (ready && !mq.matches) draw(tSec);
     if (!mq.matches || !ready) return;
     var until = performance.now() + 950;
     if (rmTimer) clearInterval(rmTimer);
