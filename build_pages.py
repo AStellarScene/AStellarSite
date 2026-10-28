@@ -137,7 +137,7 @@ home_body = """  <section class="hero">
     <div class="cards">
       <article class="card">
         <p class="label card-label">BenchLab</p>
-        <p class="status">Now: Prototype built, first usability test running</p>
+        <p class="status">Now: Prototype in progress &mdash; first usability sessions Fri Oct 30</p>
         <p>A testing simulator that runs in the browser. Build a test in a visual editor, run it against a simulated device, and get a traceability report.</p>
         <p><a class="card-link" href="benchlab.html">View project &#8599;</a></p>
       </article>
@@ -205,7 +205,7 @@ work_body = """  <section id="work">
     <div class="cards">
       <article class="card">
         <p class="label card-label">BenchLab</p>
-        <p class="status">Now: Prototype built, first usability test running</p>
+        <p class="status">Now: Prototype in progress &mdash; first usability sessions Fri Oct 30</p>
         <p>A testing simulator that runs in the browser. Build a test in a visual editor, run it against a simulated device, and get a traceability report. An agent layer turns plain-English test protocols into executable steps.</p>
         <p><a class="card-link" href="benchlab.html">View project &#8599;</a></p>
       </article>
@@ -252,7 +252,7 @@ def project(fname, name, status, paras, bullets=None):
   </section>""" % (name, status, "\n".join("    <p>%s</p>" % p for p in paras), bl)
     page(fname, "%s — Adam Laloge" % name, PROJ_DESCS.get(fname, DESC), "work.html", body)
 
-project("benchlab.html", "BenchLab", "Prototype built, first usability test running",
+project("benchlab.html", "BenchLab", "Prototype in progress &mdash; first usability sessions Fri Oct 30",
     ["A testing simulator that runs in the browser. It's the public twin of the test-platform work I do at my job, rebuilt from scratch with nothing proprietary: the workflow is real, the device under test is simulated.",
      "I'm building it alongside my WGU prototyping courses. The first usability test is running now, and what it turns up decides what the next version changes."],
     ["Build a test in a visual editor, step by step",
