@@ -2136,34 +2136,59 @@ LATENT_MAP_JS = r"""<script>
   window.addEventListener('scroll', onScroll, { passive: true });
 
   var lastRW = 0, lastRH = 0;
-  // Runtime layout: the baked anchors are PREFERENCES, not positions.
-  // On the real device, region centers are solved into the usable
-  // canvas: inside a safe margin, out from behind the overlay chrome
-  // (site header, title card, scroll cue -- measured live from the
-  // DOM, so this holds at any screen size), with clearance for the
-  // label that rides above each center, and with enough separation
-  // that clusters stay readable at any aspect. Fog, labels and
-  // points all key off the centers, so this one solve adapts the
-  // whole map to the screen it is actually on.
+  // Runtime layout, written for this map. The baked anchors are the
+  // composition: centres start at their anchors and move only when a
+  // hard constraint forces it, by the least amount that satisfies
+  // the constraint (project out along the axis of least penetration;
+  // separation corrections split evenly). Hard constraints: centres
+  // stay in the safe rect, out of the overlay chrome (header, title
+  // card, scroll cue -- measured live from the DOM), with clearance
+  // for the label above each centre; and NO object -- no centre, no
+  // label, and no point of any cluster -- may sit under the title
+  // card, enforced by testing each centre against the card rect
+  // grown by that cluster's own point reach (offsets + point radius
+  // + sway/breathing margin). Everything keys off the centres, so
+  // the solve adapts fog, labels and points together, and a new
+  // region needs nothing but its anchor.
   function layoutRegions() {
     var mX = Math.max(20, W * 0.07), mY = Math.max(20, H * 0.06);
-    var zones = [];
+    var zones = [], card = null;
     ['.site-header', '.latent-phead', '.latent-scrollzone'].forEach(function (sel) {
       var el = document.querySelector(sel);
       if (!el) return;
       var b = el.getBoundingClientRect(), pad = 44;
-      zones.push({ x0: b.left - pad, y0: b.top - pad, x1: b.right + pad, y1: b.bottom + pad });
+      var z = { x0: b.left - pad, y0: b.top - pad, x1: b.right + pad, y1: b.bottom + pad };
+      zones.push(z);
+      if (sel === '.latent-phead') card = z;
     });
     var labelLift = H * 0.16 + 10; // region labels sit above their centers
-    function pushOut(p, stag) {
-      zones.forEach(function (z) {
-        var y1 = z.y1 + labelLift; // keep the label clear as well
-        if (p.x > z.x0 && p.x < z.x1 && p.y > z.y0 && p.y < y1) {
-          var dl = p.x - z.x0, dr = z.x1 - p.x, dtp = p.y - z.y0, db = y1 - p.y;
-          var m = Math.min(dl, dr, dtp, db);
-          if (m === db) p.y = y1 + stag; else if (m === dtp) p.y = z.y0; else if (m === dl) p.x = z.x0; else p.x = z.x1;
-        }
+    var reach = {};
+    regionKeys.forEach(function (k) {
+      var rx = 0, ry = 0, rs = 0;
+      items.forEach(function (p) {
+        if (p.region !== k) return;
+        rx = Math.max(rx, Math.abs(p.dx) * W); ry = Math.max(ry, Math.abs(p.dy) * H);
+        rs = Math.max(rs, p.size);
       });
+      reach[k] = { x: rx + rs / 2 + 40, y: ry + rs / 2 + 40 }; // + sway & breathing margin
+    });
+    function project(p, z, liftExtra) {
+      var y1 = z.y1 + (liftExtra || 0);
+      if (p.x > z.x0 && p.x < z.x1 && p.y > z.y0 && p.y < y1) {
+        var dl = p.x - z.x0, dr = z.x1 - p.x, dtp = p.y - z.y0, db = y1 - p.y;
+        var m = Math.min(dl, dr, dtp, db);
+        if (m === db) p.y = y1; else if (m === dtp) p.y = z.y0; else if (m === dl) p.x = z.x0; else p.x = z.x1;
+        return true;
+      }
+      return false;
+    }
+    function pushOut(p, k) {
+      zones.forEach(function (z) { project(p, z, labelLift); });
+      if (card) { // the title card, grown by this cluster's reach: no object under it
+        var r = reach[k];
+        project(p, { x0: card.x0 - r.x, y0: card.y0 - r.y, x1: card.x1 + r.x, y1: card.y1 + r.y }, 0);
+        project(p, card, labelLift); // label clearance stands as before
+      }
     }
     var pos = {};
     regionKeys.forEach(function (k) {
@@ -2172,7 +2197,7 @@ LATENT_MAP_JS = r"""<script>
     });
     var minD = Math.min(W, H) * 0.30;
     for (var it = 0; it < 40; it++) {
-      regionKeys.forEach(function (k) { pushOut(pos[k], (k.charCodeAt(0) % 4) * 12); });
+      regionKeys.forEach(function (k) { pushOut(pos[k], k); });
       for (var a = 0; a < regionKeys.length; a++) for (var b2 = a + 1; b2 < regionKeys.length; b2++) {
         var pa = pos[regionKeys[a]], pb = pos[regionKeys[b2]];
         var dx = pb.x - pa.x, dy = pb.y - pa.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
@@ -2186,7 +2211,7 @@ LATENT_MAP_JS = r"""<script>
         p.x = Math.min(Math.max(p.x, mX), W - mX); p.y = Math.min(Math.max(p.y, mY), H - mY);
       });
     }
-    regionKeys.forEach(function (k) { pushOut(pos[k], (k.charCodeAt(0) % 4) * 12); var r = DATA.regions[k]; r.x = pos[k].x; r.y = pos[k].y; });
+    regionKeys.forEach(function (k) { pushOut(pos[k], k); var r = DATA.regions[k]; r.x = pos[k].x; r.y = pos[k].y; });
   }
 
   function resize() {
