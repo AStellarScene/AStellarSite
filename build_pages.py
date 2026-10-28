@@ -41,7 +41,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=65">
+{schema}<link rel="stylesheet" href="styles.css?v=64">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -670,10 +670,9 @@ latent_js = "<script>\n" + r'''(function () {
       '  float tm' + s + ' = tmT.' + COMP[s] + ';',
       '  float am' + s + ' = amT.' + COMP[s] + ';',
       '  vec4 nr' + s + ' = vec4(0.0); vec4 nuv' + s + ' = vec4(0.0); float nta' + s + ' = 1.0; float has' + s + ' = 0.0;',
-      '  vec4 nnbr' + s + ' = vec4(-1.0); vec4 nact' + s + ' = vec4(0.0); vec4 nph' + s + ' = vec4(0.0); vec4 ntm' + s + ' = vec4(1.0); vec4 nam' + s + ' = vec4(1.0);',
       '  for (int j = 0; j < ' + MAXC + '; j++) {',
       '    if (float(j) >= uCount) break;',
-      '    if (abs(float(j) - nj' + s + ') < 0.5) { nr' + s + ' = uRect[j]; nuv' + s + ' = uUVR[j]; nta' + s + ' = uTA[j]; nnbr' + s + ' = uNbr[j]; nact' + s + ' = uAct[j]; nph' + s + ' = uPhase[j]; ntm' + s + ' = uTempo[j]; nam' + s + ' = uAmp[j]; has' + s + ' = 1.0; }',
+      '    if (abs(float(j) - nj' + s + ') < 0.5) { nr' + s + ' = uRect[j]; nuv' + s + ' = uUVR[j]; nta' + s + ' = uTA[j]; has' + s + ' = 1.0; }',
       '  }',
       '  float ln' + s + ' = 0.0; float d' + s + ' = 1000.0; float bF' + s + ' = 0.0; float sl' + s + ' = 0.0; float seg' + s + ' = 0.0; vec2 rf' + s + ' = vec2(0.0);',
       '  if (nearSeam && has' + s + ' > 0.5 && act' + s + ' > 0.001) {',
@@ -691,45 +690,12 @@ latent_js = "<script>\n" + r'''(function () {
     '  vec3 col = ' + (es3 ? 'sampleWorld(ci, ouv)' : 'sampleCell(ouv, cuv)') + ';'
   );
   for (var s2 = 0; s2 < 4; s2++) {
-    // v6.3: the neighbour sample must use the neighbour's OWN refrSum
-    // field at p, not this side's rf * 1.6. A world is sampled from two
-    // code paths -- as the owning cell (ouv, with its own refrSum) and
-    // as the neighbour (nuv2) -- and wherever the two refraction values
-    // differ, the sampled image steps sideways at the straight cell
-    // boundary: a faint straight streak through bright smooth content
-    // (the Far Shore sky), left behind after the groove (the bold line)
-    // was removed in v6.2. Recomputing the neighbour's four side terms
-    // with the neighbour's rect and tables makes the sampled field a
-    // single function of position, continuous across the boundary by
-    // construction. NL holds the emitted lines.
-    var NL = [
-      '    vec2 refrN' + s2 + ' = vec2(0.0);',
-      '    float ned' + s2 + ' = min(min(p.x - nr' + s2 + '.x, nr' + s2 + '.z - p.x), min(p.y - nr' + s2 + '.y, nr' + s2 + '.w - p.y));'
-    ];
-    for (var k = 0; k < 4; k++) {
-      var Q = 'z' + s2 + k;
-      NL.push(
-        '    float ' + Q + 'nj = nnbr' + s2 + '.' + COMP[k] + '; float ' + Q + 'act = nact' + s2 + '.' + COMP[k] + ';',
-        '    float ' + Q + 'seg = 0.0; float ' + Q + 'ln = 0.0; float ' + Q + 'd = 1000.0; float ' + Q + 'sl = 0.0; float ' + Q + 'bF = 0.0; vec2 ' + Q + 'rf = vec2(0.0);',
-        '    if (ned' + s2 + ' < 0.10 && ' + Q + 'nj > -0.5 && ' + Q + 'act > 0.001) {',
-        '      ' + GEO[k].pre
-          .replace(/segS/g, Q + 'seg').replace(/lnS/g, Q + 'ln').replace(/slS/g, Q + 'sl').replace(/dS/g, Q + 'd')
-          .replace(/phS/g, 'nph' + s2 + '.' + COMP[k]).replace(/tmS/g, 'ntm' + s2 + '.' + COMP[k])
-          .replace(/actS/g, Q + 'act').replace(/amS/g, 'nam' + s2 + '.' + COMP[k])
-          .replace(/cellSize/g, 'nsz' + s2).replace(/\bcr\b/g, 'nr' + s2),
-        '      ' + Q + 'bF = exp(-abs(' + Q + 'd) / uBand) * ' + Q + 'act;',
-        '      ' + GEO[k].post.replace(/rfS/g, Q + 'rf').replace(/bFS/g, Q + 'bF').replace(/slS/g, Q + 'sl'),
-        '      refrN' + s2 + ' += ' + Q + 'rf;',
-        '    }'
-      );
-    }
     F.push(
       '  if (nearSeam && has' + s2 + ' > 0.5 && act' + s2 + ' > 0.001) {',
       '    vec2 nsz' + s2 + ' = max(nr' + s2 + '.zw - nr' + s2 + '.xy, vec2(0.0001));',
       '    vec2 nl' + s2 + ' = vec2((p.x - nr' + s2 + '.x) / nsz' + s2 + '.x, 1.0 - (p.y - nr' + s2 + '.y) / nsz' + s2 + '.y);',
       '    float nva' + s2 + ' = nsz' + s2 + '.x * uQA / nsz' + s2 + '.y;',
-      ...NL,
-      '    vec2 nuv2_' + s2 + ' = coverUv(nl' + s2 + ', nta' + s2 + ', nva' + s2 + ') + driftFor(nj' + s2 + ', t) + refrN' + s2 + ' * breathe;',
+      '    vec2 nuv2_' + s2 + ' = coverUv(nl' + s2 + ', nta' + s2 + ', nva' + s2 + ') + driftFor(nj' + s2 + ', t) + rf' + s2 + ' * 1.6 * breathe;',
       '    vec3 ncol' + s2 + ' = ' + (es3 ? 'sampleWorld(int(nj' + s2 + ' + 0.5), nuv2_' + s2 + ')' : 'sampleCell(nuv2_' + s2 + ', nuv' + s2 + ')') + ';',
       '    col = mix(ncol' + s2 + ', col, smoothstep(-0.0015, 0.0015, d' + s2 + '));',
       '    col += clamp(sl' + s2 + ', -1.0, 1.0) * bF' + s2 + ' * 0.13;',
