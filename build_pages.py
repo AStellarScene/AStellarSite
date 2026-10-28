@@ -1815,7 +1815,8 @@ LATENT_MAP_JS = r"""<script>
     photography: [[36, 84, 186], [34, 190, 205], [178, 246, 240]],
     bookshelf: [[146, 62, 198], [216, 96, 158], [255, 198, 226]],
     worlds: [[166, 34, 46], [228, 96, 52], [255, 216, 148]],
-    projects: [[216, 118, 36], [226, 182, 92], [255, 242, 198]]
+    projects: [[216, 118, 36], [226, 182, 92], [255, 242, 198]],
+    writing: [[72, 52, 168], [150, 130, 255], [226, 218, 255]]
   };
   var fbmField = null, ridgeField = null, distArr = null, angBinArr = null;
   var improvedSprites = {}, filamentSprites = {}, dustFieldSprite = null, improvedReady = false;
