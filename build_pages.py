@@ -41,7 +41,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=59">
+{schema}<link rel="stylesheet" href="styles.css?v=61">
 </head>
 <body>
 """
@@ -319,7 +319,7 @@ latent_body = """  <div class="world-ambient" aria-hidden="true"></div>
     <p class="section-note">I simply directed them.</p>
   </section>
 
-  <div class="latent-band" id="latent-band">
+  <div class="quilt" id="quilt">
     <canvas class="dream-gl" aria-hidden="true"></canvas>
     <button type="button" class="slice" data-world="golden" aria-expanded="false" aria-label="Open The Golden City">
       <img src="art/golden-city.jpg" alt="A golden city of spires and bridges in the clouds, built around a glowing ring" draggable="false">
@@ -340,13 +340,8 @@ latent_body = """  <div class="world-ambient" aria-hidden="true"></div>
         <span class="slice-hint">Tap again to come back</span>
       </span>
     </button>
-  </div>
-
-  <p class="flow-hint">Tap a world to step inside &middot; tap again to come back</p>
-
-  <div class="latent-band" id="latent-band-2">
-    <canvas class="dream-gl" aria-hidden="true"></canvas>
     <button type="button" class="slice" data-world="abyss" aria-expanded="false" aria-label="Open The Drowned Bells">
+      <span class="seam-h" aria-hidden="true"></span>
       <img src="art/drowned-bells.jpg" alt="A gothic cathedral-city half-drowned in a black ocean at night, its towers above the waterline and glowing teal ruins beneath the surface" draggable="false">
       <span class="slice-title">The Drowned Bells</span>
       <span class="slice-cap">
@@ -364,15 +359,653 @@ latent_body = """  <div class="world-ambient" aria-hidden="true"></div>
         <span>A green world under a ringed giant, seen for the first time.</span>
         <span class="slice-hint">Tap again to come back</span>
       </span>
+          <span class="seam-h" aria-hidden="true"></span>
     </button>
   </div>
+
+  <p class="flow-hint">Tap a world to step inside &middot; tap again to come back</p>
 
   <section>
     <p class="section-note">More worlds arrive as I make them.</p>
   </section>"""
-latent_js = "<script>\n(function () {\n  var bands = Array.prototype.slice.call(document.querySelectorAll('.latent-band'));\n  if (!bands.length) return;\n  document.documentElement.classList.add('latent-live');\n  // The opened band starts below the top bar; CSS needs the bar's real\n  // height so the image is sized to the space under it, fully in view.\n  // One world can be open at a time across all bands: opening a world\n  // in another pair closes the current one first.\n  var header = document.querySelector('.site-header');\n  var openBand = null, openIdx = -1;\n  function setBar() {\n    if (!header) return;\n    var h = header.offsetHeight;\n    document.documentElement.style.setProperty('--bar-h', h + 'px');\n    document.documentElement.style.setProperty('--bar-half', (h / 2) + 'px');\n  }\n  window.addEventListener('resize', function () { if (openBand) setBar(); });\n  function closeOpen() {\n    if (!openBand) return;\n    var b = openBand;\n    openBand = null; openIdx = -1;\n    b.classList.remove('open');\n    Array.prototype.forEach.call(b.querySelectorAll('.slice'), function (s) {\n      s.classList.remove('active'); s.setAttribute('aria-expanded', 'false');\n    });\n    document.documentElement.removeAttribute('data-world');\n    document.documentElement.classList.remove('world-lock');\n    document.documentElement.style.removeProperty('--bar-h');\n    document.documentElement.style.removeProperty('--bar-half');\n  }\n  function toggle(band, slices, idx) {\n    if (openBand === band && openIdx === idx) { closeOpen(); return; }\n    closeOpen();\n    setBar();\n    openBand = band; openIdx = idx;\n    band.classList.add('open');\n    slices.forEach(function (s, i) {\n      s.classList.toggle('active', i === idx);\n      s.setAttribute('aria-expanded', i === idx ? 'true' : 'false');\n    });\n    document.documentElement.setAttribute('data-world', slices[idx].getAttribute('data-world'));\n    document.documentElement.classList.add('world-lock');\n  }\n  bands.forEach(function (band) {\n    var slices = Array.prototype.slice.call(band.querySelectorAll('.slice'));\n    slices.forEach(function (s, i) { s.addEventListener('click', function () { toggle(band, slices, i); }); });\n  });\n  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && openBand) closeOpen(); });\n})();\n</script>\n" + "<script>\n" + "function initDreamGL(band, canvas) {\n  // Dreamscape liquid-dimensional seam v3: vanilla WebGL1 shader\n  // displacement over the two artworks (research report:\n  // research_notes/dreamscape-liquid-dimensional-ripple). DOM slices\n  // stay the tap layer and the fallback; any failure leaves the page\n  // unchanged.\n  //\n  // v3.1: the exit stutter. On close the band teleports from its\n  // fixed full-screen spot back to its in-flow position lower on\n  // the page -- a one-frame drop the expansion can't mask on the\n  // way out. FLIP it: at the close mutation, counter-shift the\n  // band by the measured drop (transform only) and ease the shift\n  // to zero on the same clock, so the world glides down into\n  // place. And while an ease is in flight, resize retargets are\n  // queued instead of shifting the targets mid-motion (iOS URL\n  // bar breathing was doing exactly that).\n  //\n  // v4 (multi-band): the v3.1 engine, instantiated once per band so\n  // each pair of worlds gets its own seam, textures and render loop.\n  // Bands pause when off-screen (IntersectionObserver gate inside),\n  // so a second band costs nothing while it is out of view. The old\n  // page-global gl-on class is gone; the transition freeze is now\n  // scoped to each band's own gl-live class in CSS.\n  //\n  // v3 mapping model -- per-world STAGES. v1/v2 cover-fit each\n  // texture to the whole band and cut it at the seam, which framed\n  // the closed split badly (subjects clipped by the frame edges)\n  // and, because the band's height snaps on open (CSS cannot\n  // animate to auto), re-cropped the image in one step mid-gesture\n  // -- the visible \"squash\". Now each texture is cover-fit to its\n  // own stage: its half of the band when closed (the framing the\n  // DOM version had), growing continuously to the full band as the\n  // split opens. Split and band aspect are both eased in JS on one\n  // exponential clock (tau ~190ms, the research's interaction spec),\n  // so framing and seam move as a single smooth motion.\n  if (!band || !canvas) return;\n  var slices = band.querySelectorAll('.slice');\n  if (slices.length !== 2) return;\n\n  var gl;\n  try {\n    gl = canvas.getContext('webgl', { alpha: false, depth: false, stencil: false, antialias: false, powerPreference: 'low-power' });\n  } catch (e) { gl = null; }\n  if (!gl) return;\n\n  var VERT = 'attribute vec2 aPos;varying vec2 vUv;void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}';\n  var FRAG = [\n    'precision mediump float;',\n    'varying vec2 vUv;',\n    'uniform sampler2D uTexA;',\n    'uniform sampler2D uTexB;',\n    'uniform float uTime;',\n    'uniform float uSplit;',\n    'uniform float uHoriz;',\n    'uniform float uBand;',\n    'uniform float uTA;',\n    'uniform float uTB;',\n    'uniform float uWA;', // stage size of world A along the across axis (0.5..1)\n    'uniform float uWB;',\n    'uniform float uAspectA;', // stage aspect (u/v) per world\n    'uniform float uAspectB;',\n    'uniform vec4 uRectA;', // POT sub-rect: (scaleX, scaleY, offX, offY)\n    'uniform vec4 uRectB;',\n    'vec2 coverUv(vec2 local, float ta, float va){',\n    '  vec2 f = vec2(0.5, 0.68);', // subject focal: 50% across, 32% from top\n    '  float r = va / ta;',\n    '  vec2 u = local;',\n    '  if (r >= 1.0) { float vf = 1.0 / r; u = vec2(local.x, f.y * (1.0 - vf) + local.y * vf); }',\n    '  else { u = vec2(f.x * (1.0 - r) + local.x * r, local.y); }',\n    '  return f + (u - f) / 1.15;', // the 1.15 overscan = drift headroom\n    '}',\n    'float wave(float s, float t){',\n    '  return 0.011 * sin(6.9 * s - t * 0.70)',\n    '       + 0.006 * sin(13.7 * s + t * 0.42 + 1.7)',\n    '       + 0.0025 * sin(27.0 * s - t * 0.24 + 4.1);',\n    '}',\n    'float slope(float s, float t){',\n    '  return 0.011 * 6.9 * cos(6.9 * s - t * 0.70)',\n    '       + 0.006 * 13.7 * cos(13.7 * s + t * 0.42 + 1.7)',\n    '       + 0.0025 * 27.0 * cos(27.0 * s - t * 0.24 + 4.1);',\n    '}',\n    'void main(){',\n    '  vec2 uv = vUv;',\n    '  float s = mix(uv.y, uv.x, uHoriz);',\n    // Across-axis: landscape = x from the left (world A). Portrait =\n    // from the TOP (world A stacks first), but GL y runs bottom-up,\n    // hence the flip.\n    '  float n = mix(uv.x, 1.0 - uv.y, uHoriz);',\n    '  float t = uTime;',\n    // When a world is open the split parks at an edge; the seam must\n    // calm to a straight off-screen line or a wavy sliver of the\n    // other world shows along the edge.\n    '  float edge = smoothstep(0.0, 0.07, uSplit) * smoothstep(1.0, 0.93, uSplit);',\n    '  float w = wave(s, t) * edge;',\n    '  float d = n - (uSplit + w);',\n    '  float bandF = exp(-abs(d) / uBand) * edge;',\n    '  float sl = slope(s, t);',\n    '  float refr = sl * 0.012 * bandF;',\n    '  vec2 refrVec = mix(vec2(refr, 0.0), vec2(0.0, refr), uHoriz);',\n    '  float breathe = 1.0 + 0.2 * sin(t * 0.31 + 0.8);',\n    '  vec2 driftA = vec2(sin(t * 0.33), sin(t * 0.23 + 1.3)) * 0.020;',\n    '  vec2 driftB = vec2(sin(t * 0.19 + 2.1), sin(t * 0.27 + 0.4)) * 0.012;',\n    // Stage-local coordinates: each world is framed inside its own\n    // stage (its share of the band), not stretched across the band.\n    '  float na = n / uWA;',\n    '  float nb = (n - (1.0 - uWB)) / uWB;',\n    '  vec2 localA = mix(vec2(na, uv.y), vec2(uv.x, 1.0 - na), uHoriz);',\n    '  vec2 localB = mix(vec2(nb, uv.y), vec2(uv.x, 1.0 - nb), uHoriz);',\n    '  vec2 uvA = coverUv(localA, uTA, uAspectA) + driftA + refrVec * breathe;',\n    '  vec2 uvB = coverUv(localB, uTB, uAspectB) + driftB + refrVec * 1.6 * breathe;',\n    '  uvA = uvA * uRectA.xy + uRectA.zw;',\n    '  uvB = uvB * uRectB.xy + uRectB.zw;',\n    '  vec3 colA = texture2D(uTexA, uvA).rgb;',\n    '  vec3 colB = texture2D(uTexB, uvB).rgb;',\n    '  float m = smoothstep(-0.0015, 0.0015, d);',\n    '  vec3 col = mix(colA, colB, m);',\n    '  col += clamp(sl, -1.0, 1.0) * bandF * 0.13;',\n    '  col += exp(-abs(d) * 220.0) * 0.08 * edge;',\n    '  col -= exp(-abs(d - 0.006) * 160.0) * 0.05 * edge;',\n    '  gl_FragColor = vec4(col, 1.0);',\n    '}'\n  ].join('\\n');\n\n  function shader(type, src) {\n    var sh = gl.createShader(type);\n    gl.shaderSource(sh, src);\n    gl.compileShader(sh);\n    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) return null;\n    return sh;\n  }\n  var vs = shader(gl.VERTEX_SHADER, VERT), fs = shader(gl.FRAGMENT_SHADER, FRAG);\n  if (!vs || !fs) return;\n  var prog = gl.createProgram();\n  gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);\n  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;\n  gl.useProgram(prog);\n\n  var buf = gl.createBuffer();\n  gl.bindBuffer(gl.ARRAY_BUFFER, buf);\n  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);\n  var aPos = gl.getAttribLocation(prog, 'aPos');\n  gl.enableVertexAttribArray(aPos);\n  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);\n\n  var U = {};\n  ['uTexA', 'uTexB', 'uTime', 'uSplit', 'uHoriz', 'uBand', 'uTA', 'uTB',\n   'uWA', 'uWB', 'uAspectA', 'uAspectB', 'uRectA', 'uRectB'].forEach(function (name) {\n    U[name] = gl.getUniformLocation(prog, name);\n  });\n  gl.uniform1i(U.uTexA, 0);\n  gl.uniform1i(U.uTexB, 1);\n  gl.uniform1f(U.uBand, 0.055);\n\n  var anisoExt = gl.getExtension('EXT_texture_filter_anisotropic') ||\n                 gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');\n  var maxAniso = anisoExt ? gl.getParameter(anisoExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT) : 1;\n\n  function nextPow2(v) { var p = 1; while (p < v) p *= 2; return p; }\n  var texA = null, texB = null, ready = false;\n  function makeTex(unit, img) {\n    // Re-pack onto a power-of-two canvas so WebGL1 allows mipmaps;\n    // NPOT textures are stuck with plain LINEAR and look soft.\n    var W = nextPow2(img.naturalWidth), H = nextPow2(img.naturalHeight);\n    var cv = document.createElement('canvas');\n    cv.width = W; cv.height = H;\n    cv.getContext('2d').drawImage(img, 0, 0);\n    var t = gl.createTexture();\n    gl.activeTexture(gl.TEXTURE0 + unit);\n    gl.bindTexture(gl.TEXTURE_2D, t);\n    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);\n    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, cv);\n    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);\n    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);\n    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);\n    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);\n    if (anisoExt && maxAniso > 1) gl.texParameteri(gl.TEXTURE_2D, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(16, maxAniso));\n    gl.generateMipmap(gl.TEXTURE_2D);\n    var rect = [img.naturalWidth / W, img.naturalHeight / H, 0, 1 - img.naturalHeight / H];\n    return { tex: t, aspect: img.naturalWidth / img.naturalHeight, rect: rect };\n  }\n  var loaded = 0;\n  function onLoad(which, img) {\n    return function () {\n      try {\n        if (which === 0) texA = makeTex(0, img); else texB = makeTex(1, img);\n      } catch (e) { return; } // texture failure: fallback stays, no gl-live\n      loaded++;\n      if (loaded === 2) start();\n    };\n  }\n  function loadTextures() {\n    loaded = 0; texA = null; texB = null;\n    var imgA = new Image(); imgA.onload = onLoad(0, imgA); imgA.src = slices[0].querySelector('img').src;\n    var imgB = new Image(); imgB.onload = onLoad(1, imgB); imgB.src = slices[1].querySelector('img').src;\n  }\n  loadTextures();\n\n  var mq = window.matchMedia('(prefers-reduced-motion: reduce)');\n  // DPR floor is 1.5: the step-down exists for thermals, but letting\n  // it reach 1.0 made the images visibly soft on hi-dpi phones.\n  var dprSteps = [2, 1.75, 1.5], stepIdx = 0;\n  var inView = true, running = false, raf = 0, lastTs = 0, tSec = 0;\n  var lastTickAt = 0, lastRafAt = 0, intervalDriver = null;\n  var bandW = 0, bandH = 0;\n  var ftSum = 0, ftCount = 0;\n  // One JS clock for the open/close motion: split and aspect ease\n  // toward their targets together (exponential approach, tau 190ms).\n  var splitCur = 0.5, splitTarget = 0.5;\n  var aspectCur = 1, aspectTarget = 1;\n  var TAU = 0.19;\n  var bandOffset = 0;      // FLIP counter-shift for the close drop\n  var fixedTop = 0;        // band's viewport top while open (recorded)\n  var needsRetarget = false;\n\n  function resize() {\n    bandW = band.clientWidth; bandH = band.clientHeight;\n    if (!bandW || !bandH) return;\n    var dpr = Math.min(window.devicePixelRatio || 1, dprSteps[stepIdx]);\n    var bw = Math.round(bandW * dpr), bh = Math.round(bandH * dpr);\n    if (canvas.width !== bw || canvas.height !== bh) {\n      canvas.width = bw; canvas.height = bh;\n      gl.viewport(0, 0, bw, bh);\n    }\n  }\n  function horizNow() { return bandW >= bandH ? 0 : 1; }\n\n  function retarget() {\n    // Called right after the band's class changes: its box has\n    // already snapped to the settled geometry, so targets read true.\n    resize();\n    if (!bandW || !bandH) return;\n    aspectTarget = bandW / bandH;\n    if (band.classList.contains('open')) {\n      var active = band.querySelector('.slice.active');\n      splitTarget = (active === slices[1]) ? 0.0005 : 0.9995;\n      fixedTop = band.getBoundingClientRect().top;\n    } else {\n      splitTarget = 0.5;\n    }\n  }\n  function animating() {\n    return Math.abs(splitTarget - splitCur) > 0.0008 ||\n           Math.abs(aspectTarget - aspectCur) > 0.002 ||\n           bandOffset !== 0;\n  }\n  var resizeTimer = 0;\n  if (window.ResizeObserver) {\n    new ResizeObserver(function () {\n      clearTimeout(resizeTimer);\n      resizeTimer = setTimeout(function () {\n        if (animating()) { needsRetarget = true; return; }\n        stepIdx = 0;\n        resize(); retarget();\n        if (!band.classList.contains('open')) { /* rotation while closed: snap */ splitCur = splitTarget; aspectCur = aspectTarget; }\n        if (mq.matches) drawStatic();\n      }, 120);\n    }).observe(band);\n  }\n  window.addEventListener('resize', function () {\n    if (animating()) { needsRetarget = true; return; }\n    resize(); retarget(); if (mq.matches) drawStatic();\n  });\n\n  function layoutSplit() {\n    // Reduced-motion / initial state only: read the live flex layout.\n    if (!bandW || !bandH) return 0.5;\n    if (bandW >= bandH) return Math.min(1, Math.max(0, (slices[0].offsetWidth - 8) / bandW));\n    return Math.min(1, Math.max(0, (slices[0].offsetHeight - 8) / bandH));\n  }\n\n  function draw(time, split, aspect) {\n    if (!texA || !texB) return;\n    var horiz = horizNow();\n    var wA = Math.max(0.5, split), wB = Math.max(0.5, 1 - split);\n    var aspA, aspB;\n    if (horiz === 0) { aspA = wA * aspect; aspB = wB * aspect; }\n    else { aspA = aspect / wA; aspB = aspect / wB; }\n    gl.uniform1f(U.uTime, time);\n    gl.uniform1f(U.uSplit, split);\n    gl.uniform1f(U.uHoriz, horiz);\n    gl.uniform1f(U.uTA, texA.aspect);\n    gl.uniform1f(U.uTB, texB.aspect);\n    gl.uniform1f(U.uWA, wA);\n    gl.uniform1f(U.uWB, wB);\n    gl.uniform1f(U.uAspectA, aspA);\n    gl.uniform1f(U.uAspectB, aspB);\n    gl.uniform4f(U.uRectA, texA.rect[0], texA.rect[1], texA.rect[2], texA.rect[3]);\n    gl.uniform4f(U.uRectB, texB.rect[0], texB.rect[1], texB.rect[2], texB.rect[3]);\n    gl.drawArrays(gl.TRIANGLES, 0, 3);\n  }\n  function drawStatic() {\n    if (!ready) return;\n    resize();\n    var lay = layoutSplit();\n    draw(0, lay, bandW / bandH);\n  }\n\n  function tick(ts) {\n    lastTickAt = performance.now();\n    if (!lastTs) lastTs = ts;\n    var dt = Math.min(0.05, Math.max(0, (ts - lastTs) / 1000));\n    lastTs = ts;\n    tSec += dt;\n    var k = 1 - Math.exp(-dt / TAU);\n    splitCur += (splitTarget - splitCur) * k;\n    aspectCur += (aspectTarget - aspectCur) * k;\n    if (bandOffset !== 0) {\n      bandOffset += (0 - bandOffset) * k;\n      if (Math.abs(bandOffset) < 0.15) {\n        bandOffset = 0;\n        band.style.transform = '';\n        band.style.willChange = '';\n      } else {\n        band.style.transform = 'translateY(' + (-bandOffset).toFixed(1) + 'px)';\n      }\n    }\n    draw(tSec, splitCur, aspectCur);\n    if (!animating() && needsRetarget) {\n      needsRetarget = false;\n      stepIdx = 0;\n      resize(); retarget();\n    }\n    // Adaptive quality: sustained slow frames step the DPR cap down.\n    if (dt > 0) { ftSum += dt * 1000; ftCount++; }\n    if (ftCount >= 90) {\n      if (ftSum / ftCount > 26 && stepIdx < dprSteps.length - 1 && !animating()) { stepIdx++; resize(); }\n      ftSum = 0; ftCount = 0;\n    }\n  }\n  function rafFrame(ts) {\n    if (!running) return;\n    lastRafAt = performance.now();\n    tick(ts);\n    raf = requestAnimationFrame(rafFrame);\n  }\n  function startLoop() {\n    if (running || mq.matches) return;\n    running = true; lastTs = 0;\n    raf = requestAnimationFrame(rafFrame);\n  }\n  function stopLoop() {\n    running = false;\n    if (raf) cancelAnimationFrame(raf);\n    if (intervalDriver) { clearInterval(intervalDriver); intervalDriver = null; }\n  }\n  function shouldRun() {\n    return ready && !mq.matches && inView && document.visibilityState === 'visible';\n  }\n  function gate() {\n    if (!ready) return;\n    if (mq.matches) { stopLoop(); drawStatic(); return; }\n    if (shouldRun()) startLoop(); else stopLoop();\n  }\n  // Watchdog: if rAF stalls on a device while the band should be\n  // animating, an interval takes over so taps still move the seam.\n  setInterval(function () {\n    if (!shouldRun() || !running) return;\n    var now = performance.now();\n    if (now - lastTickAt > 700 && !intervalDriver) {\n      intervalDriver = setInterval(function () { tick(performance.now()); }, 50);\n    }\n    if (intervalDriver && now - lastRafAt <= 700) {\n      clearInterval(intervalDriver); intervalDriver = null;\n    }\n  }, 400);\n\n  if (window.IntersectionObserver) {\n    new IntersectionObserver(function (entries) {\n      inView = entries[0].isIntersecting;\n      gate();\n    }, { threshold: 0.02 }).observe(band);\n  }\n  document.addEventListener('visibilitychange', gate);\n  if (mq.addEventListener) mq.addEventListener('change', gate);\n  // State changes: resize the backing store NOW (no debounce -- a\n  // stretched canvas during the gesture reads as distortion), set\n  // the motion targets, and in reduced-motion follow the transition\n  // with frozen-time redraws.\n  var rmTimer = null;\n  new MutationObserver(function () {\n    var nowOpen = band.classList.contains('open');\n    if (!nowOpen && fixedTop && !mq.matches && ready) {\n      // The band just teleported back into flow: counter-shift it\n      // so this frame renders exactly where the fixed band was,\n      // then the tick eases the shift away.\n      var drop = band.getBoundingClientRect().top - fixedTop;\n      if (drop > 1) {\n        bandOffset = drop;\n        band.style.willChange = 'transform';\n        band.style.transform = 'translateY(' + (-drop) + 'px)';\n      }\n    }\n    if (nowOpen) {\n      bandOffset = 0;\n      band.style.transform = '';\n      band.style.willChange = '';\n    }\n    retarget();\n    if (!mq.matches || !ready) return;\n    var until = performance.now() + 950;\n    if (rmTimer) clearInterval(rmTimer);\n    rmTimer = setInterval(function () {\n      drawStatic();\n      if (performance.now() > until) { clearInterval(rmTimer); rmTimer = null; }\n    }, 40);\n  }).observe(band, { attributes: true, attributeFilter: ['class'] });\n\n  canvas.addEventListener('webglcontextlost', function (e) {\n    e.preventDefault();\n    stopLoop();\n    ready = false;\n    band.classList.remove('gl-live');\n    canvas.style.opacity = '0';\n  });\n  canvas.addEventListener('webglcontextrestored', function () {\n    loadTextures();\n  });\n\n  function start() {\n    ready = true;\n    resize();\n    retarget();\n    splitCur = splitTarget; aspectCur = aspectTarget;\n    draw(0.001, splitCur, aspectCur);\n    // First successful frame drawn: reveal the canvas over the DOM.\n    band.style.transform = '';\n    band.classList.add('gl-live');\n    canvas.style.opacity = '1';\n    gate();\n  }\n}\ndocument.querySelectorAll('.latent-band').forEach(function (band) {\n  initDreamGL(band, band.querySelector('canvas.dream-gl'));\n});\n" + "\n</script>\n"
+latent_js = "<script>\n" + r'''(function () {
+  var quilt = document.querySelector('.quilt');
+  if (!quilt) return;
+  document.documentElement.classList.add('latent-live');
+  // The opened quilt starts below the top bar; CSS needs the bar's real
+  // height so the image is sized to the space under it, fully in view.
+  // One world can be open at a time: opening another closes the first.
+  var header = document.querySelector('.site-header');
+  var slices = Array.prototype.slice.call(quilt.querySelectorAll('.slice'));
+  var openSlice = null;
+  function setBar() {
+    if (!header) return;
+    var h = header.offsetHeight;
+    document.documentElement.style.setProperty('--bar-h', h + 'px');
+    document.documentElement.style.setProperty('--bar-half', (h / 2) + 'px');
+  }
+  window.addEventListener('resize', function () { if (openSlice) setBar(); });
+  function closeOpen() {
+    if (!openSlice) return;
+    openSlice = null;
+    quilt.classList.remove('open');
+    slices.forEach(function (s) {
+      s.classList.remove('active'); s.setAttribute('aria-expanded', 'false');
+    });
+    document.documentElement.removeAttribute('data-world');
+    document.documentElement.classList.remove('world-lock');
+    document.documentElement.style.removeProperty('--bar-h');
+    document.documentElement.style.removeProperty('--bar-half');
+  }
+  function toggle(slice) {
+    if (openSlice === slice) { closeOpen(); return; }
+    closeOpen();
+    setBar();
+    openSlice = slice;
+    quilt.classList.add('open');
+    slices.forEach(function (s) {
+      var on = s === slice;
+      s.classList.toggle('active', on);
+      s.setAttribute('aria-expanded', on ? 'true' : 'false');
+    });
+    document.documentElement.setAttribute('data-world', slice.getAttribute('data-world'));
+    document.documentElement.classList.add('world-lock');
+  }
+  slices.forEach(function (s) {
+    s.addEventListener('click', function () { toggle(s); });
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && openSlice) closeOpen(); });
+})();''' + "\n</script>\n" + "<script>\n" + r'''function initDreamQuilt(quilt, canvas) {
+  // Dreamscape liquid-dimensional seam v5: THE QUILT.
+  //
+  // v3/v4 ran one WebGL engine per pair of worlds (own canvas, context,
+  // textures and loop per band). v5 is a single engine for the whole
+  // page: one context, one shader, one clock. The worlds form a grid of
+  // cells whose rectangles are measured from the DOM layout, so the
+  // seam effect is native to the grid: every pair of abutting cells
+  // shares a liquid seam, horizontally AND vertically, including the
+  // cross-junction where four worlds meet. Adding worlds is now data:
+  // more slices in the grid, more cells in the atlas, no new engine.
+  //
+  // The per-seam math is the v3 math untouched -- same wave/slope
+  // functions, same 0.055 band falloff, same refraction and glow terms,
+  // same per-world stage framing (coverUv, focal 0.5/0.68, 1.15
+  // overscan), same drift patterns (alternating by cell, as A/B did),
+  // same exponential clock (tau ~190ms). What changed is the geometry
+  // model: a split scalar became per-cell rectangles easing toward
+  // measured targets on that same clock, and the two textures became
+  // one packed atlas.
+  //
+  // Mobile budget, deliberate:
+  // - One context and one rAF for the whole page (was: one per pair).
+  // - Atlas cells cap at 1024px on small screens (2048 desktop), and
+  //   the packer picks the shelf budget with the smallest POT area.
+  // - DPR step-down [2, 1.75, 1.5] on sustained slow frames, as v4.
+  // - IntersectionObserver + visibility gating, as v4: an off-screen
+  //   quilt costs nothing. The rAF watchdog is kept too.
+  // - Texture sources are read from each slice's own <img> (the v4
+  //   lesson: no hardcoded art paths, ever).
+  if (!quilt || !canvas) return;
+  var slices = Array.prototype.slice.call(quilt.querySelectorAll('.slice'));
+  var N = slices.length, MAXC = 12;
+  if (N < 2 || N > MAXC) return;
+
+  var gl;
+  try {
+    gl = canvas.getContext('webgl', { alpha: false, depth: false, stencil: false, antialias: false, powerPreference: 'low-power' });
+  } catch (e) { gl = null; }
+  if (!gl) return;
+
+  var VERT = 'attribute vec2 aPos;varying vec2 vUv;void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}';
+
+  // Fragment shader, assembled in JS so the four seam sides (L,R,T,B)
+  // are emitted as straight-line code with literal indices -- no
+  // dynamic array indexing beyond loop indices anywhere.
+  var F = [
+    'precision mediump float;',
+    'varying vec2 vUv;',
+    'uniform sampler2D uAtlas;',
+    'uniform float uTime;',
+    'uniform float uBand;',
+    'uniform float uQA;', // quilt aspect (width / height, CSS px)
+    'uniform float uCount;',
+    'uniform vec4 uRect[' + MAXC + '];', // cell rects, page space (x0, y0, x1, y1), y down
+    'uniform vec4 uUVR[' + MAXC + '];', // atlas sub-rect per cell (scaleX, scaleY, offX, offY)
+    'uniform float uTA[' + MAXC + '];', // texture aspect per cell
+    'uniform vec4 uNbr[' + MAXC + '];', // neighbour cell index per side (L, R, T, B), -1 none
+    'uniform vec4 uAct[' + MAXC + '];', // seam activity per side (L, R, T, B)
+    'vec2 coverUv(vec2 local, float ta, float va){',
+    '  vec2 f = vec2(0.5, 0.68);',
+    '  float r = va / ta;',
+    '  vec2 u = local;',
+    '  if (r >= 1.0) { float vf = 1.0 / r; u = vec2(local.x, f.y * (1.0 - vf) + local.y * vf); }',
+    '  else { u = vec2(f.x * (1.0 - r) + local.x * r, local.y); }',
+    '  return f + (u - f) / 1.15;',
+    '}',
+    'float wave(float s, float t){',
+    '  return 0.011 * sin(6.9 * s - t * 0.70)',
+    '       + 0.006 * sin(13.7 * s + t * 0.42 + 1.7)',
+    '       + 0.0025 * sin(27.0 * s - t * 0.24 + 4.1);',
+    '}',
+    'float slope(float s, float t){',
+    '  return 0.011 * 6.9 * cos(6.9 * s - t * 0.70)',
+    '       + 0.006 * 13.7 * cos(13.7 * s + t * 0.42 + 1.7)',
+    '       + 0.0025 * 27.0 * cos(27.0 * s - t * 0.24 + 4.1);',
+    '}',
+    'vec2 driftFor(float idx, float t){',
+    '  if (mod(idx, 2.0) < 0.5) return vec2(sin(t * 0.33), sin(t * 0.23 + 1.3)) * 0.020;',
+    '  return vec2(sin(t * 0.19 + 2.1), sin(t * 0.27 + 0.4)) * 0.012;',
+    '}',
+    'void main(){',
+    '  vec2 p = vec2(vUv.x, 1.0 - vUv.y);', // page space: y down
+    '  float t = uTime;',
+    '  int ci = -1;',
+    '  vec4 cr = vec4(0.0); vec4 cuv = vec4(0.0); float cta = 1.0;',
+    '  vec4 nbr = vec4(-1.0); vec4 act4 = vec4(0.0);',
+    '  for (int i = 0; i < ' + MAXC + '; i++) {',
+    '    if (float(i) >= uCount) break;',
+    '    vec4 r = uRect[i];',
+    '    if (p.x >= r.x && p.x <= r.z && p.y >= r.y && p.y <= r.w) {',
+    '      ci = i; cr = r; cuv = uUVR[i]; cta = uTA[i]; nbr = uNbr[i]; act4 = uAct[i];',
+    '    }',
+    '  }',
+    '  if (ci < 0) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }',
+    '  vec2 cellSize = max(cr.zw - cr.xy, vec2(0.0001));',
+    '  vec2 local = (p - cr.xy) / cellSize;',
+    '  float breathe = 1.0 + 0.2 * sin(t * 0.31 + 0.8);',
+    '  vec2 refrSum = vec2(0.0);'
+  ];
+  var COMP = ['x', 'y', 'z', 'w'];
+  // Per-side seam pre-pass: signed distance to the displaced edge line
+  // (positive inside this cell), band falloff, slope, refraction vector.
+  // Geometry mirrors v3: for a vertical seam the wave runs on uv.y
+  // (GL-up, hence 1.0 - p.y), for a horizontal seam on uv.x.
+  var GEO = [
+    { pre: 'lnS = cr.x + wave(1.0 - p.y, t) * actS; dS = p.x - lnS; slS = slope(1.0 - p.y, t);',
+      post: 'rfS = vec2(-slS * 0.012 * bFS, 0.0);' },
+    { pre: 'lnS = cr.z + wave(1.0 - p.y, t) * actS; dS = lnS - p.x; slS = slope(1.0 - p.y, t);',
+      post: 'rfS = vec2(slS * 0.012 * bFS, 0.0);' },
+    { pre: 'lnS = cr.y + wave(p.x, t) * actS; dS = p.y - lnS; slS = slope(p.x, t);',
+      post: 'rfS = vec2(0.0, slS * 0.012 * bFS);' },
+    { pre: 'lnS = cr.w + wave(p.x, t) * actS; dS = lnS - p.y; slS = slope(p.x, t);',
+      post: 'rfS = vec2(0.0, -slS * 0.012 * bFS);' }
+  ];
+  function subS(str, s) { return str.split('S').join(String(s)); }
+  for (var s = 0; s < 4; s++) {
+    F.push(
+      '  float nj' + s + ' = nbr.' + COMP[s] + ';',
+      '  float act' + s + ' = act4.' + COMP[s] + ';',
+      '  vec4 nr' + s + ' = vec4(0.0); vec4 nuv' + s + ' = vec4(0.0); float nta' + s + ' = 1.0; float has' + s + ' = 0.0;',
+      '  for (int j = 0; j < ' + MAXC + '; j++) {',
+      '    if (float(j) >= uCount) break;',
+      '    if (abs(float(j) - nj' + s + ') < 0.5) { nr' + s + ' = uRect[j]; nuv' + s + ' = uUVR[j]; nta' + s + ' = uTA[j]; has' + s + ' = 1.0; }',
+      '  }',
+      '  float ln' + s + ' = 0.0; float d' + s + ' = 1000.0; float bF' + s + ' = 0.0; float sl' + s + ' = 0.0; vec2 rf' + s + ' = vec2(0.0);',
+      '  if (has' + s + ' > 0.5 && act' + s + ' > 0.001) {',
+      '    ' + subS(GEO[s].pre, s).replace(/act\d/g, 'act' + s),
+      '    bF' + s + ' = exp(-abs(d' + s + ') / uBand) * act' + s + ';',
+      '    ' + subS(GEO[s].post, s),
+      '    refrSum += rf' + s + ';',
+      '  }'
+    );
+  }
+  F.push(
+    '  vec2 drift = driftFor(float(ci), t);',
+    '  float va = cellSize.x * uQA / cellSize.y;',
+    '  vec2 ouv = coverUv(local, cta, va) + drift + refrSum * breathe;',
+    '  vec3 col = texture2D(uAtlas, ouv * cuv.xy + cuv.zw).rgb;'
+  );
+  for (var s2 = 0; s2 < 4; s2++) {
+    F.push(
+      '  if (has' + s2 + ' > 0.5 && act' + s2 + ' > 0.001) {',
+      '    vec2 nsz' + s2 + ' = max(nr' + s2 + '.zw - nr' + s2 + '.xy, vec2(0.0001));',
+      '    vec2 nl' + s2 + ' = (p - nr' + s2 + '.xy) / nsz' + s2 + ';',
+      '    float nva' + s2 + ' = nsz' + s2 + '.x * uQA / nsz' + s2 + '.y;',
+      '    vec2 nuv2_' + s2 + ' = coverUv(nl' + s2 + ', nta' + s2 + ', nva' + s2 + ') + driftFor(nj' + s2 + ', t) + rf' + s2 + ' * 1.6 * breathe;',
+      '    vec3 ncol' + s2 + ' = texture2D(uAtlas, nuv2_' + s2 + ' * nuv' + s2 + '.xy + nuv' + s2 + '.zw).rgb;',
+      '    col = mix(ncol' + s2 + ', col, smoothstep(-0.0015, 0.0015, d' + s2 + '));',
+      '    col += clamp(sl' + s2 + ', -1.0, 1.0) * bF' + s2 + ' * 0.13;',
+      '    col += exp(-abs(d' + s2 + ') * 220.0) * 0.08 * act' + s2 + ';',
+      '    col -= exp(-abs(d' + s2 + ' - 0.006) * 160.0) * 0.05 * act' + s2 + ';',
+      '  }'
+    );
+  }
+  F.push('  gl_FragColor = vec4(col, 1.0);', '}');
+  var FRAG = F.join('\n');
+
+  function shader(type, src) {
+    var sh = gl.createShader(type);
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) return null;
+    return sh;
+  }
+  var vs = shader(gl.VERTEX_SHADER, VERT), fs = shader(gl.FRAGMENT_SHADER, FRAG);
+  if (!vs || !fs) return;
+  var prog = gl.createProgram();
+  gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+  gl.useProgram(prog);
+
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  var aPos = gl.getAttribLocation(prog, 'aPos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  var U = {};
+  ['uAtlas', 'uTime', 'uBand', 'uQA', 'uCount'].forEach(function (name) {
+    U[name] = gl.getUniformLocation(prog, name);
+  });
+  U.uRect = gl.getUniformLocation(prog, 'uRect[0]');
+  U.uUVR = gl.getUniformLocation(prog, 'uUVR[0]');
+  U.uTA = gl.getUniformLocation(prog, 'uTA[0]');
+  U.uNbr = gl.getUniformLocation(prog, 'uNbr[0]');
+  U.uAct = gl.getUniformLocation(prog, 'uAct[0]');
+  gl.uniform1i(U.uAtlas, 0);
+  gl.uniform1f(U.uBand, 0.055);
+  gl.uniform1f(U.uCount, N);
+
+  var anisoExt = gl.getExtension('EXT_texture_filter_anisotropic') ||
+                 gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
+  var maxAniso = anisoExt ? gl.getParameter(anisoExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT) : 1;
+  var maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+
+  function nextPow2(v) { var p = 1; while (p < v) p *= 2; return p; }
+
+  // ---- Atlas: every world packed into ONE texture -------------------
+  var atlasTex = null;
+  var cellUV = [];   // per cell: [sx, sy, ox, oy]
+  var cellTA = [];   // per cell: natural aspect
+  function buildAtlas() {
+    var smallScreen = Math.min(window.screen.width || 9999, window.screen.height || 9999) < 700;
+    var cellMax = smallScreen ? 1024 : 2048;
+    var PAD = 8;
+    var sized = slices.map(function (el, idx) {
+      var img = el.querySelector('img');
+      return { idx: idx, img: img, nw: img.naturalWidth, nh: img.naturalHeight };
+    });
+    for (var attempt = 0; attempt < 3; attempt++) {
+      // Try shelf budgets; keep the packing whose power-of-two atlas
+      // has the smallest area (then the smallest max dimension).
+      var best = null;
+      [cellMax, Math.floor(cellMax * 1.5), cellMax * 2].forEach(function (budget) {
+        var x = 0, y = 0, rowH = 0, usedW = 0;
+        var items = sized.map(function (it) {
+          var sc = Math.min(1, cellMax / Math.max(it.nw, it.nh));
+          var dw = Math.max(2, Math.round(it.nw * sc)), dh = Math.max(2, Math.round(it.nh * sc));
+          if (x > 0 && x + dw > budget) { x = 0; y += rowH + PAD; rowH = 0; }
+          var rec = { idx: it.idx, img: it.img, x: x, y: y, w: dw, h: dh };
+          x += dw + PAD;
+          if (x - PAD > usedW) usedW = x - PAD;
+          if (dh > rowH) rowH = dh;
+          return rec;
+        });
+        var usedH = y + rowH;
+        var AW = nextPow2(usedW), AH = nextPow2(usedH);
+        var score = AW * AH, tie = Math.max(AW, AH);
+        if (!best || score < best.score || (score === best.score && tie < best.tie)) {
+          best = { items: items, AW: AW, AH: AH, score: score, tie: tie };
+        }
+      });
+      if (Math.max(best.AW, best.AH) <= Math.min(4096, maxTexSize) || attempt === 2) {
+        var cv = document.createElement('canvas');
+        cv.width = best.AW; cv.height = best.AH;
+        var ctx = cv.getContext('2d');
+        cellUV = new Array(N); cellTA = new Array(N);
+        best.items.forEach(function (it) {
+          ctx.drawImage(it.img, it.x, it.y, it.w, it.h);
+          cellUV[it.idx] = [it.w / best.AW, it.h / best.AH, it.x / best.AW, 1 - (it.y + it.h) / best.AH];
+          cellTA[it.idx] = it.img.naturalWidth / it.img.naturalHeight;
+        });
+        if (atlasTex) gl.deleteTexture(atlasTex);
+        atlasTex = gl.createTexture();
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, atlasTex);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, cv);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        if (anisoExt && maxAniso > 1) gl.texParameteri(gl.TEXTURE_2D, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(16, maxAniso));
+        gl.generateMipmap(gl.TEXTURE_2D);
+        return true;
+      }
+      cellMax = Math.floor(cellMax / 2);
+    }
+    return false;
+  }
+
+  // ---- Cell geometry: measured rects, eased on the v3 clock ---------
+  var home = [], target = [], cur = [], nbrs = [];
+  var quiltW = 0, quiltH = 0;
+  function clamp01(v) { return Math.min(1, Math.max(0, v)); }
+  function measureLayout() {
+    var q = quilt.getBoundingClientRect();
+    if (!q.width || !q.height) return false;
+    quiltW = q.width; quiltH = q.height;
+    home = slices.map(function (el) {
+      var r = el.getBoundingClientRect();
+      return [
+        clamp01((r.left - q.left) / q.width), clamp01((r.top - q.top) / q.height),
+        clamp01((r.right - q.left) / q.width), clamp01((r.bottom - q.top) / q.height)
+      ];
+    });
+    // Neighbours from the settled layout: cells whose home rects abut
+    // within a tolerance, with real overlap on the cross axis.
+    nbrs = home.map(function () { return [-1, -1, -1, -1]; });
+    for (var i = 0; i < N; i++) {
+      for (var j = 0; j < N; j++) {
+        if (i === j) continue;
+        var a = home[i], b = home[j];
+        var ovY = Math.min(a[3], b[3]) - Math.max(a[1], b[1]);
+        var ovX = Math.min(a[2], b[2]) - Math.max(a[0], b[0]);
+        if (Math.abs(a[2] - b[0]) < 0.01 && ovY > 0.05) nbrs[i][1] = j; // j right of i
+        if (Math.abs(a[0] - b[2]) < 0.01 && ovY > 0.05) nbrs[i][0] = j; // j left of i
+        if (Math.abs(a[3] - b[1]) < 0.01 && ovX > 0.05) nbrs[i][3] = j; // j below i
+        if (Math.abs(a[1] - b[3]) < 0.01 && ovX > 0.05) nbrs[i][2] = j; // j above i
+      }
+    }
+    return true;
+  }
+  function computeTargets() {
+    target = home.map(function (h) { return h.slice(); });
+    if (!quilt.classList.contains('open')) return;
+    var ai = -1;
+    slices.forEach(function (el, i) { if (el.classList.contains('active')) ai = i; });
+    if (ai < 0) return;
+    for (var i = 0; i < N; i++) {
+      if (i === ai) { target[i] = [0, 0, 1, 1]; continue; }
+      // Collapse the other worlds onto the quilt edge nearest their
+      // home, keeping the cross-axis span, so a close re-opens them
+      // from that edge -- the v3 split-parking behaviour, generalised.
+      var h = home[i];
+      var cx = (h[0] + h[2]) / 2, cy = (h[1] + h[3]) / 2;
+      if (Math.abs(cx - 0.5) >= Math.abs(cy - 0.5)) {
+        var ex = cx < 0.5 ? 0 : 1;
+        target[i] = [ex, h[1], ex, h[3]];
+      } else {
+        var ey = cy < 0.5 ? 0 : 1;
+        target[i] = [h[0], ey, h[2], ey];
+      }
+    }
+  }
+  function retarget() {
+    resize();
+    if (!measureLayout()) return;
+    computeTargets();
+    if (quilt.classList.contains('open')) fixedTop = quilt.getBoundingClientRect().top;
+  }
+  function smoothstepJS(e0, e1, x) {
+    var t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
+    return t * t * (3 - 2 * t);
+  }
+  function activities() {
+    // Per side: the seam calms as either side's across-extent parks at
+    // an edge -- v3's edge factor, computed from the eased rects.
+    var acts = [];
+    for (var i = 0; i < N; i++) {
+      var a = cur[i], out = [0, 0, 0, 0];
+      for (var s = 0; s < 4; s++) {
+        var j = nbrs[i] ? nbrs[i][s] : -1;
+        if (j < 0 || !cur[j] || !a) continue;
+        var b = cur[j], v;
+        if (s === 0 || s === 1) {
+          var ovY = Math.min(a[3], b[3]) - Math.max(a[1], b[1]);
+          v = smoothstepJS(0, 0.07, Math.min(a[2] - a[0], b[2] - b[0])) * smoothstepJS(0, 0.05, ovY);
+        } else {
+          var ovX = Math.min(a[2], b[2]) - Math.max(a[0], b[0]);
+          v = smoothstepJS(0, 0.07, Math.min(a[3] - a[1], b[3] - b[1])) * smoothstepJS(0, 0.05, ovX);
+        }
+        out[s] = v;
+      }
+      acts.push(out[0], out[1], out[2], out[3]);
+    }
+    return acts;
+  }
+
+  // ---- Loop machinery: ported from v4, now singular ------------------
+  var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var dprSteps = [2, 1.75, 1.5], stepIdx = 0;
+  var inView = true, running = false, raf = 0, lastTs = 0, tSec = 0;
+  var lastTickAt = 0, lastRafAt = 0, intervalDriver = null;
+  var ftSum = 0, ftCount = 0;
+  var TAU = 0.19;
+  var quiltOffset = 0;     // FLIP counter-shift for the close drop
+  var fixedTop = 0;        // quilt's viewport top while open (recorded)
+  var needsRetarget = false;
+  var ready = false;
+
+  function resize() {
+    var w = quilt.clientWidth, h = quilt.clientHeight;
+    if (!w || !h) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, dprSteps[stepIdx]);
+    var bw = Math.round(w * dpr), bh = Math.round(h * dpr);
+    if (canvas.width !== bw || canvas.height !== bh) {
+      canvas.width = bw; canvas.height = bh;
+      gl.viewport(0, 0, bw, bh);
+    }
+  }
+  function animating() {
+    if (quiltOffset !== 0) return true;
+    for (var i = 0; i < N; i++) {
+      if (!cur[i] || !target[i]) return true;
+      for (var c = 0; c < 4; c++) {
+        if (Math.abs(target[i][c] - cur[i][c]) > 0.0015) return true;
+      }
+    }
+    return false;
+  }
+  var rectBuf = new Float32Array(MAXC * 4);
+  var uvBuf = new Float32Array(MAXC * 4);
+  var taBuf = new Float32Array(MAXC);
+  var nbrBuf = new Float32Array(MAXC * 4);
+  var actBuf = new Float32Array(MAXC * 4);
+  function draw(time) {
+    if (!atlasTex || !cur.length) return;
+    var i, c;
+    for (i = 0; i < N; i++) {
+      for (c = 0; c < 4; c++) {
+        rectBuf[i * 4 + c] = cur[i][c];
+        uvBuf[i * 4 + c] = cellUV[i][c];
+        nbrBuf[i * 4 + c] = nbrs[i] ? nbrs[i][c] : -1;
+      }
+      taBuf[i] = cellTA[i];
+    }
+    var acts = activities();
+    for (i = 0; i < N * 4; i++) actBuf[i] = acts[i];
+    gl.uniform1f(U.uTime, time);
+    gl.uniform1f(U.uQA, quiltW / Math.max(1, quiltH));
+    gl.uniform4fv(U.uRect, rectBuf);
+    gl.uniform4fv(U.uUVR, uvBuf);
+    gl.uniform1fv(U.uTA, taBuf);
+    gl.uniform4fv(U.uNbr, nbrBuf);
+    gl.uniform4fv(U.uAct, actBuf);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  function drawStatic() {
+    if (!ready) return;
+    resize();
+    if (!measureLayout()) return;
+    computeTargets();
+    cur = target.map(function (r) { return r.slice(); });
+    draw(0.001);
+  }
+  function tick(ts) {
+    lastTickAt = performance.now();
+    if (!lastTs) lastTs = ts;
+    var dt = Math.min(0.05, Math.max(0, (ts - lastTs) / 1000));
+    lastTs = ts;
+    tSec += dt;
+    var k = 1 - Math.exp(-dt / TAU);
+    for (var i = 0; i < N; i++) {
+      if (!cur[i] || !target[i]) continue;
+      for (var c = 0; c < 4; c++) cur[i][c] += (target[i][c] - cur[i][c]) * k;
+    }
+    if (quiltOffset !== 0) {
+      quiltOffset += (0 - quiltOffset) * k;
+      if (Math.abs(quiltOffset) < 0.15) {
+        quiltOffset = 0;
+        quilt.style.transform = '';
+        quilt.style.willChange = '';
+      } else {
+        quilt.style.transform = 'translateY(' + (-quiltOffset).toFixed(1) + 'px)';
+      }
+    }
+    draw(tSec);
+    if (!animating() && needsRetarget) {
+      needsRetarget = false;
+      stepIdx = 0;
+      retarget();
+    }
+    if (dt > 0) { ftSum += dt * 1000; ftCount++; }
+    if (ftCount >= 90) {
+      if (ftSum / ftCount > 26 && stepIdx < dprSteps.length - 1 && !animating()) { stepIdx++; resize(); }
+      ftSum = 0; ftCount = 0;
+    }
+  }
+  function rafFrame(ts) {
+    if (!running) return;
+    lastRafAt = performance.now();
+    tick(ts);
+    raf = requestAnimationFrame(rafFrame);
+  }
+  function startLoop() {
+    if (running || mq.matches) return;
+    running = true; lastTs = 0;
+    raf = requestAnimationFrame(rafFrame);
+  }
+  function stopLoop() {
+    running = false;
+    if (raf) cancelAnimationFrame(raf);
+    if (intervalDriver) { clearInterval(intervalDriver); intervalDriver = null; }
+  }
+  function shouldRun() {
+    return ready && !mq.matches && inView && document.visibilityState === 'visible';
+  }
+  function gate() {
+    if (!ready) return;
+    if (mq.matches) { stopLoop(); drawStatic(); return; }
+    if (shouldRun()) startLoop(); else stopLoop();
+  }
+  // Watchdog: if rAF stalls on a device while the quilt should be
+  // animating, an interval takes over so taps still move the seams.
+  setInterval(function () {
+    if (!shouldRun() || !running) return;
+    var now = performance.now();
+    if (now - lastTickAt > 700 && !intervalDriver) {
+      intervalDriver = setInterval(function () { tick(performance.now()); }, 50);
+    }
+    if (intervalDriver && now - lastRafAt <= 700) {
+      clearInterval(intervalDriver); intervalDriver = null;
+    }
+  }, 400);
+
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(function (entries) {
+      inView = entries[0].isIntersecting;
+      gate();
+    }, { threshold: 0.02 }).observe(quilt);
+  }
+  document.addEventListener('visibilitychange', gate);
+  if (mq.addEventListener) mq.addEventListener('change', gate);
+
+  var resizeTimer = 0;
+  function onResize() {
+    if (animating()) { needsRetarget = true; return; }
+    stepIdx = 0;
+    retarget();
+    if (!quilt.classList.contains('open')) {
+      cur = target.map(function (r) { return r.slice(); });
+    }
+    if (mq.matches) drawStatic();
+  }
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(onResize, 120);
+    }).observe(quilt);
+  }
+  window.addEventListener('resize', onResize);
+
+  var rmTimer = null;
+  new MutationObserver(function () {
+    var nowOpen = quilt.classList.contains('open');
+    if (!nowOpen && fixedTop && !mq.matches && ready) {
+      // The quilt just teleported back into flow: counter-shift it so
+      // this frame renders exactly where the fixed quilt was, then the
+      // tick eases the shift away (the v3.1 FLIP, kept).
+      var drop = quilt.getBoundingClientRect().top - fixedTop;
+      if (drop > 1) {
+        quiltOffset = drop;
+        quilt.style.willChange = 'transform';
+        quilt.style.transform = 'translateY(' + (-drop) + 'px)';
+      }
+    }
+    if (nowOpen) {
+      quiltOffset = 0;
+      quilt.style.transform = '';
+      quilt.style.willChange = '';
+    }
+    retarget();
+    if (!mq.matches || !ready) return;
+    var until = performance.now() + 950;
+    if (rmTimer) clearInterval(rmTimer);
+    rmTimer = setInterval(function () {
+      drawStatic();
+      if (performance.now() > until) { clearInterval(rmTimer); rmTimer = null; }
+    }, 40);
+  }).observe(quilt, { attributes: true, attributeFilter: ['class'] });
+
+  canvas.addEventListener('webglcontextlost', function (e) {
+    e.preventDefault();
+    stopLoop();
+    ready = false;
+    quilt.classList.remove('gl-live');
+    canvas.style.opacity = '0';
+  });
+  canvas.addEventListener('webglcontextrestored', function () {
+    if (buildAtlas()) start();
+  });
+
+  function start() {
+    ready = true;
+    retarget();
+    cur = target.map(function (r) { return r.slice(); });
+    draw(0.001);
+    // First successful frame drawn: reveal the canvas over the DOM.
+    quilt.style.transform = '';
+    quilt.classList.add('gl-live');
+    canvas.style.opacity = '1';
+    gate();
+  }
+
+  // Wait for the slices' own images (already loading as DOM <img>s),
+  // then pack the atlas and start. Any failure leaves the DOM fallback.
+  var pending = 0, failed = false;
+  function maybeStart() {
+    if (failed || pending > 0 || ready) return;
+    try {
+      if (buildAtlas()) start();
+    } catch (e) { /* texture failure: fallback stays, no gl-live */ }
+  }
+  slices.forEach(function (el) {
+    var img = el.querySelector('img');
+    if (!img) { failed = true; return; }
+    if (img.complete && img.naturalWidth > 0) return;
+    if (img.complete && img.naturalWidth === 0) { failed = true; return; }
+    pending++;
+    img.addEventListener('load', function () { pending--; maybeStart(); });
+    img.addEventListener('error', function () { failed = true; });
+  });
+  maybeStart();
+}
+initDreamQuilt(document.querySelector('.quilt'), document.querySelector('.quilt canvas.dream-gl'));''' + "\n</script>\n"
+
 page("dreams.html", "Dreamscape — Adam Laloge",
-     "AI artwork directed by Adam Laloge. Images sit in two-image splits. Open one and it fills the screen while the page takes on its colors.",
+     "AI artwork directed by Adam Laloge. Worlds are quilted into a single grid, with liquid seams between every pair. Open one and it fills the screen while the page takes on its colors.",
      "dreams.html", latent_body, latent_js)
 
 # ---------- Bookshelf ----------
