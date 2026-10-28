@@ -1310,3 +1310,8 @@ body.sitemap-body .latent-scrollzone {
 @media (max-width: 1080px) and (min-width: 761px) {
   .site-header nav a { margin-left: 16px; font-size: 14px; }
 }
+
+/* Post pages: <article> is not a <section>, so it misses the section
+   top padding every other page gets -- give it the same rhythm. */
+.post { padding-top: 56px; }
+@media (max-width: 760px) { .post { padding-top: 40px; } }
