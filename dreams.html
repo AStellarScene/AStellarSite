@@ -438,7 +438,7 @@ function initDreamQuilt(quilt, canvas) {
       '    col = mix(ncol' + s2 + ', col, smoothstep(-0.0015, 0.0015, d' + s2 + '));',
       '    col += clamp(sl' + s2 + ', -1.0, 1.0) * bF' + s2 + ' * 0.13;',
       '    col += exp(-abs(d' + s2 + ') * uBw * 0.28) * 0.08 * act' + s2 + ';',
-      '    col -= exp(-abs(d' + s2 + ' - 4.5 / uBw) * uBw * 0.20) * 0.05 * act' + s2 + ';',
+      '    col -= exp(-abs(d' + s2 + ' - 4.5 / uBw) * uBw * 0.20) * 0.0 * act' + s2 + ';', // v6.2: groove zeroed — bisection (2026-10-28) convicted it of the straight centre line; slope light + glow keep the dimension
       '  }'
     );
   }
