@@ -41,9 +41,9 @@ function setup(cv, fragSrc, imgA, imgB) {
   gl.uniform1f(gl.getUniformLocation(p, 'uBw'), cv.width);
   gl.uniform4f(gl.getUniformLocation(p, 'uVis'), -1, -1, 2, 2);
   gl.uniform1f(gl.getUniformLocation(p, 'uTime'), 30.0);
-  gl.uniform1i(gl.getUniformLocation(p, 'uCount'), 2);
+  gl.uniform1f(gl.getUniformLocation(p, 'uCount'), 2);
   var rects = new Float32Array(48), uvrs = new Float32Array(48), tas = new Float32Array(12);
-  var nbr = new Int32Array(48), act = new Float32Array(48), ph = new Float32Array(48), tm = new Float32Array(48), am = new Float32Array(48);
+  var nbr = new Float32Array(48), act = new Float32Array(48), ph = new Float32Array(48), tm = new Float32Array(48), am = new Float32Array(48);
   rects.set([0,0,0.5,1,  0.5,0,1,1], 0);
   tas[0] = 1206/608; tas[1] = 1206/678;
   nbr.set([-1, 1, -1, -1,   0, -1, -1, -1], 0);
@@ -54,7 +54,7 @@ function setup(cv, fragSrc, imgA, imgB) {
   gl.uniform4fv(gl.getUniformLocation(p, 'uRect'), rects);
   gl.uniform4fv(gl.getUniformLocation(p, 'uUVR'), uvrs);
   gl.uniform1fv(gl.getUniformLocation(p, 'uTA'), tas);
-  gl.uniform4iv(gl.getUniformLocation(p, 'uNbr'), nbr);
+  gl.uniform4fv(gl.getUniformLocation(p, 'uNbr'), nbr);
   gl.uniform1fv(gl.getUniformLocation(p, 'uAct'), act);
   gl.uniform1fv(gl.getUniformLocation(p, 'uPhase'), ph);
   gl.uniform1fv(gl.getUniformLocation(p, 'uTempo'), tm);
