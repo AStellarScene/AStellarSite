@@ -250,6 +250,8 @@ And then v6.3 was rolled back, the same day, on my call — which is also part o
 
 ## The record
 
+Nine engine versions in three days. The pace is part of the record, not a footnote to it: every version below was live, on real devices, within hours of the one before it, and most of what the later versions know was taught by a screenshot of the earlier one failing.
+
 | Version | Date | Architecture | Fate |
 |---|---|---|---|
 | v1–v2 | Oct 25–26 | CSS bands, membrane seams | Superseded — no displacement possible |
