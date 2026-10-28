@@ -1304,3 +1304,9 @@ body.sitemap-body .latent-scrollzone {
 .post-body code { font-family: var(--mono); font-size: .92em; }
 .post-body blockquote { margin: 20px 0; padding: 4px 18px; border-left: 3px solid var(--teal); }
 .post-foot { margin-top: 40px; }
+
+/* Nav compression band: between the hamburger cutoff (760px) and
+   full width, the row tightens instead of crowding. */
+@media (max-width: 1080px) and (min-width: 761px) {
+  .site-header nav a { margin-left: 16px; font-size: 14px; }
+}

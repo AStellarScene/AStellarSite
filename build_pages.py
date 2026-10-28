@@ -41,7 +41,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=62">
+{schema}<link rel="stylesheet" href="styles.css?v=63">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -61,7 +61,7 @@ NAV_ITEMS = [
 
 def header(active):
     links = "\n      ".join(
-        '<a href="%s"%s>%s</a>' % (href, ' class="active"' if href == active else "", label)
+        '<a href="%s"%s>%s</a>' % (href, ' class="active" aria-current="page"' if href == active else "", label)
         for href, label in NAV_ITEMS)
     return """<header class="site-header">
   <div class="wrap header-inner">
