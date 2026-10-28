@@ -208,6 +208,7 @@ function initDreamQuilt(quilt, canvas) {
     'uniform float uBand;',
     'uniform float uQA;', // quilt aspect (width / height, CSS px)
     'uniform float uCount;',
+    'uniform vec4 uVis;', // visible region of the canvas (GL uv) -- off-view fragments exit cheap
     'uniform vec4 uRect[' + MAXC + '];', // cell rects, page space (x0, y0, x1, y1), y down
     'uniform vec4 uUVR[' + MAXC + '];', // atlas sub-rect per cell (scaleX, scaleY, offX, offY)
     'uniform float uTA[' + MAXC + '];', // texture aspect per cell
@@ -258,6 +259,9 @@ function initDreamQuilt(quilt, canvas) {
     '  return vec2(sin(t * 0.19 + 2.1 + ph), sin(t * 0.27 + 0.4 + ph)) * 0.012;',
     '}',
     'void main(){',
+    '  if (vUv.x < uVis.x || vUv.x > uVis.z || vUv.y < uVis.y || vUv.y > uVis.w) {',
+    '    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return;',
+    '  }',
     '  vec2 p = vec2(vUv.x, 1.0 - vUv.y);', // page space: y down
     '  float t = uTime;',
     '  int ci = -1;',
@@ -280,7 +284,13 @@ function initDreamQuilt(quilt, canvas) {
     // renders every world upside-down -- caught on the live page.
     '  vec2 local = vec2((p.x - cr.x) / cellSize.x, 1.0 - (p.y - cr.y) / cellSize.y);',
     '  float breathe = 1.0 + 0.2 * sin(t * 0.31 + 0.8);',
-    '  vec2 refrSum = vec2(0.0);'
+    '  vec2 refrSum = vec2(0.0);',
+    // Interior fast path: beyond 0.10 of every edge, the seam terms
+    // contribute under ~0.4% luminance (the band falloff sees to
+    // that), so the per-side seam work is skipped entirely. Most of
+    // the quilt is interior -- this is what keeps full DPR affordable.
+    '  float edgeDist = min(min(p.x - cr.x, cr.z - p.x), min(p.y - cr.y, cr.w - p.y));',
+    '  bool nearSeam = edgeDist < 0.10;'
   ];
   var COMP = ['x', 'y', 'z', 'w'];
   // Per-side seam pre-pass: signed distance to the displaced edge line
@@ -311,7 +321,7 @@ function initDreamQuilt(quilt, canvas) {
       '    if (abs(float(j) - nj' + s + ') < 0.5) { nr' + s + ' = uRect[j]; nuv' + s + ' = uUVR[j]; nta' + s + ' = uTA[j]; has' + s + ' = 1.0; }',
       '  }',
       '  float ln' + s + ' = 0.0; float d' + s + ' = 1000.0; float bF' + s + ' = 0.0; float sl' + s + ' = 0.0; vec2 rf' + s + ' = vec2(0.0);',
-      '  if (has' + s + ' > 0.5 && act' + s + ' > 0.001) {',
+      '  if (nearSeam && has' + s + ' > 0.5 && act' + s + ' > 0.001) {',
       '    ' + subS(GEO[s].pre, s).replace(/act\d/g, 'act' + s),
       '    bF' + s + ' = exp(-abs(d' + s + ') / uBand) * act' + s + ';',
       '    ' + subS(GEO[s].post, s),
@@ -327,7 +337,7 @@ function initDreamQuilt(quilt, canvas) {
   );
   for (var s2 = 0; s2 < 4; s2++) {
     F.push(
-      '  if (has' + s2 + ' > 0.5 && act' + s2 + ' > 0.001) {',
+      '  if (nearSeam && has' + s2 + ' > 0.5 && act' + s2 + ' > 0.001) {',
       '    vec2 nsz' + s2 + ' = max(nr' + s2 + '.zw - nr' + s2 + '.xy, vec2(0.0001));',
       '    vec2 nl' + s2 + ' = vec2((p.x - nr' + s2 + '.x) / nsz' + s2 + '.x, 1.0 - (p.y - nr' + s2 + '.y) / nsz' + s2 + '.y);',
       '    float nva' + s2 + ' = nsz' + s2 + '.x * uQA / nsz' + s2 + '.y;',
@@ -365,7 +375,7 @@ function initDreamQuilt(quilt, canvas) {
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   var U = {};
-  ['uAtlas', 'uAtlasSize', 'uTime', 'uBand', 'uQA', 'uCount'].forEach(function (name) {
+  ['uAtlas', 'uAtlasSize', 'uTime', 'uBand', 'uQA', 'uCount', 'uVis'].forEach(function (name) {
     U[name] = gl.getUniformLocation(prog, name);
   });
   U.uRect = gl.getUniformLocation(prog, 'uRect[0]');
@@ -392,9 +402,16 @@ function initDreamQuilt(quilt, canvas) {
   var cellUV = [];   // per cell: [sx, sy, ox, oy]
   var cellTA = [];   // per cell: natural aspect
   function buildAtlas() {
-    var smallScreen = Math.min(window.screen.width || 9999, window.screen.height || 9999) < 700;
-    var cellMax = smallScreen ? 1024 : 2048;
-    var PAD = 8;
+    // Atlas resolution follows the DISPLAY, not a screen-size guess
+    // (the old 1024 cap starved landscape tablets/phones and read as
+    // a filtering regression). A cell can be as wide as the whole
+    // quilt (single-column portrait), so size for quilt width x DPR
+    // with headroom; the attempt loop still shrinks if the packed
+    // atlas would exceed texture limits.
+    var dprNeed = Math.min(window.devicePixelRatio || 1, 2);
+    var need = Math.ceil((quilt.clientWidth || 1200) * dprNeed * 1.1);
+    var cellMax = Math.max(1024, Math.min(2048, need));
+    var PAD = 16;
     var sized = slices.map(function (el, idx) {
       var img = el.querySelector('img');
       return { idx: idx, img: img, nw: img.naturalWidth, nh: img.naturalHeight };
@@ -509,10 +526,24 @@ function initDreamQuilt(quilt, canvas) {
       }
     }
   }
+  // The quilt canvas is ~124vh tall but only ~100vh is ever on
+  // screen: fragments outside the visible region exit at the top of
+  // the shader instead of paying for the seam machinery.
+  var vis = [0, 0, 1, 1];
+  function updateVis() {
+    var r = quilt.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    var M = 0.03;
+    var x0 = Math.max(0, -r.left / r.width - M), x1 = Math.min(1, (window.innerWidth - r.left) / r.width + M);
+    var yt = Math.max(0, -r.top / r.height - M), yb = Math.min(1, (window.innerHeight - r.top) / r.height + M);
+    vis = [x0, 1 - yb, x1, 1 - yt]; // GL uv: y up
+  }
+  window.addEventListener('scroll', updateVis, { passive: true });
   function retarget() {
     resize();
     if (!measureLayout()) return;
     computeTargets();
+    updateVis();
     if (quilt.classList.contains('open')) fixedTop = quilt.getBoundingClientRect().top;
   }
   function smoothstepJS(e0, e1, x) {
@@ -643,6 +674,7 @@ function initDreamQuilt(quilt, canvas) {
     var acts = activities();
     for (i = 0; i < N * 4; i++) actBuf[i] = acts[i];
     gl.uniform1f(U.uTime, time);
+    gl.uniform4f(U.uVis, vis[0], vis[1], vis[2], vis[3]);
     gl.uniform1f(U.uQA, quiltW / Math.max(1, quiltH));
     gl.uniform4fv(U.uRect, rectBuf);
     gl.uniform4fv(U.uUVR, uvBuf);
