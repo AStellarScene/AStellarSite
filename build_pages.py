@@ -1694,7 +1694,7 @@ def latent_map_data():
         "bookshelf": {"label": "BOOKSHELF", "fx": 0.76, "fy": 0.40, "rgb": [216, 96, 158]},
         "worlds": {"label": "DREAMSCAPE", "fx": 0.24, "fy": 0.80, "rgb": [228, 96, 52]},
         "projects": {"label": "PROJECTS", "fx": 0.74, "fy": 0.79, "rgb": [226, 182, 92]},
-        "writing": {"label": "WRITING", "fx": 0.52, "fy": 0.16, "rgb": [150, 130, 255]},
+        "writing": {"label": "WRITING", "fx": 0.50, "fy": 0.32, "rgb": [150, 130, 255]},
     }
     return {"regions": regions, "items": items}
 
