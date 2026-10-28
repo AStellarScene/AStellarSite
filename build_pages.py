@@ -35,13 +35,13 @@ HEAD = """<!DOCTYPE html>
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="{url}">
-<meta property="og:image" content="https://adamlaloge.com/art/obsidian-dragon.jpg">
+<meta property="og:image" content="{og_image}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{title}">
 <meta name="twitter:description" content="{desc}">
-<meta name="twitter:image" content="https://adamlaloge.com/art/obsidian-dragon.jpg">
+<meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=59">
+{schema}<link rel="stylesheet" href="styles.css?v=60">
 </head>
 <body>
 """
@@ -94,9 +94,9 @@ NAV_JS = """<script>
 </script>
 """
 
-def page(fname, title, desc, active, body, extra_js="", schema=""):
+def page(fname, title, desc, active, body, extra_js="", schema="", og_image="https://adamlaloge.com/art/obsidian-dragon.jpg"):
     url = "https://adamlaloge.com/" + ("" if fname == "index.html" else fname)
-    html = (HEAD.format(title=title, desc=desc, url=url, schema=schema) + header(active)
+    html = (HEAD.format(title=title, desc=desc, url=url, schema=schema, og_image=og_image) + header(active)
             + '\n<main class="wrap">\n' + body + '\n</main>\n' + FOOTER
             + extra_js + NAV_JS + "\n</body>\n</html>\n")
     open(os.path.join(SITE, fname), "w").write(html)
@@ -119,6 +119,47 @@ PROJ_DESCS = {
     "lucent.html": "Lucent Launcher, by Adam Laloge: a native Minecraft launcher in Rust and GTK4, with a vendored core that installs Vanilla, Fabric, Quilt, Forge, and NeoForge.",
 }
 
+PROJECT_CARDS = [
+    {"name": "BenchLab", "href": "benchlab.html", "status": "Prototype built, first usability test running", "featured": True,
+     "home": "A testing simulator that runs in the browser. Build a test in a visual editor, run it against a simulated device, and get a traceability report.",
+     "work": "A testing simulator that runs in the browser. Build a test in a visual editor, run it against a simulated device, and get a traceability report. An agent layer turns plain-English test protocols into executable steps."},
+    {"name": "Lucent Launcher", "href": "lucent.html", "status": "In development", "featured": True,
+     "home": "A native Minecraft launcher in Rust and GTK4. Its vendored core installs Vanilla, Fabric, Quilt, Forge, and NeoForge, builds the launch command, and runs the game.",
+     "work": "A native Minecraft launcher in Rust and GTK4. Its vendored core installs Vanilla, Fabric, Quilt, Forge, and NeoForge, builds the launch command, and runs the game."},
+    {"name": "Pace", "href": "pace.html", "status": "In development", "featured": True,
+     "home": "A planner for self-paced degree programs, generalized from the system I run my own degree on. Courses and a finish date in; a week-by-week plan out.",
+     "work": "A planner for self-paced degree programs, built from the system I run my own degree on. Courses and a target finish date in; a week-by-week plan out. It only counts work that is actually finished."},
+    {"name": "Rotation", "href": "rotation.html", "status": "In development", "featured": False,
+     "home": "A five-day packed-lunch rotation, turned into a tool anyone can use. Pick the week's meals and get the grocery list, checked against what's already at home.",
+     "work": "A five-day packed-lunch rotation, turned into a tool anyone can use. Pick the week's meals and get the grocery list, checked against what's already at home."},
+    {"name": "Slip", "href": "slip.html", "status": "Planned, not started", "featured": False,
+     "home": "A pause before small purchases. Enter a price and how often it recurs, and see it as days of delay on a savings target instead of dollars.",
+     "work": "A pause before small purchases. Enter a price and how often it recurs, and see the cost as days of delay on a savings target. There is a 48-hour hold list for undecided items. Local data only, no bank connection."},
+]
+
+def _project_card(card, text_key):
+    return "\n".join([
+        '      <article class="card">',
+        '        <p class="label card-label">%s</p>' % card["name"],
+        '        <p class="status">Now: %s</p>' % card["status"],
+        '        <p>%s</p>' % card[text_key],
+        '        <p><a class="card-link" href="%s">View project &#8599;</a></p>' % card["href"],
+        '      </article>',
+    ])
+
+def _project_cards(featured_only, text_key):
+    return "\n".join(_project_card(c, text_key) for c in PROJECT_CARDS
+                      if c["featured"] or not featured_only)
+
+def _also_building():
+    rest = [c for c in PROJECT_CARDS if not c["featured"]]
+    bits = " &middot; ".join(
+        '<a href="%s">%s</a> <span class="also-status">%s</span>'
+        % (c["href"], c["name"], c["status"][0].lower() + c["status"][1:])
+        for c in rest)
+    return '    <p class="also-building"><span class="also-label">Also in progress:</span> %s</p>' % bits
+
+
 # ---------- Home ----------
 home_body = """  <section class="hero">
     <canvas id="sky" aria-hidden="true"></canvas>
@@ -134,66 +175,48 @@ home_body = """  <section class="hero">
     <p class="label">Projects</p>
     <h2>Things I'm building</h2>
     <p class="section-note">Each one is labeled with where it actually stands. Nothing here is called finished before it is.</p>
-    <div class="cards">
-      <article class="card">
-        <p class="label card-label">BenchLab</p>
-        <p class="status">Now: Prototype built, first usability test running</p>
-        <p>A testing simulator that runs in the browser. Build a test in a visual editor, run it against a simulated device, and get a traceability report.</p>
-        <p><a class="card-link" href="benchlab.html">View project &#8599;</a></p>
+    <div class="cards home-cards">
+""" + _project_cards(True, "home") + """
+    </div>
+""" + _also_building() + """
+  </section>
+
+  <section id="explore">
+    <p class="label">Explore</p>
+    <h2>Photography, books, worlds, and the map</h2>
+    <div class="explore-list">
+      <article class="explore-item">
+        <p class="label">Photography</p>
+        <h3>Off the clock</h3>
+        <p><a href="photography.html"><img class="teaser-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass" width="1206" height="804" loading="lazy" decoding="async"></a></p>
+        <p><a href="photography.html">See the photography &#8599;</a></p>
       </article>
-      <article class="card">
-        <p class="label card-label">Pace</p>
-        <p class="status">Now: In development</p>
-        <p>A planner for self-paced degree programs, generalized from the system I run my own degree on. Courses and a finish date in; a week-by-week plan out.</p>
-        <p><a class="card-link" href="pace.html">View project &#8599;</a></p>
+      <article class="explore-item">
+        <p class="label">Bookshelf</p>
+        <h3>On the shelves</h3>
+        <p>The books I'm reading and the ones waiting their turn, mostly historical horror, dark fantasy, and sci-fi.</p>
+        <p><a href="bookshelf.html">Browse the bookshelf &#8599;</a></p>
       </article>
-      <article class="card">
-        <p class="label card-label">Rotation</p>
-        <p class="status">Now: In development</p>
-        <p>A five-day packed-lunch rotation, turned into a tool anyone can use. Pick the week's meals and get the grocery list, checked against what's already at home.</p>
-        <p><a class="card-link" href="rotation.html">View project &#8599;</a></p>
+      <article class="explore-item">
+        <p class="label">Dreamscape</p>
+        <h3>Worlds imagined by computers</h3>
+        <p><a href="dreams.html"><img class="teaser-img" src="art/drowned-bells.jpg" alt="A cathedral-city drowned in a black sea, its windows still lit" width="2048" height="1150" loading="lazy" decoding="async"></a></p>
+        <p><a href="dreams.html">Enter Dreamscape &#8599;</a></p>
       </article>
-      <article class="card">
-        <p class="label card-label">Slip</p>
-        <p class="status">Now: Planned, not started</p>
-        <p>A pause before small purchases. Enter a price and how often it recurs, and see it as days of delay on a savings target instead of dollars.</p>
-        <p><a class="card-link" href="slip.html">View project &#8599;</a></p>
-      </article>
-      <article class="card">
-        <p class="label card-label">Lucent Launcher</p>
-        <p class="status">Now: In development</p>
-        <p>A native Minecraft launcher in Rust and GTK4. Its vendored core installs Vanilla, Fabric, Quilt, Forge, and NeoForge, builds the launch command, and runs the game.</p>
-        <p><a class="card-link" href="lucent.html">View project &#8599;</a></p>
+      <article class="explore-item">
+        <p class="label">Atlas</p>
+        <h3>The site, drawn as a galaxy</h3>
+        <p>Every photo, book, world, and project here is a point of light in a living nebula, drifting near the things it belongs with &mdash; a sitemap built like latent space, and generated from the site itself.</p>
+        <p><a href="latent-sitemap.html">Explore Atlas &#8599;</a></p>
       </article>
     </div>
   </section>
 
   <section id="about">
     <p class="label">About</p>
-    <h2>About</h2>
+    <h2>The short version</h2>
     <p>I'm 22. I work as an engineering test technician at a medical-device lab in Batesville, Indiana, where most of my time goes to building test software. I'm also finishing a B.S. in UX Design at WGU.</p>
     <p><a href="about.html">More about me &#8599;</a></p>
-  </section>
-
-  <section id="photography">
-    <p class="label">Photography</p>
-    <h2>Off the clock</h2>
-    <p><a href="photography.html"><img class="teaser-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass"></a></p>
-    <p><a href="photography.html">See the photography &#8599;</a></p>
-  </section>
-
-  <section id="latent">
-    <p class="label">Dreamscape</p>
-    <h2>Worlds imagined by computers</h2>
-    <p><a href="dreams.html"><img class="teaser-img" src="art/drowned-bells.jpg" alt="A cathedral-city drowned in a black sea, its windows still lit"></a></p>
-    <p><a href="dreams.html">Enter Dreamscape &#8599;</a></p>
-  </section>
-
-  <section id="atlas">
-    <p class="label">Atlas</p>
-    <h2>The site, drawn as a galaxy</h2>
-    <p>Every photo, book, world, and project here is a point of light in a living nebula, drifting near the things it belongs with &mdash; a sitemap built like latent space, and generated from the site itself.</p>
-    <p><a href="latent-sitemap.html">Explore Atlas &#8599;</a></p>
   </section>
 
   <section id="contact">
@@ -202,7 +225,7 @@ home_body = """  <section class="hero">
     <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
   </section>"""
 page("index.html", "Adam Laloge", DESC, "index.html",
-     home_body, "<script>" + sky_js + "</script>\n", schema=PERSON_LD)
+     home_body, "<script>" + sky_js + "</script>\n", schema=PERSON_LD, og_image="https://adamlaloge.com/photos/sunset-grass.jpg")
 
 # ---------- Work index ----------
 work_body = """  <section id="work">
@@ -210,36 +233,7 @@ work_body = """  <section id="work">
     <h2>Things I'm building</h2>
     <p class="section-note">The status line is the part to trust. Descriptions say what each project is meant to do.</p>
     <div class="cards">
-      <article class="card">
-        <p class="label card-label">BenchLab</p>
-        <p class="status">Now: Prototype built, first usability test running</p>
-        <p>A testing simulator that runs in the browser. Build a test in a visual editor, run it against a simulated device, and get a traceability report. An agent layer turns plain-English test protocols into executable steps.</p>
-        <p><a class="card-link" href="benchlab.html">View project &#8599;</a></p>
-      </article>
-      <article class="card">
-        <p class="label card-label">Pace</p>
-        <p class="status">Now: In development</p>
-        <p>A planner for self-paced degree programs, built from the system I run my own degree on. Courses and a target finish date in; a week-by-week plan out. It only counts work that is actually finished.</p>
-        <p><a class="card-link" href="pace.html">View project &#8599;</a></p>
-      </article>
-      <article class="card">
-        <p class="label card-label">Rotation</p>
-        <p class="status">Now: In development</p>
-        <p>A five-day packed-lunch rotation, turned into a tool anyone can use. Pick the week's meals and get the grocery list, checked against what you already have at home.</p>
-        <p><a class="card-link" href="rotation.html">View project &#8599;</a></p>
-      </article>
-      <article class="card">
-        <p class="label card-label">Slip</p>
-        <p class="status">Now: Planned, not started</p>
-        <p>A pause before small purchases. Enter a price and how often it recurs, and see the cost as days of delay on a savings target. There is a 48-hour hold list for undecided items. Local data only, no bank connection.</p>
-        <p><a class="card-link" href="slip.html">View project &#8599;</a></p>
-      </article>
-      <article class="card">
-        <p class="label card-label">Lucent Launcher</p>
-        <p class="status">Now: In development</p>
-        <p>A native Minecraft launcher in Rust and GTK4. Its vendored core installs Vanilla, Fabric, Quilt, Forge, and NeoForge, builds the launch command, and runs the game.</p>
-        <p><a class="card-link" href="lucent.html">View project &#8599;</a></p>
-      </article>
+""" + _project_cards(False, "work") + """
     </div>
   </section>"""
 page("work.html", "Projects — Adam Laloge", WORK_DESC, "work.html", work_body)
