@@ -8,7 +8,16 @@ The Dreamscape page on this site is a gallery of AI-generated worlds — The Gol
 
 This post is the complete technical record of building that effect: what the idea actually was, the approaches that failed and why, the bugs that hid, and what the final engine looks like. It took four architectures and one very instructive day of failures to get a border to behave like water.
 
-## The idea
+<div class="statband">
+<div class="stat"><b>4</b><span>Architectures</span></div>
+<div class="stat"><b>7</b><span>Bisection renders</span></div>
+<div class="stat"><b>2</b><span>Silent shader deaths</span></div>
+<div class="stat"><b>1 px</b><span>The last streak</span></div>
+</div>
+
+## It started with two pictures
+
+The Golden City and the Obsidian Dragon: two AI-generated images, side by side, and a question that would not leave — *can the border between them melt?* The first version of this effect was not a grid, a quilt, or a system. It was one seam between two pictures, built to find out whether a boundary could behave like the surface of a liquid instead of a line. Everything in this post — four architectures, two silent shader deaths, a one-pixel line hunted through seven renders — grew out of that single seam.
 
 A grid of images is a contact sheet. The pictures sit in their cells, laminated, aware of nothing. But the Dreamscape's premise — stated on the page itself — is "worlds imagined by computers." Worlds are places. Places touch each other. I wanted the boundary between two worlds to stop being a border and become a *place itself*: a membrane of liquid that both worlds press into, where the geography of one bends into the other.
 
@@ -74,24 +83,95 @@ The strongest pure-CSS construction — static tiles with narrow seam bands, com
 
 ## First working version: one engine per pair (v3–v4)
 
-The research that killed CSS named the winner: a hand-written WebGL fragment shader. The first working build (October 26) gave each pair of worlds its own engine — one canvas per split, painting both artworks cover-fit, with the seam computed in the fragment shader:
+The research that killed CSS named the winner: a hand-written WebGL fragment shader. The first working build (October 26) gave the original pair its own engine — one canvas, painting both artworks cover-fit, with the seam computed in the fragment shader:
 
 - The boundary is a sum of three sines (swell, chop, detail) at incommensurate frequencies, parameterised along the seam.
 - Inside a narrow band around the boundary, each world is sampled with an offset proportional to the wave's *slope* — that is the refraction. Steep slope, strong bend.
 - Light is coupled to the same slope: a highlight on one face of the wave, shadow on the other, a specular line at the crest. This is what makes it read as a surface instead of a warp.
 - The two worlds drift at different rates (roughly 1 : 0.6), which sells depth — the seam feels like a surface *between* two spaces, not a crack in one picture.
 
-It worked, and it worked on Safari, because a fragment shader doesn't care which browser hosts it. But the architecture had a ceiling: one engine per pair. Four worlds meant two engines; the seams existed only *within* a pair, never between pairs, and every new pair meant new machinery. Against requirement 4's spirit and the growth property of the concept, that was a prototype wearing a production costume.
+It worked, and it worked on Safari, because a fragment shader doesn't care which browser hosts it. But the architecture had a ceiling, and the ceiling was the scope: one engine per pair. The seams existed only *within* a pair, never between pairs, and every new pair meant new machinery. Against the growth property of the concept, that was a prototype wearing a production costume.
 
-## Second architecture: the quilt and the atlas (v5)
+The seam's vocabulary, for the chapters ahead:
+
+| Term | What it does |
+|---|---|
+| Swell, chop, detail | The three sines whose sum is the wave — a slow heave, a mid ripple, a fine shimmer |
+| Refraction | The sampling offset, proportional to the wave's slope — what bends the artwork |
+| Slope light | Highlight and shadow coupled to the slope, so the seam reads as a surface |
+| Crest glow | A soft specular line riding the wave's crest |
+| Groove | A dark crease offset inside the seam, meant as contact shadow — remember this one |
+| Drift | Each world slides slowly beneath the seam at its own rate; the difference sells depth |
+| Breathe | A slow global swell that scales the whole seam field |
+
+## The scope expands: the quilt and the atlas (v5)
+
+Then the second pair arrived — The Drowned Bells and The Far Shore — and one seam became a scope problem. Two pairs could have meant two engines, forever: every new pair another canvas, another copy of the machinery, and no seam at all where the pairs met. Or the scope could change underneath the effect: stop thinking in pairs entirely, and quilt everything into one surface.
 
 The fix was to stop thinking in pairs. One engine renders the entire page as a single grid — the *quilt* — up to twelve cells. Each cell knows its neighbours; every interior edge runs the same seam math, horizontally and vertically, including the centre cross where four worlds meet. Adding worlds became adding cells: data, not code. The whole page is one canvas, one shader, one draw.
 
+<figure>
+<div class="figbox">
+<svg viewBox="0 0 680 250" role="img" aria-label="Diagram of the scope change from one pair to the quilt">
+  <rect x="10" y="10" width="660" height="230" rx="10" fill="rgba(148,163,184,0.04)" stroke="rgba(148,163,184,0.25)"/>
+  <rect x="30" y="30" width="92" height="140" fill="rgba(240,163,94,0.12)"/>
+  <rect x="128" y="30" width="92" height="140" fill="rgba(45,212,191,0.10)"/>
+  <path d="M 125 30 C 112 65, 140 100, 125 135 C 118 152, 132 160, 125 170" fill="none" stroke="#e8f4f1" stroke-width="2"/>
+  <text x="30" y="196" fill="#e8f4f1" font-family="var(--mono)" font-size="12" letter-spacing="2">ONE PAIR</text>
+  <text x="30" y="214" fill="#9fb4c8" font-family="var(--mono)" font-size="11">one seam · v3</text>
+  <rect x="250" y="30" width="200" height="140" fill="none" stroke="rgba(148,163,184,0.4)" stroke-width="1.2" stroke-dasharray="5 5"/>
+  <rect x="262" y="42" width="82" height="52" fill="rgba(240,163,94,0.12)"/>
+  <rect x="348" y="42" width="82" height="52" fill="rgba(45,212,191,0.10)"/>
+  <rect x="262" y="106" width="82" height="52" fill="rgba(96,165,250,0.12)"/>
+  <rect x="348" y="106" width="82" height="52" fill="rgba(74,222,128,0.10)"/>
+  <text x="262" y="102" fill="#f0a35e" font-family="var(--mono)" font-size="10">no seam between pairs</text>
+  <text x="250" y="196" fill="#e8f4f1" font-family="var(--mono)" font-size="12" letter-spacing="2">TWO PAIRS</text>
+  <text x="250" y="214" fill="#9fb4c8" font-family="var(--mono)" font-size="11">two engines · v4</text>
+  <rect x="480" y="30" width="82" height="66" fill="rgba(240,163,94,0.12)"/>
+  <rect x="568" y="30" width="82" height="66" fill="rgba(45,212,191,0.10)"/>
+  <rect x="480" y="102" width="82" height="68" fill="rgba(96,165,250,0.12)"/>
+  <rect x="568" y="102" width="82" height="68" fill="rgba(74,222,128,0.10)"/>
+  <path d="M 565 30 C 552 65, 580 100, 565 135 C 558 152, 572 162, 565 170" fill="none" stroke="#e8f4f1" stroke-width="2"/>
+  <path d="M 480 99 C 515 88, 550 112, 585 99 C 610 90, 632 106, 650 99" fill="none" stroke="#e8f4f1" stroke-width="2"/>
+  <circle cx="565" cy="99" r="3.5" fill="#e8f4f1"/>
+  <text x="480" y="196" fill="#e8f4f1" font-family="var(--mono)" font-size="12" letter-spacing="2">THE QUILT</text>
+  <text x="480" y="214" fill="#9fb4c8" font-family="var(--mono)" font-size="11">one engine, every edge · v5</text>
+</svg>
+</div>
+<figcaption>FIG. 2 — THE SCOPE CHANGE. THE EFFECT STARTED AS ONE SEAM BETWEEN TWO IMAGES (LEFT). A SECOND PAIR WOULD HAVE MEANT A SECOND ENGINE AND NO SEAMS BETWEEN PAIRS (CENTRE). THE QUILT (RIGHT) MADE EVERY EDGE — INCLUDING THE FOUR-WAY CROSS — THE SAME LIQUID.</figcaption>
+</figure>
+
 Two problems surfaced immediately:
 
-**The cross ledged.** With the wave parameterised globally, the four edges arrived at the centre point carrying four different displacement values — so the boundary visibly *jumped* at the cross, a ledge in the melt. The fix is structural: parameterise the wave *per segment* (each edge computes its own 0-to-1 coordinate) and taper displacement to zero at both ends. If every edge is exactly at its nominal position at the corners, all four agree at the cross *by construction* — no tuning, no special case. Neighbours sharing an edge compute the identical segment coordinate, so the line still cannot tear mid-edge.
+### The cross ledged
 
-**The atlas taxed growth.** One shader needs the artworks in GPU memory, and the v5 way was a single texture atlas: all worlds packed into one 4096² texture. That is a fixed budget divided by the number of worlds — each world got a 2048² cell at four worlds, and the share halves with every doubling. I shipped it; the person who caught the flaw was the one reading over my shoulder, in one sentence: *"adding more images will over time reduce quality."* Correct, and it's an asymptote, not a bug — the architecture itself expires as the collection grows. A tablet also exposed a related failure: the atlas path could fall back to a half-resolution mosaic when the packed texture pressed against device limits. The atlas had to go.
+With the wave parameterised globally, the four edges arrived at the centre point carrying four different displacement values — so the boundary visibly *jumped* at the cross, a ledge in the melt. The fix is structural: parameterise the wave *per segment* (each edge computes its own 0-to-1 coordinate) and taper displacement to zero at both ends. If every edge is exactly at its nominal position at the corners, all four agree at the cross *by construction* — no tuning, no special case. Neighbours sharing an edge compute the identical segment coordinate, so the line still cannot tear mid-edge.
+
+### The atlas taxed growth
+
+One shader needs the artworks in GPU memory, and the v5 way was a single texture atlas: all worlds packed into one 4096² texture. That is a fixed budget divided by the number of worlds — each world got a 2048² cell at four worlds, and the share halves with every doubling. I shipped it; the person who caught the flaw was the one reading over my shoulder, in one sentence: *"adding more images will over time reduce quality."* Correct, and it's an asymptote, not a bug — the architecture itself expires as the collection grows. A tablet also exposed a related failure: the atlas path could fall back to a half-resolution mosaic when the packed texture pressed against device limits. The atlas had to go.
+
+<figure>
+<div class="figbox">
+<svg viewBox="0 0 680 245" role="img" aria-label="Bar chart of atlas cell width per world as the collection grows">
+  <rect x="10" y="10" width="660" height="225" rx="10" fill="rgba(148,163,184,0.04)" stroke="rgba(148,163,184,0.25)"/>
+  <text x="30" y="48" fill="#9fb4c8" font-family="var(--mono)" font-size="11.5">4 WORLDS (2×2)</text>
+  <rect x="185" y="34" width="400" height="20" fill="rgba(45,212,191,0.35)"/>
+  <text x="595" y="48" fill="#e8f4f1" font-family="var(--mono)" font-size="11.5">2048 px</text>
+  <text x="30" y="90" fill="#9fb4c8" font-family="var(--mono)" font-size="11.5">9 WORLDS (3×3)</text>
+  <rect x="185" y="76" width="267" height="20" fill="rgba(45,212,191,0.28)"/>
+  <text x="462" y="90" fill="#e8f4f1" font-family="var(--mono)" font-size="11.5">1365 px</text>
+  <text x="30" y="132" fill="#9fb4c8" font-family="var(--mono)" font-size="11.5">12 WORLDS (4×3)</text>
+  <rect x="185" y="118" width="200" height="20" fill="rgba(45,212,191,0.20)"/>
+  <text x="395" y="132" fill="#e8f4f1" font-family="var(--mono)" font-size="11.5">1024 px</text>
+  <text x="30" y="182" fill="#f0c894" font-family="var(--mono)" font-size="11.5">PER-WORLD TEXTURES</text>
+  <rect x="185" y="168" width="400" height="20" fill="none" stroke="#d9b36a" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="595" y="182" fill="#f0c894" font-family="var(--mono)" font-size="11.5">always native</text>
+  <text x="30" y="216" fill="#9fb4c8" font-family="var(--mono)" font-size="11">ATLAS CELL WIDTH PER WORLD, FROM ONE FIXED 4096² TEXTURE</text>
+</svg>
+</div>
+<figcaption>FIG. 3 — THE ATLAS BUDGET. EVERY WORLD ADDED TO A FIXED ATLAS SHRINKS THE WORLDS ALREADY THERE. PER-WORLD TEXTURES (GOLD) NEVER DIVIDE.</figcaption>
+</figure>
 
 **Lesson 2: prefer the design whose cost doesn't scale against the collection.** Per-world textures cost the same per world forever. The atlas cost less today and more every day after.
 
@@ -99,11 +179,15 @@ Two problems surfaced immediately:
 
 The WebGL2 rebuild (v6) replaced the atlas with one texture per world at native resolution, moved the seam blends into linear space (blending in gamma space was mathematically darkening every seam midpoint — the mix of two values was landing darker than either), and switched to explicit-gradient sampling so mip selection stays correct under refraction. It shipped, was verified live byte-for-byte, and rendered — on the checking browser — as a page of static zigzag-edged images. That is the CSS fallback. The shader was dead. It had, in fact, been dead for hours *before* the rebuild, and the investigation that followed found two separate corpses.
 
-**Death one: a name, mangled by a string replace.** The shader is generated code: the generator stamps out four near-identical blocks of GLSL, one per side of a cell, by substituting a placeholder letter. The substitution was a blind split on the character `S` — and a variable introduced that morning was named `cellSize`. The stamper ate the `S` inside it and emitted `cell0ize`, an undeclared identifier. The fragment shader failed to compile, the engine bailed silently, and the fallback — which *imitates* the melt with zigzag clip-paths — took over so convincingly that my own render check certified the page as working. Screenshots were taken, comparisons were made, an architecture debate was held — about a fallback.
+### Death one: a name, mangled by a string replace
+
+The shader is generated code: the generator stamps out four near-identical blocks of GLSL, one per side of a cell, by substituting a placeholder letter. The substitution was a blind split on the character `S` — and a variable introduced that morning was named `cellSize`. The stamper ate the `S` inside it and emitted `cell0ize`, an undeclared identifier. The fragment shader failed to compile, the engine bailed silently, and the fallback — which *imitates* the melt with zigzag clip-paths — took over so convincingly that my own render check certified the page as working. Screenshots were taken, comparisons were made, an architecture debate was held — about a fallback.
 
 > A still image cannot distinguish the engine from its fallback, especially when the fallback is designed to look like the engine. The only honest liveness check for an animated effect is witnessing motion.
 
-**Death two: the spec is not the terrain.** The v6 shader indexed its texture array with a loop variable — legal GLSL ES 3.00. It compiled nowhere that matters: ANGLE, the translation layer inside both Chrome's and Safari's WebGL stacks, rejects it outright:
+### Death two: the spec is not the terrain
+
+The v6 shader indexed its texture array with a loop variable — legal GLSL ES 3.00. It compiled nowhere that matters: ANGLE, the translation layer inside both Chrome's and Safari's WebGL stacks, rejects it outright:
 
 ```
 ERROR: 0:32: '[' : array index for samplers must be constant integral expressions
@@ -140,13 +224,17 @@ With v6.1 live, the melt finally ran everywhere — and a thin, straight, black 
 | F | Slope light off only | Present | Flat |
 | G | All three softened (groove at 0.02) | Faint trace | Dimensional, softer |
 
-The culprit was the **groove**: a deliberate dark crease, offset 4.5 device pixels inside the seam, meant to read as contact shadow. Its depth constant (0.05) had been tuned in the gamma-space era. In the linear pipeline the same number lands up to twice as hard in dark tones — the crease printed as a hard line that the eye reads straight even though it technically follows the wave. Variant G is the instructive one: softening everything *almost* worked, but the trace remained because the groove survived at 0.02. Half-measures kept the culprit alive; removing it (v6.2) killed the bold line outright while the slope light and glow kept the seam's dimension. The heavy dark band visible along the seams on iPhone Safari was the same term.
+The culprit was the **groove**: a deliberate dark crease, offset 4.5 device pixels inside the seam, meant to read as contact shadow. Its depth constant (0.05) had been tuned in the gamma-space era. In the linear pipeline the same number lands up to twice as hard in dark tones — the crease printed as a hard line that the eye reads straight even though it technically follows the wave.
+
+Variant G is the instructive one: softening everything *almost* worked, but the trace remained because the groove survived at 0.02. Half-measures kept the culprit alive; removing it (v6.2) killed the bold line outright while the slope light and glow kept the seam's dimension. The heavy dark band visible along the seams on iPhone Safari was the same term.
 
 **Lesson 6: when an artifact has multiple plausible parents, bisect by rendering variants — one variable per render.** Guessing would have "fixed" the refraction first (it was the most suspicious-looking term) and changed nothing, twice.
 
 ## The last streak
 
-One remnant survived v6.2: a one-pixel grey streak at the exact centre of the bottom row, visible only where The Far Shore's bright sky and grass gave it contrast, in the stretches where the wave bulges far from the boundary. This one was not a shading term at all — it was in the *sampled field*. A world is sampled through two code paths: as the cell that owns a pixel (with its accumulated refraction), and as the *neighbour* of the cell that owns the pixel across the boundary (with that side's refraction, amplified ×1.6). Two different refraction values for the same world means the world's image steps sideways where the paths hand over — which is, precisely, the straight boundary. Busy artwork hides a few texels of sideways step. A smooth sky gradient cannot.
+One remnant survived v6.2: a one-pixel grey streak at the exact centre of the bottom row, visible only where The Far Shore's bright sky and grass gave it contrast, in the stretches where the wave bulges far from the boundary. This one was not a shading term at all — it was in the *sampled field*. A world is sampled through two code paths: as the cell that owns a pixel (with its accumulated refraction), and as the *neighbour* of the cell that owns the pixel across the boundary (with that side's refraction, amplified ×1.6). Two different refraction values for the same world means the world's image steps sideways where the paths hand over — which is, precisely, the straight boundary.
+
+Busy artwork hides a few texels of sideways step. A smooth sky gradient cannot.
 
 The fix (v6.3) is a principle rather than a patch: **a world's sampled image must be a single function of position.** The neighbour sample recomputes the neighbour's *own* refraction field at that point — its four side terms, its rect, its tables — so both paths evaluate the identical function. Continuity across the boundary stops being tuned and becomes true by construction.
 

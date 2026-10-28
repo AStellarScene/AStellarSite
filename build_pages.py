@@ -41,7 +41,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=65">
+{schema}<link rel="stylesheet" href="styles.css?v=66">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -1676,6 +1676,14 @@ def load_posts():
                 continue
             d = _dt.date(int(dm.group(1)), int(dm.group(2)), int(dm.group(3)))
         words = len(body.split())
+        # Blog layout system: the first paragraph renders as the lede,
+        # and any paragraph opening with a bold "Lesson N:" lead renders
+        # as a callout card. Authors opt in purely by writing that way;
+        # every post inherits the treatment (styles: .post-body .lede /
+        # .lesson, plus .statband / .figbox raw-HTML blocks).
+        _html = _md.markdown(body, extensions=["extra"])
+        _html = _html.replace("<p>", '<p class="lede">', 1)
+        _html = _html.replace("<p><strong>Lesson", '<p class="lesson"><strong>Lesson')
         posts.append({
             "slug": slug,
             "fname": "blog-" + slug + ".html",
@@ -1684,7 +1692,7 @@ def load_posts():
             "date": d,
             "date_long": d.strftime("%B ") + str(d.day) + d.strftime(", %Y"),
             "mins": max(1, -(-words // 200)),
-            "html": _md.markdown(body, extensions=["extra"]),
+            "html": _html,
         })
     posts.sort(key=lambda p: p["date"], reverse=True)
     return posts

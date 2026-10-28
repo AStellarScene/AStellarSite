@@ -1314,6 +1314,23 @@ body.sitemap-body .latent-scrollzone {
 .post-body .figbox { border: 1px solid rgba(148, 163, 184, .18); border-radius: 14px; padding: 18px 18px 10px; background: rgba(148, 163, 184, .05); }
 .post-body .figbox svg { display: block; width: 100%; height: auto; }
 .post-body figcaption { font-family: var(--mono); font-size: 12.5px; letter-spacing: .04em; color: var(--teal); margin-top: 10px; }
+/* Blog layout system (v66): lede, lesson callouts, stat band, heading
+   rhythm, pull-quotes. Every post inherits these; authors opt in by
+   writing a strong first paragraph, a bold "Lesson N:" lead, a
+   blockquote, or a raw .statband block. */
+.post-body p { margin: 0 0 18px; }
+.post-body .lede { font-size: 20px; line-height: 1.65; color: var(--heading); }
+.post-body h2 { margin-top: 48px; padding-top: 26px; border-top: 1px solid var(--hairline); font-size: 27px; }
+.post-body h3 { margin-top: 32px; font-size: 19.5px; color: var(--heading); }
+.post-body blockquote { font-size: 20.5px; line-height: 1.6; font-style: italic; color: var(--heading); margin: 30px 0; padding: 6px 22px; }
+.post-body .lesson { background: rgba(94, 234, 212, .05); border: 1px solid rgba(94, 234, 212, .22); border-left: 3px solid var(--teal); border-radius: 10px; padding: 15px 19px; margin: 26px 0; }
+.post-body .lesson strong { color: var(--teal); }
+.post-body tbody tr:nth-child(even) td { background: rgba(148, 163, 184, .03); }
+.post-body .statband { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 28px 0 6px; }
+.post-body .stat { border: 1px solid rgba(148, 163, 184, .18); border-radius: 12px; background: rgba(148, 163, 184, .05); padding: 15px 16px 12px; }
+.post-body .stat b { display: block; font-size: 29px; line-height: 1.1; color: var(--heading); font-weight: 650; }
+.post-body .stat span { display: block; margin-top: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--teal); }
+@media (max-width: 760px) { .post-body .statband { grid-template-columns: repeat(2, 1fr); } .post-body .lede { font-size: 18.5px; } .post-body blockquote { font-size: 19px; } }
 .post-foot { margin-top: 40px; }
 
 /* Nav compression band: between the hamburger cutoff (760px) and
