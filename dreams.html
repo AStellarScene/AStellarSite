@@ -249,7 +249,11 @@ function initDreamQuilt(quilt, canvas) {
     '  }',
     '  if (ci < 0) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }',
     '  vec2 cellSize = max(cr.zw - cr.xy, vec2(0.0001));',
-    '  vec2 local = (p - cr.xy) / cellSize;',
+    // Stage-local coords are built in GL orientation (y UP): coverUv
+    // and its focal point are defined in that space (as in v3/v4, whose
+    // locals came from vUv). Building local from page-space y-down
+    // renders every world upside-down -- caught on the live page.
+    '  vec2 local = vec2((p.x - cr.x) / cellSize.x, 1.0 - (p.y - cr.y) / cellSize.y);',
     '  float breathe = 1.0 + 0.2 * sin(t * 0.31 + 0.8);',
     '  vec2 refrSum = vec2(0.0);'
   ];
@@ -297,7 +301,7 @@ function initDreamQuilt(quilt, canvas) {
     F.push(
       '  if (has' + s2 + ' > 0.5 && act' + s2 + ' > 0.001) {',
       '    vec2 nsz' + s2 + ' = max(nr' + s2 + '.zw - nr' + s2 + '.xy, vec2(0.0001));',
-      '    vec2 nl' + s2 + ' = (p - nr' + s2 + '.xy) / nsz' + s2 + ';',
+      '    vec2 nl' + s2 + ' = vec2((p.x - nr' + s2 + '.x) / nsz' + s2 + '.x, 1.0 - (p.y - nr' + s2 + '.y) / nsz' + s2 + '.y);',
       '    float nva' + s2 + ' = nsz' + s2 + '.x * uQA / nsz' + s2 + '.y;',
       '    vec2 nuv2_' + s2 + ' = coverUv(nl' + s2 + ', nta' + s2 + ', nva' + s2 + ') + driftFor(nj' + s2 + ', t) + rf' + s2 + ' * 1.6 * breathe;',
       '    vec3 ncol' + s2 + ' = texture2D(uAtlas, nuv2_' + s2 + ' * nuv' + s2 + '.xy + nuv' + s2 + '.zw).rgb;',
