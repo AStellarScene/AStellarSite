@@ -34,7 +34,7 @@ function setup(cv, fragSrc, imgA, imgB) {
   var buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
-  var loc = gl.getAttribLocation(p, 'aP');
+  var loc = gl.getAttribLocation(p, 'aPos');
   gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   gl.uniform1f(gl.getUniformLocation(p, 'uQA'), cv.width / cv.height);
   gl.uniform1f(gl.getUniformLocation(p, 'uBand'), 0.055);
@@ -74,7 +74,7 @@ function ready() {
     if (j) jobs.push(j);
   });
   logEl.textContent = 'rendering A B C at uTime=30 (looping)';
-  (function loop() { jobs.forEach(function(j) { j.draw(); }); requestAnimationFrame(loop); })();
+  var frames = 0; (function loop() { jobs.forEach(function(j) { j.draw(); }); if (++frames === 30 && jobs[0]) { var px = new Uint8Array(4); jobs[0].gl.readPixels(500, 310, 1, 1, jobs[0].gl.RGBA, jobs[0].gl.UNSIGNED_BYTE, px); logEl.textContent += ' | A centre px after 30 frames: ' + px[0] + ',' + px[1] + ',' + px[2]; } requestAnimationFrame(loop); })();
 }
 imgA.onload = ready; imgB.onload = ready;
 imgA.src = 'art/golden-city.jpg'; imgB.src = 'art/obsidian-dragon.jpg';
