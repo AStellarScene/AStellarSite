@@ -1303,6 +1303,17 @@ body.sitemap-body .latent-scrollzone {
 .post-body pre { overflow-x: auto; padding: 14px 16px; border-radius: 10px; background: rgba(2, 6, 17, .6); border: 1px solid rgba(148, 163, 184, .18); font-size: 14px; }
 .post-body code { font-family: var(--mono); font-size: .92em; }
 .post-body blockquote { margin: 20px 0; padding: 4px 18px; border-left: 3px solid var(--teal); }
+.post-body table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 15px; line-height: 1.55; }
+.post-body th { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); text-align: left; padding: 8px 12px; border-bottom: 2px solid rgba(45, 212, 191, .35); white-space: nowrap; }
+.post-body td { padding: 8px 12px; border-bottom: 1px solid rgba(148, 163, 184, .14); vertical-align: top; }
+.post-body tbody tr:last-child td { border-bottom: none; }
+.post-body td.ok { color: var(--teal); }
+.post-body td.no { color: #f0a35e; }
+@media (max-width: 760px) { .post-body table { display: block; overflow-x: auto; font-size: 13.5px; } }
+.post-body figure { margin: 28px 0; }
+.post-body .figbox { border: 1px solid rgba(148, 163, 184, .18); border-radius: 14px; padding: 18px 18px 10px; background: rgba(148, 163, 184, .05); }
+.post-body .figbox svg { display: block; width: 100%; height: auto; }
+.post-body figcaption { font-family: var(--mono); font-size: 12.5px; letter-spacing: .04em; color: var(--teal); margin-top: 10px; }
 .post-foot { margin-top: 40px; }
 
 /* Nav compression band: between the hamburger cutoff (760px) and

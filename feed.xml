@@ -5,6 +5,13 @@
     <link>https://adamlaloge.com/blog.html</link>
     <description>Blog by Adam Laloge: notes and essays on building software, testing, design, and whatever else is on the workbench.</description>
     <item>
+      <title>The Liquid Seam</title>
+      <link>https://adamlaloge.com/blog-the-liquid-seam.html</link>
+      <guid isPermaLink="true">https://adamlaloge.com/blog-the-liquid-seam.html</guid>
+      <pubDate>Wed, 28 Oct 2026 12:00:00 +0000</pubDate>
+      <description>The Dreamscape&#x27;s worlds melt into each other along living seams. This is the full technical story — the concept, the dead ends, two silent shader deaths, and the bisection that hunted a one-pixel line.</description>
+    </item>
+    <item>
       <title>This site is generated</title>
       <link>https://adamlaloge.com/blog-this-site-is-generated.html</link>
       <guid isPermaLink="true">https://adamlaloge.com/blog-this-site-is-generated.html</guid>
