@@ -466,18 +466,28 @@ latent_js = "<script>\n" + r'''(function () {
   try { gl = canvas.getContext('webgl2', CTX); if (gl) isGL2 = true; } catch (e) { gl = null; }
   if (!gl) { try { gl = canvas.getContext('webgl', CTX); } catch (e) { gl = null; } }
   if (!gl) return;
-  if (isGL2 && gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS) < N) return;
 
-  var VERT = isGL2
-    ? '#version 300 es\nin vec2 aPos;out vec2 vUv;void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}'
-    : 'attribute vec2 aPos;varying vec2 vUv;void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}';
-  var OUTC = isGL2 ? 'fragColor' : 'gl_FragColor';
+  // Dialect ladder. es3 = the WebGL2 dialect (ES 3.00 shaders,
+  // per-world textures, linear blending). If anything in it fails --
+  // too few texture units, or a shader construct a driver rejects --
+  // the engine steps down to the ES 1.00 atlas dialect INSIDE the
+  // same context (tryProgram below) instead of dying to the DOM
+  // fallback. v6.0 shipped without the middle rung: ANGLE rejected
+  // the ES 3.00 fragment shader and the whole quilt went dark.
+  var es3 = isGL2 && gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS) >= N;
+  var mode = 'none';
+  var VERT = '', FRAG = '';
+  function buildShaders() {
+    VERT = es3
+      ? '#version 300 es\nin vec2 aPos;out vec2 vUv;void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}'
+      : 'attribute vec2 aPos;varying vec2 vUv;void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}';
+    var OUTC = es3 ? 'fragColor' : 'gl_FragColor';
 
   // Fragment shader, assembled in JS so the four seam sides (L,R,T,B)
   // are emitted as straight-line code with literal indices -- no
   // dynamic array indexing beyond loop indices anywhere.
   var F = [];
-  if (isGL2) {
+  if (es3) {
     F.push(
       '#version 300 es',
       'precision highp float;',
@@ -517,25 +527,30 @@ latent_js = "<script>\n" + r'''(function () {
     '  return f + (u - f) / 1.15;',
     '}'
   );
-  if (isGL2) {
+  if (es3) {
     // Per-world textures: the cover uv IS the texture uv, and
     // CLAMP_TO_EDGE on a world's own texture smears its edge pixels
     // -- the v3 melt, restored by construction rather than by an
     // inset clamp. textureGrad with explicit gradients keeps
-    // sampling well-defined inside the divergent per-side branches;
-    // the sampler index rides the loop index (a constant-index
-    // expression in ES 3.00). Textures are SRGB8_ALPHA8, so samples
-    // arrive LINEAR: the seam mixes stop dipping dark, and
-    // srgbEncode restores the display curve once at the end.
-    F.push(
+    // sampling well-defined inside the divergent per-side branches.
+    // The sampler branches use LITERAL indices: indexing a sampler
+    // array with a loop index is legal ES 3.00 on paper, but ANGLE
+    // (Chrome's and Safari's WebGL translator alike) rejects it --
+    // "array index for samplers must be constant integral
+    // expressions" -- which is what killed v6.0 in the field.
+    // Textures are SRGB8_ALPHA8, so samples arrive LINEAR: the seam
+    // mixes stop dipping dark, and srgbEncode restores the display
+    // curve once at the end.
+    var swLines = [
       'vec3 sampleWorld(int idx, vec2 uv){',
-      '  vec2 gx = dFdx(uv); vec2 gy = dFdy(uv);',
-      '  vec3 c = vec3(0.0);',
-      '  for (int i = 0; i < ' + MAXC + '; i++) {',
-      '    if (i == idx) c = textureGrad(uTex[i], uv, gx, gy).rgb;',
-      '  }',
-      '  return c;',
-      '}',
+      '  vec2 gx = dFdx(uv); vec2 gy = dFdy(uv);'
+    ];
+    for (var wi = 0; wi < MAXC; wi++) {
+      swLines.push('  if (idx == ' + wi + ') return textureGrad(uTex[' + wi + '], uv, gx, gy).rgb;');
+    }
+    swLines.push('  return vec3(0.0);', '}');
+    F.push.apply(F, swLines);
+    F.push(
       'vec3 srgbEncode(vec3 c){',
       '  return pow(clamp(c, 0.0, 1.0), vec3(1.0 / 2.2));',
       '}'
@@ -672,7 +687,7 @@ latent_js = "<script>\n" + r'''(function () {
     '  vec2 drift = driftFor(float(ci), t);',
     '  float va = cellSize.x * uQA / cellSize.y;',
     '  vec2 ouv = coverUv(local, cta, va) + drift + refrSum * breathe;',
-    '  vec3 col = ' + (isGL2 ? 'sampleWorld(ci, ouv)' : 'sampleCell(ouv, cuv)') + ';'
+    '  vec3 col = ' + (es3 ? 'sampleWorld(ci, ouv)' : 'sampleCell(ouv, cuv)') + ';'
   );
   for (var s2 = 0; s2 < 4; s2++) {
     F.push(
@@ -681,7 +696,7 @@ latent_js = "<script>\n" + r'''(function () {
       '    vec2 nl' + s2 + ' = vec2((p.x - nr' + s2 + '.x) / nsz' + s2 + '.x, 1.0 - (p.y - nr' + s2 + '.y) / nsz' + s2 + '.y);',
       '    float nva' + s2 + ' = nsz' + s2 + '.x * uQA / nsz' + s2 + '.y;',
       '    vec2 nuv2_' + s2 + ' = coverUv(nl' + s2 + ', nta' + s2 + ', nva' + s2 + ') + driftFor(nj' + s2 + ', t) + rf' + s2 + ' * 1.6 * breathe;',
-      '    vec3 ncol' + s2 + ' = ' + (isGL2 ? 'sampleWorld(int(nj' + s2 + ' + 0.5), nuv2_' + s2 + ')' : 'sampleCell(nuv2_' + s2 + ', nuv' + s2 + ')') + ';',
+      '    vec3 ncol' + s2 + ' = ' + (es3 ? 'sampleWorld(int(nj' + s2 + ' + 0.5), nuv2_' + s2 + ')' : 'sampleCell(nuv2_' + s2 + ', nuv' + s2 + ')') + ';',
       '    col = mix(ncol' + s2 + ', col, smoothstep(-0.0015, 0.0015, d' + s2 + '));',
       '    col += clamp(sl' + s2 + ', -1.0, 1.0) * bF' + s2 + ' * 0.13;',
       '    col += exp(-abs(d' + s2 + ') * uBw * 0.28) * 0.08 * act' + s2 + ';',
@@ -689,8 +704,9 @@ latent_js = "<script>\n" + r'''(function () {
       '  }'
     );
   }
-  F.push('  ' + OUTC + ' = vec4(' + (isGL2 ? 'srgbEncode(col)' : 'col') + ', 1.0);', '}');
-  var FRAG = F.join('\n');
+  F.push('  ' + OUTC + ' = vec4(' + (es3 ? 'srgbEncode(col)' : 'col') + ', 1.0);', '}');
+    FRAG = F.join('\n');
+  }
 
   function shader(type, src) {
     var sh = gl.createShader(type);
@@ -699,11 +715,19 @@ latent_js = "<script>\n" + r'''(function () {
     if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) return null;
     return sh;
   }
-  var vs = shader(gl.VERTEX_SHADER, VERT), fs = shader(gl.FRAGMENT_SHADER, FRAG);
-  if (!vs || !fs) return;
-  var prog = gl.createProgram();
-  gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+  function tryProgram() {
+    buildShaders();
+    var vs = shader(gl.VERTEX_SHADER, VERT), fs = shader(gl.FRAGMENT_SHADER, FRAG);
+    if (!vs || !fs) return null;
+    var p = gl.createProgram();
+    gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) { gl.deleteProgram(p); return null; }
+    return p;
+  }
+  var prog = tryProgram();
+  if (!prog && es3) { es3 = false; prog = tryProgram(); }
+  if (!prog) return;
+  mode = es3 ? 'webgl2' : (isGL2 ? 'webgl2-es1' : 'webgl1');
   gl.useProgram(prog);
 
   var buf = gl.createBuffer();
@@ -818,7 +842,8 @@ latent_js = "<script>\n" + r'''(function () {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, atlasTex);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, cv);
+        var IFMT = isGL2 ? gl.RGBA : gl.RGB; // ES 3.00 contexts take the sized-friendly form
+        gl.texImage2D(gl.TEXTURE_2D, 0, IFMT, IFMT, gl.UNSIGNED_BYTE, cv);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
@@ -868,7 +893,7 @@ latent_js = "<script>\n" + r'''(function () {
     texReady = true;
     return true;
   }
-  function buildTextures() { return isGL2 ? buildWorldTextures() : buildAtlas(); }
+  function buildTextures() { return es3 ? buildWorldTextures() : buildAtlas(); }
 
   // ---- Cell geometry: measured rects, eased on the v3 clock ---------
   var home = [], target = [], cur = [], nbrs = [];
@@ -1252,7 +1277,7 @@ latent_js = "<script>\n" + r'''(function () {
     draw(0.001);
     // First successful frame drawn: reveal the canvas over the DOM.
     quilt.style.transform = '';
-    quilt.setAttribute('data-gl', isGL2 ? 'webgl2' : 'webgl1');
+    quilt.setAttribute('data-gl', mode);
     quilt.classList.add('gl-live');
     canvas.style.opacity = '1';
     gate();
