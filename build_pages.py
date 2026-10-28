@@ -447,27 +447,53 @@ latent_js = "<script>\n" + r'''(function () {
   //   quilt costs nothing. The rAF watchdog is kept too.
   // - Texture sources are read from each slice's own <img> (the v4
   //   lesson: no hardcoded art paths, ever).
+  //
+  // v6 (2026-10-28): a WebGL2 path runs alongside the atlas. One
+  // texture per world at native size (SRGB8_ALPHA8), so quality no
+  // longer dilutes as worlds are added and no packing budget can
+  // starve a texture-capped device; samples arrive linear, so seam
+  // blends stop dipping dark (the gamma-space mix was darkening
+  // every seam midpoint), and highp fragment precision is
+  // guaranteed. The seam math is untouched. WebGL1-only devices
+  // run the v5 atlas engine exactly as before.
   if (!quilt || !canvas) return;
   var slices = Array.prototype.slice.call(quilt.querySelectorAll('.slice'));
   var N = slices.length, MAXC = 12;
   if (N < 2 || N > MAXC) return;
 
-  var gl;
-  try {
-    gl = canvas.getContext('webgl', { alpha: false, depth: false, stencil: false, antialias: false, powerPreference: 'low-power' });
-  } catch (e) { gl = null; }
+  var CTX = { alpha: false, depth: false, stencil: false, antialias: false, powerPreference: 'low-power' };
+  var gl = null, isGL2 = false;
+  try { gl = canvas.getContext('webgl2', CTX); if (gl) isGL2 = true; } catch (e) { gl = null; }
+  if (!gl) { try { gl = canvas.getContext('webgl', CTX); } catch (e) { gl = null; } }
   if (!gl) return;
+  if (isGL2 && gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS) < N) return;
 
-  var VERT = 'attribute vec2 aPos;varying vec2 vUv;void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}';
+  var VERT = isGL2
+    ? '#version 300 es\nin vec2 aPos;out vec2 vUv;void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}'
+    : 'attribute vec2 aPos;varying vec2 vUv;void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}';
+  var OUTC = isGL2 ? 'fragColor' : 'gl_FragColor';
 
   // Fragment shader, assembled in JS so the four seam sides (L,R,T,B)
   // are emitted as straight-line code with literal indices -- no
   // dynamic array indexing beyond loop indices anywhere.
-  var F = [
-    'precision mediump float;',
-    'varying vec2 vUv;',
-    'uniform sampler2D uAtlas;',
-    'uniform vec2 uAtlasSize;',
+  var F = [];
+  if (isGL2) {
+    F.push(
+      '#version 300 es',
+      'precision highp float;',
+      'in vec2 vUv;',
+      'out vec4 fragColor;',
+      'uniform sampler2D uTex[' + MAXC + '];'
+    );
+  } else {
+    F.push(
+      'precision mediump float;',
+      'varying vec2 vUv;',
+      'uniform sampler2D uAtlas;',
+      'uniform vec2 uAtlasSize;'
+    );
+  }
+  F.push(
     'uniform float uTime;',
     'uniform float uBand;',
     'uniform float uQA;', // quilt aspect (width / height, CSS px)
@@ -489,19 +515,48 @@ latent_js = "<script>\n" + r'''(function () {
     '  if (r >= 1.0) { float vf = 1.0 / r; u = vec2(local.x, f.y * (1.0 - vf) + local.y * vf); }',
     '  else { u = vec2(f.x * (1.0 - r) + local.x * r, local.y); }',
     '  return f + (u - f) / 1.15;',
-    '}',
+    '}'
+  );
+  if (isGL2) {
+    // Per-world textures: the cover uv IS the texture uv, and
+    // CLAMP_TO_EDGE on a world's own texture smears its edge pixels
+    // -- the v3 melt, restored by construction rather than by an
+    // inset clamp. textureGrad with explicit gradients keeps
+    // sampling well-defined inside the divergent per-side branches;
+    // the sampler index rides the loop index (a constant-index
+    // expression in ES 3.00). Textures are SRGB8_ALPHA8, so samples
+    // arrive LINEAR: the seam mixes stop dipping dark, and
+    // srgbEncode restores the display curve once at the end.
+    F.push(
+      'vec3 sampleWorld(int idx, vec2 uv){',
+      '  vec2 gx = dFdx(uv); vec2 gy = dFdy(uv);',
+      '  vec3 c = vec3(0.0);',
+      '  for (int i = 0; i < ' + MAXC + '; i++) {',
+      '    if (i == idx) c = textureGrad(uTex[i], uv, gx, gy).rgb;',
+      '  }',
+      '  return c;',
+      '}',
+      'vec3 srgbEncode(vec3 c){',
+      '  return pow(clamp(c, 0.0, 1.0), vec3(1.0 / 2.2));',
+      '}'
+    );
+  } else {
     // Per-cell CLAMP_TO_EDGE inside the atlas. v3/v4 gave each world
     // its own texture, so samples pushed past the edge by the wave,
     // drift or refraction clamped to the world's edge pixels -- that
     // clamp IS the melt. In the atlas, past a cell's sub-rect lies
     // empty padding (black), which showed as a dark band at every
     // seam. Clamping the final sample to the sub-rect restores it.
-    'vec3 sampleCell(vec2 uv, vec4 rect){',
-    '  vec2 suv = uv * rect.xy + rect.zw;',
-    '  vec2 pad = vec2(0.6) / uAtlasSize;',
-    '  suv = clamp(suv, rect.zw + pad, rect.zw + rect.xy - pad);',
-    '  return texture2D(uAtlas, suv).rgb;',
-    '}',
+    F.push(
+      'vec3 sampleCell(vec2 uv, vec4 rect){',
+      '  vec2 suv = uv * rect.xy + rect.zw;',
+      '  vec2 pad = vec2(0.6) / uAtlasSize;',
+      '  suv = clamp(suv, rect.zw + pad, rect.zw + rect.xy - pad);',
+      '  return texture2D(uAtlas, suv).rgb;',
+      '}'
+    );
+  }
+  F.push(
     // The v3 waveform, unchanged -- but each edge runs it with its own
     // phase and tempo, so the seams no longer crest in lockstep. The
     // parameters belong to the EDGE (the unordered pair of cells), so
@@ -528,7 +583,7 @@ latent_js = "<script>\n" + r'''(function () {
     '}',
     'void main(){',
     '  if (vUv.x < uVis.x || vUv.x > uVis.z || vUv.y < uVis.y || vUv.y > uVis.w) {',
-    '    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return;',
+    '    ' + OUTC + ' = vec4(0.0, 0.0, 0.0, 1.0); return;',
     '  }',
     '  vec2 p = vec2(vUv.x, 1.0 - vUv.y);', // page space: y down
     '  float t = uTime;',
@@ -544,7 +599,7 @@ latent_js = "<script>\n" + r'''(function () {
     '      phT = uPhase[i]; tmT = uTempo[i]; amT = uAmp[i];',
     '    }',
     '  }',
-    '  if (ci < 0) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }',
+    '  if (ci < 0) { ' + OUTC + ' = vec4(0.0, 0.0, 0.0, 1.0); return; }',
     '  vec2 cellSize = max(cr.zw - cr.xy, vec2(0.0001));',
     // Stage-local coords are built in GL orientation (y UP): coverUv
     // and its focal point are defined in that space (as in v3/v4, whose
@@ -559,7 +614,7 @@ latent_js = "<script>\n" + r'''(function () {
     // the quilt is interior -- this is what keeps full DPR affordable.
     '  float edgeDist = min(min(p.x - cr.x, cr.z - p.x), min(p.y - cr.y, cr.w - p.y));',
     '  bool nearSeam = edgeDist < 0.10;'
-  ];
+  );
   var COMP = ['x', 'y', 'z', 'w'];
   // Per-side seam pre-pass: signed distance to the displaced edge line
   // (positive inside this cell), band falloff, slope, refraction vector.
@@ -585,7 +640,13 @@ latent_js = "<script>\n" + r'''(function () {
     { pre: 'segS = (p.x - cr.x) / cellSize.x; lnS = cr.w + waveP(segS, t, phS, tmS) * envW(segS) * actS * amS; dS = lnS - p.y; slS = slopeP(segS, t, phS, tmS) * envW(segS) * amS;',
       post: 'rfS = vec2(0.0, -slS * 0.012 * bFS);' }
   ];
-  function subS(str, s) { return str.split('S').join(String(s)); }
+  // The side placeholder is a word-final capital S (segS, lnS, dS,
+  // slS, rfS, bFS...). A blind split on 'S' also eats the S inside
+  // 'cellSize', emitting 'cell0ize' -- an undeclared identifier that
+  // fails the whole shader compile and silently drops the page to
+  // the DOM fallback. Replace only an S NOT followed by a lowercase
+  // letter, which is every placeholder and nothing else.
+  function subS(str, s) { return str.replace(/S(?![a-z])/g, String(s)); }
   for (var s = 0; s < 4; s++) {
     F.push(
       '  float nj' + s + ' = nbr.' + COMP[s] + ';',
@@ -611,7 +672,7 @@ latent_js = "<script>\n" + r'''(function () {
     '  vec2 drift = driftFor(float(ci), t);',
     '  float va = cellSize.x * uQA / cellSize.y;',
     '  vec2 ouv = coverUv(local, cta, va) + drift + refrSum * breathe;',
-    '  vec3 col = sampleCell(ouv, cuv);'
+    '  vec3 col = ' + (isGL2 ? 'sampleWorld(ci, ouv)' : 'sampleCell(ouv, cuv)') + ';'
   );
   for (var s2 = 0; s2 < 4; s2++) {
     F.push(
@@ -620,7 +681,7 @@ latent_js = "<script>\n" + r'''(function () {
       '    vec2 nl' + s2 + ' = vec2((p.x - nr' + s2 + '.x) / nsz' + s2 + '.x, 1.0 - (p.y - nr' + s2 + '.y) / nsz' + s2 + '.y);',
       '    float nva' + s2 + ' = nsz' + s2 + '.x * uQA / nsz' + s2 + '.y;',
       '    vec2 nuv2_' + s2 + ' = coverUv(nl' + s2 + ', nta' + s2 + ', nva' + s2 + ') + driftFor(nj' + s2 + ', t) + rf' + s2 + ' * 1.6 * breathe;',
-      '    vec3 ncol' + s2 + ' = sampleCell(nuv2_' + s2 + ', nuv' + s2 + ');',
+      '    vec3 ncol' + s2 + ' = ' + (isGL2 ? 'sampleWorld(int(nj' + s2 + ' + 0.5), nuv2_' + s2 + ')' : 'sampleCell(nuv2_' + s2 + ', nuv' + s2 + ')') + ';',
       '    col = mix(ncol' + s2 + ', col, smoothstep(-0.0015, 0.0015, d' + s2 + '));',
       '    col += clamp(sl' + s2 + ', -1.0, 1.0) * bF' + s2 + ' * 0.13;',
       '    col += exp(-abs(d' + s2 + ') * uBw * 0.28) * 0.08 * act' + s2 + ';',
@@ -628,7 +689,7 @@ latent_js = "<script>\n" + r'''(function () {
       '  }'
     );
   }
-  F.push('  gl_FragColor = vec4(col, 1.0);', '}');
+  F.push('  ' + OUTC + ' = vec4(' + (isGL2 ? 'srgbEncode(col)' : 'col') + ', 1.0);', '}');
   var FRAG = F.join('\n');
 
   function shader(type, src) {
@@ -678,6 +739,7 @@ latent_js = "<script>\n" + r'''(function () {
 
   // ---- Atlas: every world packed into ONE texture -------------------
   var atlasTex = null;
+  var texReady = false;   // set by whichever texture path uploaded
   var cellUV = [];   // per cell: [sx, sy, ox, oy]
   var cellTA = [];   // per cell: natural aspect
   function buildAtlas() {
@@ -764,11 +826,49 @@ latent_js = "<script>\n" + r'''(function () {
         if (anisoExt && maxAniso > 1) gl.texParameteri(gl.TEXTURE_2D, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(16, maxAniso));
         gl.generateMipmap(gl.TEXTURE_2D);
         gl.uniform2f(U.uAtlasSize, best.AW, best.AH);
+        texReady = true;
         return true;
       }
     }
     return false;
   }
+
+  // ---- WebGL2: one texture per world, native size, sRGB ------------
+  // No packing, no budget staircase, no shared cap: each world is
+  // uploaded once at its natural resolution, so adding worlds never
+  // dilutes the ones already there. SRGB8_ALPHA8 makes the GPU hand
+  // the shader linear values; the seam mixes then average light the
+  // way light actually averages.
+  var worldTex = [];
+  function buildWorldTextures() {
+    cellUV = new Array(N); cellTA = new Array(N);
+    for (var i = 0; i < N; i++) {
+      var img = slices[i].querySelector('img');
+      if (!img || !img.naturalWidth) return false;
+      var tx = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE0 + i);
+      gl.bindTexture(gl.TEXTURE_2D, tx);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.SRGB8_ALPHA8, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      if (anisoExt && maxAniso > 1) gl.texParameteri(gl.TEXTURE_2D, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(16, maxAniso));
+      gl.generateMipmap(gl.TEXTURE_2D);
+      worldTex.push(tx);
+      cellUV[i] = [1, 1, 0, 0];   // draw() still uploads uUVR; unused by the GL2 shader
+      cellTA[i] = img.naturalWidth / img.naturalHeight;
+    }
+    var loc = gl.getUniformLocation(prog, 'uTex[0]');
+    var arr = [];
+    for (var k = 0; k < MAXC; k++) arr.push(k < N ? k : 0);
+    gl.uniform1iv(loc, arr);
+    gl.activeTexture(gl.TEXTURE0);
+    texReady = true;
+    return true;
+  }
+  function buildTextures() { return isGL2 ? buildWorldTextures() : buildAtlas(); }
 
   // ---- Cell geometry: measured rects, eased on the v3 clock ---------
   var home = [], target = [], cur = [], nbrs = [];
@@ -945,7 +1045,7 @@ latent_js = "<script>\n" + r'''(function () {
   var tempoBuf = new Float32Array(MAXC * 4);
   var ampBuf = new Float32Array(MAXC * 4);
   function draw(time) {
-    if (!atlasTex || !cur.length) return;
+    if (!texReady || !cur.length) return;
     var i, c;
     for (i = 0; i < N; i++) {
       for (c = 0; c < 4; c++) {
@@ -1142,7 +1242,7 @@ latent_js = "<script>\n" + r'''(function () {
     canvas.style.opacity = '0';
   });
   canvas.addEventListener('webglcontextrestored', function () {
-    if (buildAtlas()) start();
+    if (buildTextures()) start();
   });
 
   function start() {
@@ -1152,6 +1252,7 @@ latent_js = "<script>\n" + r'''(function () {
     draw(0.001);
     // First successful frame drawn: reveal the canvas over the DOM.
     quilt.style.transform = '';
+    quilt.setAttribute('data-gl', isGL2 ? 'webgl2' : 'webgl1');
     quilt.classList.add('gl-live');
     canvas.style.opacity = '1';
     gate();
@@ -1163,7 +1264,7 @@ latent_js = "<script>\n" + r'''(function () {
   function maybeStart() {
     if (failed || pending > 0 || ready) return;
     try {
-      if (buildAtlas()) start();
+      if (buildTextures()) start();
     } catch (e) { /* texture failure: fallback stays, no gl-live */ }
   }
   slices.forEach(function (el) {
