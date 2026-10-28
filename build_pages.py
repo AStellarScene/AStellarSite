@@ -1923,6 +1923,15 @@ LATENT_MAP_JS = r"""<script>
     }
     g.putImageData(img, 0, 0); return c;
   }
+  // Regions added by the generator may have no hand-tuned palette;
+  // derive a 3-stop ramp from the region's own colour so a new
+  // region can never take the map down or arrive unstyled.
+  function derivePal(rgb) {
+    var deep = rgb.map(function (c) { return Math.round(c * 0.42); });
+    var pale = rgb.map(function (c) { return Math.round(c + (255 - c) * 0.72); });
+    return [deep, rgb.slice(), pale];
+  }
+
   function generateImproved() {
     var size = 256;
     buildFields(size); buildGeom(size);
@@ -1931,7 +1940,7 @@ LATENT_MAP_JS = r"""<script>
     for (var k = 0; k < 4; k++) probeSet.push(buildImprovedSprite(PALS.photography, 0.30, 0.44, k, size));
     if ((performance.now() - t0) * 4.2 > 200) { size = 192; buildFields(size); buildGeom(size); probeSet = null; }
     Object.keys(DATA.regions).forEach(function (k) {
-      var r = DATA.regions[k], pal = PALS[k], a = [], f = [];
+      var r = DATA.regions[k], pal = PALS[k] || derivePal(r.rgb), a = [], f = [];
       for (var i2 = 0; i2 < 4; i2++) a.push(probeSet && k === 'photography' ? probeSet[i2] : buildImprovedSprite(pal, r.fx, r.fy, i2, size));
       for (var j2 = 0; j2 < 2; j2++) f.push(buildFilamentSprite(pal, j2, size));
       improvedSprites[k] = a; filamentSprites[k] = f;
@@ -2127,6 +2136,59 @@ LATENT_MAP_JS = r"""<script>
   window.addEventListener('scroll', onScroll, { passive: true });
 
   var lastRW = 0, lastRH = 0;
+  // Runtime layout: the baked anchors are PREFERENCES, not positions.
+  // On the real device, region centers are solved into the usable
+  // canvas: inside a safe margin, out from behind the overlay chrome
+  // (site header, title card, scroll cue -- measured live from the
+  // DOM, so this holds at any screen size), with clearance for the
+  // label that rides above each center, and with enough separation
+  // that clusters stay readable at any aspect. Fog, labels and
+  // points all key off the centers, so this one solve adapts the
+  // whole map to the screen it is actually on.
+  function layoutRegions() {
+    var mX = Math.max(20, W * 0.07), mY = Math.max(20, H * 0.06);
+    var zones = [];
+    ['.site-header', '.latent-phead', '.latent-scrollzone'].forEach(function (sel) {
+      var el = document.querySelector(sel);
+      if (!el) return;
+      var b = el.getBoundingClientRect(), pad = 44;
+      zones.push({ x0: b.left - pad, y0: b.top - pad, x1: b.right + pad, y1: b.bottom + pad });
+    });
+    var labelLift = H * 0.16 + 10; // region labels sit above their centers
+    function pushOut(p, stag) {
+      zones.forEach(function (z) {
+        var y1 = z.y1 + labelLift; // keep the label clear as well
+        if (p.x > z.x0 && p.x < z.x1 && p.y > z.y0 && p.y < y1) {
+          var dl = p.x - z.x0, dr = z.x1 - p.x, dtp = p.y - z.y0, db = y1 - p.y;
+          var m = Math.min(dl, dr, dtp, db);
+          if (m === db) p.y = y1 + stag; else if (m === dtp) p.y = z.y0; else if (m === dl) p.x = z.x0; else p.x = z.x1;
+        }
+      });
+    }
+    var pos = {};
+    regionKeys.forEach(function (k) {
+      var r = DATA.regions[k];
+      pos[k] = { x: Math.min(Math.max(r.fx * W, mX), W - mX), y: Math.min(Math.max(r.fy * H, mY), H - mY) };
+    });
+    var minD = Math.min(W, H) * 0.30;
+    for (var it = 0; it < 40; it++) {
+      regionKeys.forEach(function (k) { pushOut(pos[k], (k.charCodeAt(0) % 4) * 12); });
+      for (var a = 0; a < regionKeys.length; a++) for (var b2 = a + 1; b2 < regionKeys.length; b2++) {
+        var pa = pos[regionKeys[a]], pb = pos[regionKeys[b2]];
+        var dx = pb.x - pa.x, dy = pb.y - pa.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+        if (d < minD) {
+          var push = (minD - d) / 2, ux = dx / d, uy = dy / d;
+          pa.x -= ux * push; pa.y -= uy * push; pb.x += ux * push; pb.y += uy * push;
+        }
+      }
+      regionKeys.forEach(function (k) {
+        var p = pos[k];
+        p.x = Math.min(Math.max(p.x, mX), W - mX); p.y = Math.min(Math.max(p.y, mY), H - mY);
+      });
+    }
+    regionKeys.forEach(function (k) { pushOut(pos[k], (k.charCodeAt(0) % 4) * 12); var r = DATA.regions[k]; r.x = pos[k].x; r.y = pos[k].y; });
+  }
+
   function resize() {
     var nw = window.innerWidth, nh = window.innerHeight;
     // iOS fires resize as its URL bar collapses mid-scroll; rebuilding
@@ -2142,7 +2204,7 @@ LATENT_MAP_JS = r"""<script>
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     if (!fogC) { fogC = document.createElement('canvas'); fctx = fogC.getContext('2d'); }
     fogC.width = Math.max(2, Math.round(W * FOGRES)); fogC.height = Math.max(2, Math.round(H * FOGRES));
-    regionKeys.forEach(function (k) { var r = DATA.regions[k]; r.x = r.fx * W; r.y = r.fy * H; });
+    layoutRegions();
     if (!filler.length) { buildFiller(); buildSparks(); buildStars(); }
     items.forEach(function (p) { if (!p.x) { var r = DATA.regions[p.region]; p.x = r.x + p.dx * W; p.y = r.y + p.dy * H; } });
     filler.forEach(function (p) { if (!p.x) { p.x = p.hx * W; p.y = p.hy * H; } });
