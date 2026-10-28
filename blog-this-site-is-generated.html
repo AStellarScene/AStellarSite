@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>This site is generated — Adam Laloge</title>
+<meta name="description" content="Every page on this site comes out of a single Python program. As of today the blog does too — this post is the proof and the explanation.">
+<link rel="canonical" href="https://adamlaloge.com/blog-this-site-is-generated.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Adam Laloge">
+<meta property="og:title" content="This site is generated — Adam Laloge">
+<meta property="og:description" content="Every page on this site comes out of a single Python program. As of today the blog does too — this post is the proof and the explanation.">
+<meta property="og:url" content="https://adamlaloge.com/blog-this-site-is-generated.html">
+<meta property="og:image" content="https://adamlaloge.com/art/obsidian-dragon.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="This site is generated — Adam Laloge">
+<meta name="twitter:description" content="Every page on this site comes out of a single Python program. As of today the blog does too — this post is the proof and the explanation.">
+<meta name="twitter:image" content="https://adamlaloge.com/art/obsidian-dragon.jpg">
+<meta name="theme-color" content="#070b16">
+<link rel="stylesheet" href="styles.css?v=62">
+<link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">Adam Laloge</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
+    <nav id="site-nav">
+      <a href="index.html">Home</a>
+      <a href="work.html">Projects</a>
+      <a href="resume.html">Resume</a>
+      <a href="about.html">About</a>
+      <a href="photography.html">Photography</a>
+      <a href="bookshelf.html">Bookshelf</a>
+      <a href="blog.html" class="active">Blog</a>
+      <a href="dreams.html">Dreamscape</a>
+      <a href="latent-sitemap.html">Atlas</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="post">
+    <p class="post-meta">October 28, 2026 &middot; 2 min read</p>
+    <h1>This site is generated</h1>
+    <div class="post-body">
+<p>There is no CMS behind this site, and no build server. Every page — the home page, the projects, the bookshelf, the Dreamscape, the Atlas — is written out by one Python program. I change the program, run it, and push what it produces. If a page looks wrong, the bug is in the generator, and fixing it there fixes it everywhere.</p>
+<p>The Atlas is the clearest example. Nobody places those points by hand. The generator reads the site's own content — every photo, book, artwork, and project — and puts a point in the nebula for each one. Add a book to the shelf and the map grows a point the next time the site builds.</p>
+<p>This blog runs on the same rails, and this is the first post through the pipe. A post is just a Markdown file with a title and a date. The generator turns it into a page, lists it here, adds it to the RSS feed and the sitemap, and gives it a point in the Atlas's new Writing cluster. Nothing is registered or copy-pasted anywhere by hand, which matters, because hand-maintained lists go stale silently.</p>
+<p>Short notes and longer essays will both land here. First one had to be about the plumbing.</p>
+<p><em>Drafted with an AI's help and edited by me — the same way most of this site gets built.</em></p>
+    </div>
+    <p class="post-foot"><a href="blog.html">&larr; All posts</a></p>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span><strong>Adam Laloge</strong></span>
+    <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a> &middot; <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a></span>
+  </div>
+</footer>
+<script>
+(function () {
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('site-nav');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+
+</body>
+</html>

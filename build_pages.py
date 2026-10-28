@@ -41,7 +41,8 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=61">
+{schema}<link rel="stylesheet" href="styles.css?v=62">
+<link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
 """
@@ -53,6 +54,7 @@ NAV_ITEMS = [
     ("about.html", "About"),
     ("photography.html", "Photography"),
     ("bookshelf.html", "Bookshelf"),
+    ("blog.html", "Blog"),
     ("dreams.html", "Dreamscape"),
     ("latent-sitemap.html", "Atlas"),
 ]
@@ -1464,6 +1466,143 @@ def _slug(title):
     return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
 
 
+# ---------- Blog ----------
+# Posts are Markdown files in posts/, named YYYY-MM-DD-slug.md with a
+# small front-matter block (title, date, description, optional
+# draft: true). The generator renders the index, one page per post,
+# the RSS feed, the sitemap entries and the Atlas points -- add a
+# file, rebuild, and the post appears everywhere it should. Nothing
+# about a post is hand-listed anywhere else, on purpose: hand-kept
+# lists go stale silently.
+import datetime as _dt
+import email.utils as _eu
+from html import escape as _esc
+import markdown as _md
+
+POSTS_DIR = os.path.join(SITE, "posts")
+BLOG_DESC = "Blog by Adam Laloge: notes and essays on building software, testing, design, and whatever else is on the workbench."
+
+
+def _fm_value(fm, key, default=""):
+    m = re.search(r"^%s:\s*(.+)$" % key, fm, re.M)
+    return m.group(1).strip().strip('"').strip("'") if m else default
+
+
+def load_posts():
+    posts = []
+    if not os.path.isdir(POSTS_DIR):
+        return posts
+    for name in sorted(os.listdir(POSTS_DIR)):
+        if not name.endswith(".md"):
+            continue
+        raw = open(os.path.join(POSTS_DIR, name), encoding="utf-8").read()
+        m = re.match(r"^---\n(.*?)\n---\n(.*)$", raw, re.S)
+        if not m:
+            continue
+        fm, body = m.groups()
+        if _fm_value(fm, "draft").lower() == "true":
+            continue
+        stem = name[:-3]
+        slug = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", stem)
+        try:
+            d = _dt.date.fromisoformat(_fm_value(fm, "date"))
+        except ValueError:
+            dm = re.match(r"(\d{4})-(\d{2})-(\d{2})-", stem)
+            if not dm:
+                continue
+            d = _dt.date(int(dm.group(1)), int(dm.group(2)), int(dm.group(3)))
+        words = len(body.split())
+        posts.append({
+            "slug": slug,
+            "fname": "blog-" + slug + ".html",
+            "title": _fm_value(fm, "title", slug.replace("-", " ").title()),
+            "desc": _fm_value(fm, "description"),
+            "date": d,
+            "date_long": d.strftime("%B ") + str(d.day) + d.strftime(", %Y"),
+            "mins": max(1, -(-words // 200)),
+            "html": _md.markdown(body, extensions=["extra"]),
+        })
+    posts.sort(key=lambda p: p["date"], reverse=True)
+    return posts
+
+
+POSTS = load_posts()
+
+
+def blog_index_body():
+    rows = []
+    for p in POSTS:
+        rows.append("""    <article class="post-card">
+      <h2><a href="%s">%s</a></h2>
+      <p class="post-meta">%s &middot; %d min read</p>
+      <p>%s</p>
+    </article>""" % (p["fname"], _esc(p["title"]), p["date_long"], p["mins"], _esc(p["desc"])))
+    listing = "\n".join(rows) if rows else "    <p>Nothing here yet.</p>"
+    return """  <section class="blog-head">
+    <h1>Blog</h1>
+    <p class="intro">Notes and essays, newest first. Short field notes and longer pieces run on the same rails here.</p>
+  </section>
+  <section class="post-list">
+%s
+  </section>""" % listing
+
+
+def blog_post_body(p):
+    return """  <article class="post">
+    <p class="post-meta">%s &middot; %d min read</p>
+    <h1>%s</h1>
+    <div class="post-body">
+%s
+    </div>
+    <p class="post-foot"><a href="blog.html">&larr; All posts</a></p>
+  </article>""" % (p["date_long"], p["mins"], _esc(p["title"]), p["html"])
+
+
+def write_feed():
+    items = []
+    for p in POSTS:
+        dt = _dt.datetime(p["date"].year, p["date"].month, p["date"].day, 12, 0, tzinfo=_dt.timezone.utc)
+        items.append("""    <item>
+      <title>%s</title>
+      <link>https://adamlaloge.com/%s</link>
+      <guid isPermaLink="true">https://adamlaloge.com/%s</guid>
+      <pubDate>%s</pubDate>
+      <description>%s</description>
+    </item>""" % (_esc(p["title"]), p["fname"], p["fname"], _eu.format_datetime(dt), _esc(p["desc"])))
+    feed = """<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Adam Laloge - Blog</title>
+    <link>https://adamlaloge.com/blog.html</link>
+    <description>%s</description>
+%s
+  </channel>
+</rss>
+""" % (BLOG_DESC, "\n".join(items))
+    open(os.path.join(SITE, "feed.xml"), "w", encoding="utf-8").write(feed)
+    print("wrote feed.xml", len(feed))
+
+
+def write_sitemap():
+    path = os.path.join(SITE, "sitemap.xml")
+    existing = open(path, encoding="utf-8").read()
+    have = set(re.findall(r"<loc>([^<]+)</loc>", existing))
+    blocks = re.findall(r"  <url>.*?</url>\n", existing)
+    latest = POSTS[0]["date"].isoformat() if POSTS else _dt.date.today().isoformat()
+    new = []
+    cand = [("https://adamlaloge.com/blog.html", latest, "0.7")]
+    cand += [("https://adamlaloge.com/" + p["fname"], p["date"].isoformat(), "0.6") for p in POSTS]
+    for loc, lastmod, prio in cand:
+        if loc not in have:
+            new.append('  <url><loc>%s</loc><lastmod>%s</lastmod><priority>%s</priority></url>\n' % (loc, lastmod, prio))
+    out = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+           + "".join(blocks) + "".join(new) + "</urlset>\n")
+    open(path, "w", encoding="utf-8").write(out)
+    print("wrote sitemap.xml", len(out))
+
+
+
 def latent_map_data():
     items = []
     group_angle = {"sunsets": -90, "shoreline": 0, "landscapes": 90, "details": 180}
@@ -1506,6 +1645,13 @@ def latent_map_data():
                       "rgb": _lighten([94, 234, 212], 0.1 + (h % 40) / 100.0), "size": 22,
                       "dx": round(math.cos(ang) * 0.07, 4), "dy": round(math.sin(ang) * 0.05, 4),
                       "region": "projects", "href": slug + ".html"})
+    for i, p in enumerate(POSTS):
+        h = zlib.crc32(p["title"].encode())
+        ang = math.radians(-160 + i * 42)
+        items.append({"kind": "post", "title": p["title"], "sub": "Blog \u00b7 " + p["date"].strftime("%b %Y"),
+                      "rgb": _lighten([150, 130, 255], 0.1 + (h % 30) / 100.0), "size": 18,
+                      "dx": round(math.cos(ang) * 0.075, 4), "dy": round(math.sin(ang) * 0.055, 4),
+                      "region": "writing", "href": p["fname"]})
     # Clusters breathe a tad: each region's offsets scale out from
     # their own centroid, then a deterministic relaxation enforces a
     # minimum separation so no two points sit on top of each other.
@@ -1548,6 +1694,7 @@ def latent_map_data():
         "bookshelf": {"label": "BOOKSHELF", "fx": 0.76, "fy": 0.40, "rgb": [216, 96, 158]},
         "worlds": {"label": "DREAMSCAPE", "fx": 0.24, "fy": 0.80, "rgb": [228, 96, 52]},
         "projects": {"label": "PROJECTS", "fx": 0.74, "fy": 0.79, "rgb": [226, 182, 92]},
+        "writing": {"label": "WRITING", "fx": 0.52, "fy": 0.16, "rgb": [150, 130, 255]},
     }
     return {"regions": regions, "items": items}
 
@@ -1589,6 +1736,7 @@ sitemap_body = """  <canvas id="latent-map" aria-hidden="true"></canvas>
 """.replace("/*__GROUPS__*/", "\n".join([
     _map_group("Photography", "photography.html", "photography"),
     _map_group("Bookshelf", "bookshelf.html", "bookshelf"),
+    _map_group("Blog", "blog.html", "writing"),
     _map_group("Dreamscape", "dreams.html", "worlds"),
     _map_group("Projects", "work.html", "projects"),
 ]))
@@ -2551,6 +2699,12 @@ LATENT_MAP_JS = r"""<script>
 })();
 </script>
 """.replace("/*__DATA__*/null", json.dumps(LATENT_DATA))
+
+page("blog.html", "Blog \u2014 Adam Laloge", BLOG_DESC, "blog.html", blog_index_body())
+for _p in POSTS:
+    page(_p["fname"], _p["title"] + " \u2014 Adam Laloge", _p["desc"] or BLOG_DESC, "blog.html", blog_post_body(_p))
+write_feed()
+write_sitemap()
 
 page("latent-sitemap.html", "Atlas — Adam Laloge",
      "A sitemap drawn as a latent space: every photo, book, artwork, and project on Adam Laloge's site as a point in one flowing map.",

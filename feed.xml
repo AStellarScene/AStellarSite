@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Adam Laloge - Blog</title>
+    <link>https://adamlaloge.com/blog.html</link>
+    <description>Blog by Adam Laloge: notes and essays on building software, testing, design, and whatever else is on the workbench.</description>
+    <item>
+      <title>This site is generated</title>
+      <link>https://adamlaloge.com/blog-this-site-is-generated.html</link>
+      <guid isPermaLink="true">https://adamlaloge.com/blog-this-site-is-generated.html</guid>
+      <pubDate>Wed, 28 Oct 2026 12:00:00 +0000</pubDate>
+      <description>Every page on this site comes out of a single Python program. As of today the blog does too — this post is the proof and the explanation.</description>
+    </item>
+  </channel>
+</rss>
