@@ -4,6 +4,12 @@ date: 2026-10-28
 description: The Dreamscape's worlds melt into each other along living seams. This is the full technical story — the concept, the dead ends, two silent shader deaths, and the bisection that hunted a one-pixel line.
 ---
 
+<div class="seefirst">
+<div class="seefirst-k">See it first</div>
+<div class="seefirst-t">This post is about a visual effect, and words are the wrong medium for one. Before the story of how it was built — go watch the seams move.</div>
+<a class="seefirst-a" href="dreams.html">Open the Dreamscape &rarr;</a>
+</div>
+
 The Dreamscape page on this site is a gallery of AI-generated worlds — The Golden City, the Obsidian Dragon, The Drowned Bells, The Far Shore. They are not presented as thumbnails in a grid. They share one continuous surface, and every border between them is a living seam: a slow, refracting melt that sways like the surface of a liquid, bends the artwork on both sides, and carries light along its crest. Tap a world and it opens; the seams around it rearrange and keep moving.
 
 This post is the complete technical record of building that effect: what the idea actually was, the approaches that failed and why, the bugs that hid, and what the final engine looks like. It took four architectures and one very instructive day of failures to get a border to behave like water.

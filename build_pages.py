@@ -41,7 +41,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=66">
+{schema}<link rel="stylesheet" href="styles.css?v=67">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -1680,7 +1680,9 @@ def load_posts():
         # and any paragraph opening with a bold "Lesson N:" lead renders
         # as a callout card. Authors opt in purely by writing that way;
         # every post inherits the treatment (styles: .post-body .lede /
-        # .lesson, plus .statband / .figbox raw-HTML blocks).
+        # .lesson, plus .statband / .figbox / .seefirst raw-HTML blocks —
+        # .seefirst is an invitation card linking out to the thing the
+        # post is about, placed by the author at the top of the body).
         _html = _md.markdown(body, extensions=["extra"])
         _html = _html.replace("<p>", '<p class="lede">', 1)
         _html = _html.replace("<p><strong>Lesson", '<p class="lesson"><strong>Lesson')

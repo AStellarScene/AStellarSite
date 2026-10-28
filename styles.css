@@ -1330,6 +1330,10 @@ body.sitemap-body .latent-scrollzone {
 .post-body .stat { border: 1px solid rgba(148, 163, 184, .18); border-radius: 12px; background: rgba(148, 163, 184, .05); padding: 15px 16px 12px; }
 .post-body .stat b { display: block; font-size: 29px; line-height: 1.1; color: var(--heading); font-weight: 650; }
 .post-body .stat span { display: block; margin-top: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--teal); }
+.post-body .seefirst { border: 1px solid rgba(94, 234, 212, .28); border-radius: 12px; background: rgba(94, 234, 212, .05); padding: 16px 19px 15px; margin: 2px 0 28px; }
+.post-body .seefirst-k { font-family: var(--mono); font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--teal); }
+.post-body .seefirst-t { margin-top: 8px; font-size: 16.5px; line-height: 1.6; }
+.post-body .seefirst-a { display: inline-block; margin-top: 10px; font-family: var(--mono); font-size: 14px; color: var(--teal); text-decoration: none; border-bottom: 1px solid rgba(94, 234, 212, .45); padding-bottom: 1px; }
 @media (max-width: 760px) { .post-body .statband { grid-template-columns: repeat(2, 1fr); } .post-body .lede { font-size: 18.5px; } .post-body blockquote { font-size: 19px; } }
 .post-foot { margin-top: 40px; }
 
