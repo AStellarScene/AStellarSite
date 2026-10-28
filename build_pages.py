@@ -471,6 +471,7 @@ latent_js = "<script>\n" + r'''(function () {
     'uniform float uTime;',
     'uniform float uBand;',
     'uniform float uQA;', // quilt aspect (width / height, CSS px)
+    'uniform float uBw;', // canvas backing width in device px: seam shading scale
     'uniform float uCount;',
     'uniform vec4 uVis;', // visible region of the canvas (GL uv) -- off-view fragments exit cheap
     'uniform vec4 uRect[' + MAXC + '];', // cell rects, page space (x0, y0, x1, y1), y down
@@ -517,6 +518,9 @@ latent_js = "<script>\n" + r'''(function () {
     '       + 0.006 * 13.7 * cos(13.7 * s + tt * 0.42 + 1.7 + ph)',
     '       + 0.0025 * 27.0 * cos(27.0 * s - tt * 0.24 + 4.1 + ph);',
     '}',
+    'float envW(float s){', // corner taper: full melt mid-edge, zero at the ends
+    '  return smoothstep(0.0, 0.16, s) * smoothstep(1.0, 0.84, s);',
+    '}',
     'vec2 driftFor(float idx, float t){',
     '  float ph = idx * 1.93;', // per-world phase: diagonal twins no longer drift together
     '  if (mod(idx, 2.0) < 0.5) return vec2(sin(t * 0.33 + ph), sin(t * 0.23 + 1.3 + ph)) * 0.020;',
@@ -561,14 +565,24 @@ latent_js = "<script>\n" + r'''(function () {
   // (positive inside this cell), band falloff, slope, refraction vector.
   // Geometry mirrors v3: for a vertical seam the wave runs on uv.y
   // (GL-up, hence 1.0 - p.y), for a horizontal seam on uv.x.
+  // The wave is parameterised by SEGMENT-LOCAL s (0..1 along this
+  // cell's own edge) and tapered to zero at the segment ends. In the
+  // quilt, four edges meet at the centre cross; with the old global
+  // parameter each edge arrived at the cross at a different wave
+  // value, so the boundary line jumped -- a visible ledge where the
+  // four worlds meet. Zero displacement at every corner makes all
+  // edges agree at the corners by construction, while mid-edge (most
+  // of every seam) keeps the full v3 melt. Neighbours sharing an
+  // edge extent compute the identical seg, so the line still cannot
+  // tear.
   var GEO = [
-    { pre: 'lnS = cr.x + waveP(1.0 - p.y, t, phS, tmS) * actS * amS; dS = p.x - lnS; slS = slopeP(1.0 - p.y, t, phS, tmS) * amS;',
+    { pre: 'segS = 1.0 - (p.y - cr.y) / cellSize.y; lnS = cr.x + waveP(segS, t, phS, tmS) * envW(segS) * actS * amS; dS = p.x - lnS; slS = slopeP(segS, t, phS, tmS) * envW(segS) * amS;',
       post: 'rfS = vec2(-slS * 0.012 * bFS, 0.0);' },
-    { pre: 'lnS = cr.z + waveP(1.0 - p.y, t, phS, tmS) * actS * amS; dS = lnS - p.x; slS = slopeP(1.0 - p.y, t, phS, tmS) * amS;',
+    { pre: 'segS = 1.0 - (p.y - cr.y) / cellSize.y; lnS = cr.z + waveP(segS, t, phS, tmS) * envW(segS) * actS * amS; dS = lnS - p.x; slS = slopeP(segS, t, phS, tmS) * envW(segS) * amS;',
       post: 'rfS = vec2(slS * 0.012 * bFS, 0.0);' },
-    { pre: 'lnS = cr.y + waveP(p.x, t, phS, tmS) * actS * amS; dS = p.y - lnS; slS = slopeP(p.x, t, phS, tmS) * amS;',
+    { pre: 'segS = (p.x - cr.x) / cellSize.x; lnS = cr.y + waveP(segS, t, phS, tmS) * envW(segS) * actS * amS; dS = p.y - lnS; slS = slopeP(segS, t, phS, tmS) * envW(segS) * amS;',
       post: 'rfS = vec2(0.0, slS * 0.012 * bFS);' },
-    { pre: 'lnS = cr.w + waveP(p.x, t, phS, tmS) * actS * amS; dS = lnS - p.y; slS = slopeP(p.x, t, phS, tmS) * amS;',
+    { pre: 'segS = (p.x - cr.x) / cellSize.x; lnS = cr.w + waveP(segS, t, phS, tmS) * envW(segS) * actS * amS; dS = lnS - p.y; slS = slopeP(segS, t, phS, tmS) * envW(segS) * amS;',
       post: 'rfS = vec2(0.0, -slS * 0.012 * bFS);' }
   ];
   function subS(str, s) { return str.split('S').join(String(s)); }
@@ -584,7 +598,7 @@ latent_js = "<script>\n" + r'''(function () {
       '    if (float(j) >= uCount) break;',
       '    if (abs(float(j) - nj' + s + ') < 0.5) { nr' + s + ' = uRect[j]; nuv' + s + ' = uUVR[j]; nta' + s + ' = uTA[j]; has' + s + ' = 1.0; }',
       '  }',
-      '  float ln' + s + ' = 0.0; float d' + s + ' = 1000.0; float bF' + s + ' = 0.0; float sl' + s + ' = 0.0; vec2 rf' + s + ' = vec2(0.0);',
+      '  float ln' + s + ' = 0.0; float d' + s + ' = 1000.0; float bF' + s + ' = 0.0; float sl' + s + ' = 0.0; float seg' + s + ' = 0.0; vec2 rf' + s + ' = vec2(0.0);',
       '  if (nearSeam && has' + s + ' > 0.5 && act' + s + ' > 0.001) {',
       '    ' + subS(GEO[s].pre, s).replace(/act\d/g, 'act' + s),
       '    bF' + s + ' = exp(-abs(d' + s + ') / uBand) * act' + s + ';',
@@ -609,8 +623,8 @@ latent_js = "<script>\n" + r'''(function () {
       '    vec3 ncol' + s2 + ' = sampleCell(nuv2_' + s2 + ', nuv' + s2 + ');',
       '    col = mix(ncol' + s2 + ', col, smoothstep(-0.0015, 0.0015, d' + s2 + '));',
       '    col += clamp(sl' + s2 + ', -1.0, 1.0) * bF' + s2 + ' * 0.13;',
-      '    col += exp(-abs(d' + s2 + ') * 220.0) * 0.08 * act' + s2 + ';',
-      '    col -= exp(-abs(d' + s2 + ' - 0.006) * 160.0) * 0.05 * act' + s2 + ';',
+      '    col += exp(-abs(d' + s2 + ') * uBw * 0.28) * 0.08 * act' + s2 + ';',
+      '    col -= exp(-abs(d' + s2 + ' - 4.5 / uBw) * uBw * 0.20) * 0.05 * act' + s2 + ';',
       '  }'
     );
   }
@@ -639,7 +653,7 @@ latent_js = "<script>\n" + r'''(function () {
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   var U = {};
-  ['uAtlas', 'uAtlasSize', 'uTime', 'uBand', 'uQA', 'uCount', 'uVis'].forEach(function (name) {
+  ['uAtlas', 'uAtlasSize', 'uTime', 'uBand', 'uQA', 'uBw', 'uCount', 'uVis'].forEach(function (name) {
     U[name] = gl.getUniformLocation(prog, name);
   });
   U.uRect = gl.getUniformLocation(prog, 'uRect[0]');
@@ -652,6 +666,7 @@ latent_js = "<script>\n" + r'''(function () {
   U.uAmp = gl.getUniformLocation(prog, 'uAmp[0]');
   gl.uniform1i(U.uAtlas, 0);
   gl.uniform1f(U.uBand, 0.055);
+  gl.uniform1f(U.uBw, 1600);
   gl.uniform1f(U.uCount, N);
 
   var anisoExt = gl.getExtension('EXT_texture_filter_anisotropic') ||
@@ -680,14 +695,22 @@ latent_js = "<script>\n" + r'''(function () {
       var img = el.querySelector('img');
       return { idx: idx, img: img, nw: img.naturalWidth, nh: img.naturalHeight };
     });
-    for (var attempt = 0; attempt < 3; attempt++) {
-      // Try shelf budgets; keep the packing whose power-of-two atlas
-      // has the smallest area (then the smallest max dimension).
+    // Fit, don't halve: try full resolution first across several
+    // shelf budgets; if no packing fits the device's texture limit,
+    // step the cell size down gently (0.85, 0.72, ...) and retry.
+    // The old loop halved cellMax twice when the naive packing
+    // overflowed, which baked every world at ~512px on tablets
+    // whose GPUs cap textures at 2048-4096px -- the whole quilt
+    // then upscaled into mosaic blocks.
+    var cap = Math.min(8192, maxTexSize);
+    var scales = [1, 0.85, 0.72, 0.6, 0.5, 0.42, 0.35];
+    for (var attempt = 0; attempt < scales.length; attempt++) {
+      var cm = Math.max(256, Math.floor(cellMax * scales[attempt]));
       var best = null;
-      [cellMax, Math.floor(cellMax * 1.5), cellMax * 2].forEach(function (budget) {
+      [cm, Math.floor(cm * 1.5), cm * 2, cm * 3, cm * 4].forEach(function (budget) {
         var x = 0, y = 0, rowH = 0, usedW = 0;
         var items = sized.map(function (it) {
-          var sc = Math.min(1, cellMax / Math.max(it.nw, it.nh));
+          var sc = Math.min(1, cm / Math.max(it.nw, it.nh));
           var dw = Math.max(2, Math.round(it.nw * sc)), dh = Math.max(2, Math.round(it.nh * sc));
           if (x > 0 && x + dw > budget) { x = 0; y += rowH + PAD; rowH = 0; }
           var rec = { idx: it.idx, img: it.img, x: x, y: y, w: dw, h: dh };
@@ -698,12 +721,27 @@ latent_js = "<script>\n" + r'''(function () {
         });
         var usedH = y + rowH;
         var AW = nextPow2(usedW), AH = nextPow2(usedH);
+        if (AW > cap || AH > cap) return; // infeasible at this budget
         var score = AW * AH, tie = Math.max(AW, AH);
         if (!best || score < best.score || (score === best.score && tie < best.tie)) {
           best = { items: items, AW: AW, AH: AH, score: score, tie: tie };
         }
       });
-      if (Math.max(best.AW, best.AH) <= Math.min(4096, maxTexSize) || attempt === 2) {
+      if (best || attempt === scales.length - 1) {
+        if (!best) { // last resort: smallest scale, widest shelf
+          var x2 = 0, y2 = 0, rowH2 = 0, usedW2 = 0;
+          var items2 = sized.map(function (it) {
+            var sc2 = Math.min(1, cm / Math.max(it.nw, it.nh));
+            var dw2 = Math.max(2, Math.round(it.nw * sc2)), dh2 = Math.max(2, Math.round(it.nh * sc2));
+            if (x2 > 0 && x2 + dw2 > cm * 4) { x2 = 0; y2 += rowH2 + PAD; rowH2 = 0; }
+            var rec2 = { idx: it.idx, img: it.img, x: x2, y: y2, w: dw2, h: dh2 };
+            x2 += dw2 + PAD;
+            if (x2 - PAD > usedW2) usedW2 = x2 - PAD;
+            if (dh2 > rowH2) rowH2 = dh2;
+            return rec2;
+          });
+          best = { items: items2, AW: nextPow2(usedW2), AH: nextPow2(y2 + rowH2), score: 0, tie: 0 };
+        }
         var cv = document.createElement('canvas');
         cv.width = best.AW; cv.height = best.AH;
         var ctx = cv.getContext('2d');
@@ -728,7 +766,6 @@ latent_js = "<script>\n" + r'''(function () {
         gl.uniform2f(U.uAtlasSize, best.AW, best.AH);
         return true;
       }
-      cellMax = Math.floor(cellMax / 2);
     }
     return false;
   }
@@ -886,6 +923,7 @@ latent_js = "<script>\n" + r'''(function () {
     if (canvas.width !== bw || canvas.height !== bh) {
       canvas.width = bw; canvas.height = bh;
       gl.viewport(0, 0, bw, bh);
+      if (U.uBw) gl.uniform1f(U.uBw, bw);
     }
   }
   function animating() {
