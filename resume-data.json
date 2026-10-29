@@ -126,7 +126,7 @@
  ],
  "projects": [
   {
-   "title": "**BenchLab** | Testing simulator",
+   "title": "**BenchLab** | Testing simulator | In planning",
    "lines": [
     {
      "text": "Clean-room recreation, created from scratch, of the automated test platform built at Baxter: an internal codebase of 20,000+ lines of Python that cannot be shared publicly. Visual test builder, in-browser simulated device, auto-generated traceability reporting, and an agent layer that converts plain-English protocols into executable test steps.",
@@ -139,7 +139,7 @@
    ]
   },
   {
-   "title": "**Lucent Launcher** | Native Minecraft launcher in Rust",
+   "title": "**Lucent Launcher** | Native Minecraft launcher in Rust | In development",
    "lines": [
     {
      "text": "Native launcher built with Rust, GTK4, and Libadwaita. Launcher core builds clean with 38 passing tests; features resource-pack management, Flatpak packaging, and a readiness-aware launch flow. github.com/AStellarScene/lucent-launcher",

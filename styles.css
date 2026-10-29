@@ -1364,3 +1364,5 @@ body.sitemap-body .latent-scrollzone {
 .proj-title { color: var(--heading); font-size: 17px; margin-top: 0; }
 .res-sub { color: var(--dim); font-size: 14.5px; }
 @media (max-width: 700px) { .proj-grid { grid-template-columns: 1fr; } }
+
+.proj-status { color: var(--gold); font-size: 13.5px; letter-spacing: .04em; text-transform: uppercase; margin: 2px 0 6px; }

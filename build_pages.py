@@ -43,7 +43,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=70">
+{schema}<link rel="stylesheet" href="styles.css?v=71">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -1711,7 +1711,10 @@ def resume_body():
     out.append('  <div class="proj-grid">')
     for proj in data["projects"]:
         out.append('    <div class="proj-card">')
-        out.append('      <p class="proj-title">%s</p>' % _md(proj["title"]))
+        title_parts = [p.strip() for p in proj["title"].split("|")]
+        out.append('      <p class="proj-title">%s</p>' % _md(" | ".join(title_parts[:2])))
+        if len(title_parts) > 2:
+            out.append('      <p class="proj-status">Status: %s</p>' % _md(title_parts[2]))
         for ln in proj["lines"]:
             text = ln["text"]
             if text.startswith("Project page: "):
