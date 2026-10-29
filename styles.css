@@ -908,6 +908,10 @@ html.latent-live[data-world="golden"] .site-header::after { background: rgba(26,
 html.latent-live[data-world="ember"] .site-header::after { background: rgba(22, 9, 5, 0.38); }
 html.latent-live[data-world="abyss"] .site-header::after { background: rgba(3, 16, 18, 0.42); }
 html.latent-live[data-world="shore"] .site-header::after { background: rgba(6, 18, 10, 0.42); }
+html.latent-live[data-world="vending"] .site-header::before { background-image: url("art/vending-hall.jpg"); }
+html.latent-live[data-world="watch"] .site-header::before { background-image: url("art/the-long-watch.jpg"); }
+html.latent-live[data-world="vending"] .site-header::after { background: rgba(4, 10, 16, 0.42); }
+html.latent-live[data-world="watch"] .site-header::after { background: rgba(8, 10, 20, 0.42); }
 
 /* When a world opens, the text above it fades away entirely */
 html.latent-live .latent-head { transition: opacity 0.7s ease; }
