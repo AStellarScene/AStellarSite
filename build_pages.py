@@ -481,9 +481,6 @@ latent_js = "<script>\n" + r'''(function () {
   var slices = Array.prototype.slice.call(quilt.querySelectorAll('.slice'));
   var N = slices.length, MAXC = 12;
   if (N < 2 || N > MAXC) return;
-  var DIAGQ = '';
-  try { DIAGQ = (location.search.match(/diag=(\d)/) || [])[1] || ''; } catch (e) {}
-  if (DIAGQ === '8') { var dst = document.createElement('style'); dst.textContent = '.seam,.seam-h{display:none!important}'; document.head.appendChild(dst); }
 
   var CTX = { alpha: false, depth: false, stencil: false, antialias: false, powerPreference: 'low-power' };
   var gl = null, isGL2 = false;
@@ -565,9 +562,21 @@ latent_js = "<script>\n" + r'''(function () {
     // Textures are SRGB8_ALPHA8, so samples arrive LINEAR: the seam
     // mixes stop dipping dark, and srgbEncode restores the display
     // curve once at the end.
+    // v6.3 (2026-10-28): the sampler's gradients are FIXED, not
+    // hardware-inferred. dFdx/dFdy are computed over 2x2 fragment
+    // quads; a quad straddling a cell boundary mixes UVs from two
+    // texture spaces, the inferred gradient explodes, and those
+    // fragments sample the coarsest mip -- the whole texture
+    // averaged -- drawing a straight line of average colour along
+    // the boundary (bright over dark content, dark over bright).
+    // It surfaced when the quilt grew to six worlds and the new
+    // boundaries landed on straddling parities. Telling the
+    // sampler a fixed fine gradient removes the inference; Adam
+    // judged the result perfect on his phone (the ?diag=7 test)
+    // and chose it as the shipping version.
     var swLines = [
       'vec3 sampleWorld(int idx, vec2 uv){',
-      '  vec2 gx = dFdx(uv); vec2 gy = dFdy(uv);'
+      '  vec2 gx = vec2(0.001, 0.0); vec2 gy = vec2(0.0, 0.001);'
     ];
     for (var wi = 0; wi < MAXC; wi++) {
       swLines.push('  if (idx == ' + wi + ') return textureGrad(uTex[' + wi + '], uv, gx, gy).rgb;');
@@ -730,29 +739,6 @@ latent_js = "<script>\n" + r'''(function () {
   }
   F.push('  ' + OUTC + ' = vec4(' + (es3 ? 'srgbEncode(col)' : 'col') + ', 1.0);', '}');
     FRAG = F.join('\n');
-    // DIAGNOSTIC (2026-10-28, temporary): ?diag=N swaps exactly one
-    // seam ingredient for this load only, to bisect the straight
-    // hairline on Adam's phone that survived the row fix, the
-    // epsilon, and the edge glue. Inert without the parameter; the
-    // assembled shader above is byte-identical to v6.2 either way.
-    var DIAG = DIAGQ;
-    if (DIAG === '1') FRAG = FRAG.split('* 0.13').join('* 0.0').split('* 0.08 * act').join('* 0.0 * act');
-    if (DIAG === '2') FRAG = FRAG.split('smoothstep(-0.0015, 0.0015, d').join('smoothstep(-0.02, 0.02, d');
-    if (DIAG === '3') FRAG = FRAG.split(' + refrSum * breathe').join('')
-      .split('rf0 * 1.6 * breathe').join('0.0').split('rf1 * 1.6 * breathe').join('0.0')
-      .split('rf2 * 1.6 * breathe').join('0.0').split('rf3 * 1.6 * breathe').join('0.0');
-    if (DIAG === '4') FRAG = FRAG.replace('vec2 driftFor(float idx, float t){',
-      'vec2 driftFor(float idx, float t){ if (idx > -1.0) return vec2(0.0);');
-    if (DIAG === '5') FRAG = FRAG.split('0.011 * sin').join('0.0 * sin')
-      .split('0.006 * sin').join('0.0 * sin').split('0.0025 * sin').join('0.0 * sin');
-    if (DIAG === '9') FRAG = FRAG.split('mix(ncol0, col,').join('mix(col, col,')
-      .split('mix(ncol1, col,').join('mix(col, col,')
-      .split('mix(ncol2, col,').join('mix(col, col,')
-      .split('mix(ncol3, col,').join('mix(col, col,');
-    if (DIAG === '0') FRAG = FRAG.replace('vec3 sampleWorld(int idx, vec2 uv){',
-      'vec3 sampleWorld(int idx, vec2 uv){ return vec3(0.30 + 0.09 * mod(float(idx), 6.0), 0.42, 0.72);');
-    if (DIAG === '7') FRAG = FRAG.split('vec2 gx = dFdx(uv); vec2 gy = dFdy(uv);')
-      .join('vec2 gx = vec2(0.001, 0.0); vec2 gy = vec2(0.0, 0.001);');
   }
 
   function shader(type, src) {
@@ -1172,7 +1158,6 @@ latent_js = "<script>\n" + r'''(function () {
     for (i = 0; i < N * 4; i++) actBuf[i] = acts[i];
     gl.uniform1f(U.uTime, time);
     gl.uniform4f(U.uVis, vis[0], vis[1], vis[2], vis[3]);
-    if (DIAGQ === '6') gl.uniform4f(U.uVis, 0, 0, 1, 1);
     gl.uniform1f(U.uQA, quiltW / Math.max(1, quiltH));
     gl.uniform4fv(U.uRect, rectBuf);
     gl.uniform4fv(U.uUVR, uvBuf);
