@@ -59,42 +59,42 @@
    "role": "**Engineering Test Technician** (Full-Time Work While Completing B.S. Degree)",
    "bullets": [
     {
-     "lead": "Usability research:",
+     "lead": "Usability research",
      "text": "Moderate usability test sessions with end users of lab test software. Gather requirements and needs directly from users. Translate findings into formal traceable system specifications for internal tools developed full stack.",
      "web_only": false
     },
     {
-     "lead": "Interface design:",
+     "lead": "Interface design",
      "text": "Design user interfaces and human machine interfaces (HMI) for automated test equipment and test software used daily by lab technicians.",
      "web_only": false
     },
     {
-     "lead": "AI systems development:",
+     "lead": "AI systems development",
      "text": "Deliver end to end software development from user interface design through backend implementation. Build specialized AI agent workspaces that support automated testing and software development. Includes natural language protocol ingestion and automated traceability reporting.",
      "web_only": false
     },
     {
-     "lead": "Automated test equipment:",
+     "lead": "Automated test equipment",
      "text": "Design and build automated test equipment for medical device testing. Design, build, and validate test equipment with embedded controllers.",
      "web_only": false
     },
     {
-     "lead": "Medical device verification:",
+     "lead": "Medical device verification",
      "text": "Perform verification testing of medical devices to rigorous compliance standards. Maintain requirements traceability throughout.",
      "web_only": false
     },
     {
-     "lead": "Innovation and communication:",
+     "lead": "Innovation and communication",
      "text": "Present lab results and AI work at project reviews and internal showcases. Contribute to multiple invention disclosures.",
      "web_only": false
     },
     {
-     "lead": "PLM and issue management:",
+     "lead": "PLM and issue management",
      "text": "Manage document control and validation data in enterprise PLM systems. Document product issues and escalate them to Engineering.",
      "web_only": true
     },
     {
-     "lead": "Electrical and mechanical assembly:",
+     "lead": "Electrical and mechanical assembly",
      "text": "Perform electrical and mechanical assembly of projects from engineering documentation.",
      "web_only": true
     }
@@ -106,17 +106,17 @@
    "role": "**On-Site IT Support** (Part-Time Work While Completing A.A.S. Degree)",
    "bullets": [
     {
-     "lead": "Technical Support:",
+     "lead": "Technical Support",
      "text": "Delivered in-person and remote support for hardware and software issues.",
      "web_only": false
     },
     {
-     "lead": "IT Operations:",
+     "lead": "IT Operations",
      "text": "Assisted with infrastructure planning and hardware asset management.",
      "web_only": false
     },
     {
-     "lead": "Procurement and Upgrades:",
+     "lead": "Procurement and Upgrades",
      "text": "Handled purchasing, planned system upgrades, and configured equipment.",
      "web_only": false
     }
