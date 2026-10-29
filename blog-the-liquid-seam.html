@@ -41,7 +41,7 @@
 
 <main class="wrap">
   <article class="post">
-    <p class="post-meta">October 28, 2026 &middot; 23 min read</p>
+    <p class="post-meta">October 28, 2026 &middot; 27 min read</p>
     <h1>The Liquid Seam</h1>
     <div class="post-body">
 <div class="seefirst">
@@ -485,6 +485,47 @@
 </tr>
 </tbody>
 </table>
+<h2>Postscript: the third pair, and the line that wasn't a seam</h2>
+<p>The same evening, two more worlds arrived. <strong>The Vending Hall</strong> is from a dream of mine that stuck with me: a clean black warehouse under a radiant glass ceiling, full of vending machines, each given an uncomfortable amount of room. <strong>The Long Watch</strong> is its companion: thousands of cameras on tripods across a frozen lake, photographing a sunset for someone who never came back. Six worlds — and the record above claims adding one is "data only." That claim got its first real test within the hour, and failed it twice.</p>
+<p><strong>Failure one: the third row didn't exist.</strong> The markup was correct and the live page was byte-identical to the build, but the stylesheet still declared the four-world grid — two explicit rows, four in portrait, fixed heights, overflow hidden — so the new row was laid out below the quilt's box and clipped away, canvas and all. A byte check proved the file; only a render check could prove the page, and I hadn't run one. The fix follows the rule this site keeps relearning: the generator now counts the slices itself and hands the stylesheet the count (<code>--rows</code>, <code>--cells</code>), so the grid derives from the content instead of remembering it.</p>
+<p><strong>Failure two: a straight line on the boundaries.</strong> Once the row existed, a ruler-straight hairline sat exactly on the grid lines — while the melt waves moved around it. It was bright over dark content and dark over bright content. Measured rather than argued about: I averaged 109 frames of a screen recording of my own phone, the waves cancelled, and the line survived untouched — a whitish ridge a few pixels wide, +37 luminance over The Drowned Bells' dark sky, present in every frame at the same height across the whole quilt. It also reproduced on a desktop checker at the horizontal boundary while the vertical stayed clean. That selectivity was a clue, not noise.</p>
+<p>The hunt burned three plausible fixes first — a sub-pixel crack between measured rectangles (would paint black), an overlap (would offset the two seam lines), averaging shared edges into both cells (exact, and irrelevant). Then the A–G method, scaled up: diagnostic builds of the real page, one variable killed per build, judged on the phone that showed the line. Seam light: innocent. Glow: innocent. Crossfade width, refraction, per-world drift, the neighbour blends themselves, the visibility window, the page's own glass seam strips: innocent, all. I had said early on that it didn't look like the seam animation itself. That was the correct instrument reading, and the bisection proved it the expensive way.</p>
+<p>The cut that mattered removed the textures entirely: flat-colour worlds, no sampling at all — and no line. Not the compositor, not the DOM. The sampling.</p>
+<p>Here is the mechanism. A GPU chooses a texture's sharpness level (its mip) from how fast the texture coordinates change across each 2×2 block of pixels. A block straddling a boundary between worlds holds coordinates from <em>two different textures</em> — the change across it reads as enormous, so those pixels sample the <strong>coarsest mip: the entire world averaged into a single colour</strong>, and paint that average along the boundary. Brighter than a dark sky, darker than bright clouds — the sign flips exactly the way the screenshots showed. And whether a boundary straddles a block depends on its pixel parity: the taller six-world quilt moved the boundaries onto straddling positions, one screen caught the horizontal line and not the vertical, and — in hindsight — the faint streak that survived v6.2 in The Far Shore's sky was this same artifact on a weaker parity, misfiled as a sampling-field step.</p>
+<p>The fix is one line: the sampler no longer infers its gradients from neighbouring pixels. It is handed a fixed, fine gradient, so no block can poison the estimate. The melt, the light, the glow — everything this post spent its length tuning — is untouched. It ships as <strong>v6.4</strong>, the number after the rolled-back v6.3. Verdict, on the phone that found the line: <em>finally, it's perfect.</em></p>
+<p>The record, extended:</p>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Change</th>
+<th>Fate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>—</td>
+<td>Oct 28 (eve)</td>
+<td>Third pair added — six worlds</td>
+<td>Row clipped by the four-world grid; a line on the boundaries</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Oct 28 (eve)</td>
+<td>Grid derives from the slice count</td>
+<td>The row exists</td>
+</tr>
+<tr>
+<td>v6.4</td>
+<td>Oct 28 (eve)</td>
+<td>Fixed sampler gradients</td>
+<td>The line dies; ships</td>
+</tr>
+</tbody>
+</table>
+<p class="lesson"><strong>Lesson 8: an instance count hides anywhere a number is written down — CSS rows, a palette table, a texture parity. If adding one is "data only," every consumer has to derive from the data. The ones that don't will be found by the addition.</strong></p>
+<p class="lesson"><strong>Lesson 9: when an artifact survives every term you can name, change what you're measuring. Average the video. Flatten the colours. And treat "it doesn't look like the seam" — from the person staring at the screen — as data, not as a hunch to argue with.</strong></p>
 <h2>Why any of this matters</h2>
 <p>Strip the specifics away and the day's lessons are not really about shaders:</p>
 <ol>

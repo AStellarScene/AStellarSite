@@ -562,7 +562,7 @@ latent_js = "<script>\n" + r'''(function () {
     // Textures are SRGB8_ALPHA8, so samples arrive LINEAR: the seam
     // mixes stop dipping dark, and srgbEncode restores the display
     // curve once at the end.
-    // v6.3 (2026-10-28): the sampler's gradients are FIXED, not
+    // v6.4 (2026-10-28): the sampler's gradients are FIXED, not
     // hardware-inferred. dFdx/dFdy are computed over 2x2 fragment
     // quads; a quad straddling a cell boundary mixes UVs from two
     // texture spaces, the inferred gradient explodes, and those
