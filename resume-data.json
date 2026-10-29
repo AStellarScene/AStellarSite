@@ -8,17 +8,6 @@
  "summary": "UI/UX Software Engineer building human-centered AI systems in regulated medical-device environments. Moderates usability sessions with end users and translates findings into formal, traceable system specifications, then designs, builds, and validates the full stack behind them: HMI interfaces, backend services, AI agent workspaces, and embedded test hardware.",
  "skills": [
   {
-   "category": "AI Systems",
-   "items": [
-    "AI agent workspace design",
-    "agent team orchestration",
-    "agentic coding with Muse, Copilot, and Claude",
-    "retrieval-augmented generation (RAG) and MCP tool integration",
-    "AI output evaluation and validation",
-    "natural language workflow automation"
-   ]
-  },
-  {
    "category": "UX Research and HMI Design",
    "items": [
     "Moderated usability testing with end users",
@@ -28,6 +17,17 @@
     "graphic design and visual composition",
     "heuristic evaluation and calibration procedure UX",
     "accessible design, ADA and Section 508 compliance"
+   ]
+  },
+  {
+   "category": "AI Systems",
+   "items": [
+    "AI agent workspace design",
+    "agent team orchestration",
+    "agentic coding with Muse, Copilot, and Claude",
+    "retrieval-augmented generation (RAG) and MCP tool integration",
+    "AI output evaluation and validation",
+    "natural language workflow automation"
    ]
   },
   {
