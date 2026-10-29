@@ -129,7 +129,7 @@
    "title": "**BenchLab** | Testing simulator | In planning",
    "lines": [
     {
-     "text": "Clean-room recreation, created from scratch, of the automated test platform built at Baxter: an internal codebase of 20,000+ lines of Python that cannot be shared publicly. Visual test builder, in-browser simulated device, auto-generated traceability reporting, and an agent layer that converts plain-English protocols into executable test steps.",
+     "text": "Created from scratch, modeled on an automated test platform I built professionally: an internal codebase of 20,000+ lines of Python that cannot be shared publicly. Visual test builder, in-browser simulated device, auto-generated traceability reporting, and an agent layer that converts plain-English protocols into executable test steps.",
      "web_only": false
     },
     {
