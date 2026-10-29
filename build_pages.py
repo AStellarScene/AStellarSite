@@ -98,7 +98,7 @@ NAV_JS = """<script>
 </script>
 """
 
-def page(fname, title, desc, active, body, extra_js="", schema="", og_image="https://adamlaloge.com/art/obsidian-dragon.jpg"):
+def page(fname, title, desc, active, body, extra_js="", schema="", og_image="https://adamlaloge.com/art/hero-card.jpg"):
     url = "https://adamlaloge.com/" + ("" if fname == "index.html" else fname)
     html = (HEAD.format(title=title, desc=desc, url=url, schema=schema, og_image=og_image) + header(active)
             + '\n<main class="wrap">\n' + body + '\n</main>\n' + FOOTER
@@ -109,7 +109,7 @@ def page(fname, title, desc, active, body, extra_js="", schema="", og_image="htt
 DESC = "Personal site of Adam Laloge: software projects, photography, and what I'm building lately."
 
 PERSON_LD = """<script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Person", "name": "Adam Laloge", "url": "https://adamlaloge.com/", "image": "https://adamlaloge.com/art/obsidian-dragon.jpg", "email": "mailto:hello@adamlaloge.com", "jobTitle": "Engineering Test Technician", "worksFor": {"@type": "Organization", "name": "Baxter International"}, "sameAs": ["https://github.com/AStellarScene"]}
+{"@context": "https://schema.org", "@type": "Person", "name": "Adam Laloge", "url": "https://adamlaloge.com/", "image": "https://adamlaloge.com/art/hero-card.jpg", "email": "mailto:hello@adamlaloge.com", "jobTitle": "Engineering Test Technician", "worksFor": {"@type": "Organization", "name": "Baxter International"}, "sameAs": ["https://github.com/AStellarScene"]}
 </script>
 """
 
@@ -199,7 +199,7 @@ home_body = """  <section class="hero">
     <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
   </section>"""
 page("index.html", "Adam Laloge", DESC, "index.html",
-     home_body, "<script>" + sky_js + "</script>\n", schema=PERSON_LD, og_image="https://adamlaloge.com/photos/sunset-grass.jpg")
+     home_body, "<script>" + sky_js + "</script>\n", schema=PERSON_LD, og_image="https://adamlaloge.com/art/hero-card.jpg")
 
 # ---------- Work index ----------
 work_body = """  <section id="work">
