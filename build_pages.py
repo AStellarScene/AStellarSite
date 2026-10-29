@@ -41,7 +41,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=68">
+{schema}<link rel="stylesheet" href="styles.css?v=69">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -1326,6 +1326,15 @@ latent_js = "<script>\n" + r'''(function () {
 }
 initDreamQuilt(document.querySelector('.quilt'), document.querySelector('.quilt canvas.dream-gl'));''' + "\n</script>\n"
 
+# The quilt's grid metrics derive from the slice count itself: the
+# stylesheet sizes rows from --rows (pairs) and the portrait column
+# from --cells, so adding a pair can never strand a row outside a
+# hardcoded grid (the six-world ship did exactly that: CSS still
+# declared two rows / four portrait rows and row three was clipped).
+_cells = latent_body.count('class="slice"')
+latent_body = latent_body.replace(
+    '<div class="quilt" id="quilt">',
+    '<div class="quilt" id="quilt" style="--rows:%d;--cells:%d">' % ((_cells + 1) // 2, _cells))
 page("dreams.html", "Dreamscape — Adam Laloge",
      "AI artwork directed by Adam Laloge. Worlds are quilted into a single grid, with liquid seams between every pair. Open one and it fills the screen while the page takes on its colors.",
      "dreams.html", latent_body, latent_js)

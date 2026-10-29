@@ -778,11 +778,11 @@ ul.plain { list-style: none; padding-left: 0; }
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: repeat(var(--rows, 2), 1fr);
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-bottom: 10px;
-  height: calc(124vh + 10px); /* two band-heights + the old 10px gap */
+  height: calc(var(--rows, 2) * 62vh + 10px); /* band-heights + the old 10px gap; --rows is generator-derived from the slice count */
   min-height: 770px;
   overflow: hidden;
   background: #000;
@@ -803,10 +803,12 @@ ul.plain { list-style: none; padding-left: 0; }
 .quilt .slice:nth-of-type(2) {
   clip-path: polygon(7px 0, 100% 0, 100% 100%, 13px 100%, 4px 87%, 15px 73%, 5px 59%, 14px 45%, 4px 31%, 15px 17%, 6px 5%);
 }
-.quilt .slice:nth-of-type(3) {
+.quilt .slice:nth-of-type(3),
+.quilt .slice:nth-of-type(5) {
   clip-path: polygon(0 7px, 5% 6px, 17% 15px, 31% 4px, 45% 14px, 59% 5px, 73% 15px, 87% 4px, 100% 13px, 100% 100%, 0 100%);
 }
-.quilt .slice:nth-of-type(4) {
+.quilt .slice:nth-of-type(4),
+.quilt .slice:nth-of-type(6) {
   clip-path: polygon(7px 13px, 13% 4px, 27% 15px, 42% 5px, 56% 14px, 71% 4px, 85% 15px, 100% 6px, 100% 100%, 13px 100%, 4px 87%, 15px 73%, 5px 59%, 14px 45%, 4px 31%, 15px 17%, 6px 5%);
 }
 /* The seam membrane, horizontal: rides the top edge of bottom-row
@@ -840,20 +842,22 @@ ul.plain { list-style: none; padding-left: 0; }
 .quilt.open .slice-title { opacity: 0; }
 .quilt.open .slice.active .slice-cap { opacity: 1; transform: none; }
 @media (max-width: 760px) {
-  .quilt { height: calc(108vh + 10px); min-height: 650px; }
+  .quilt { height: calc(var(--rows, 2) * 54vh + 10px); min-height: 650px; }
 }
 /* Portrait: the quilt turns to a single column — every seam horizontal,
    mirroring how the bands stacked. */
 @media (orientation: portrait) {
   .quilt {
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(4, 1fr);
-    height: calc(136vh + 10px);
+    grid-template-rows: repeat(var(--cells, 4), 1fr);
+    height: calc(var(--cells, 4) * 34vh + 10px);
     min-height: 650px;
   }
   .quilt .slice:nth-of-type(1) { clip-path: none; }
   .quilt .slice:nth-of-type(2),
-  .quilt .slice:nth-of-type(4) {
+  .quilt .slice:nth-of-type(4),
+  .quilt .slice:nth-of-type(5),
+  .quilt .slice:nth-of-type(6) {
     clip-path: polygon(0 7px, 5% 6px, 17% 15px, 31% 4px, 45% 14px, 59% 5px, 73% 15px, 87% 4px, 100% 13px, 100% 100%, 0 100%);
   }
   .quilt .slice:nth-of-type(3) {
