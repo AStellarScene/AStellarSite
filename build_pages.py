@@ -1927,6 +1927,13 @@ def write_sitemap():
     new = []
     cand = [("https://adamlaloge.com/blog.html", latest, "0.7")]
     cand += [("https://adamlaloge.com/" + p["fname"], p["date"].isoformat(), "0.6") for p in POSTS]
+    # Prune stale blog-post entries (e.g. a renamed post): the sitemap is
+    # derived from the current posts, never accumulated across renames.
+    valid_blog = {"https://adamlaloge.com/blog.html"} | {loc for loc, _, _ in cand}
+    def _keep(block):
+        loc = re.search(r"<loc>([^<]+)</loc>", block).group(1)
+        return not ("/blog-" in loc and loc.endswith(".html")) or loc in valid_blog
+    blocks = [b for b in blocks if _keep(b)]
     for loc, lastmod, prio in cand:
         if loc not in have:
             new.append('  <url><loc>%s</loc><lastmod>%s</lastmod><priority>%s</priority></url>\n' % (loc, lastmod, prio))
