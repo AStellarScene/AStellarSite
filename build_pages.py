@@ -1095,7 +1095,15 @@ latent_js = "<script>\n" + r'''(function () {
     var i, c;
     for (i = 0; i < N; i++) {
       for (c = 0; c < 4; c++) {
-        rectBuf[i * 4 + c] = cur[i][c];
+        // Expand each rect by a hair as it uploads: measured abutting
+        // rects can round a fraction apart, and any fragment landing
+        // in the crack belongs to no cell, so the shader paints it
+        // black -- a straight 1px line exactly on the grid boundary
+        // (seen on the six-world quilt's row seam, 2026-10-28). A
+        // slight overlap instead is harmless: the seam blend is
+        // distance-based and already exercised wherever rounding
+        // overlapped. Shader untouched (still v6.2, byte-identical).
+        rectBuf[i * 4 + c] = cur[i][c] + (c < 2 ? -0.0009 : 0.0009);
         uvBuf[i * 4 + c] = cellUV[i][c];
         var j = nbrs[i] ? nbrs[i][c] : -1;
         nbrBuf[i * 4 + c] = j;
