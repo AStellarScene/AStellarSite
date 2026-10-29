@@ -1,0 +1,190 @@
+{
+ "name": "Adam Joseph Laloge",
+ "headline": "UI/UX Software Engineer | Human-Centered AI Systems",
+ "location": "West Harrison, Indiana",
+ "email": "hello@adamlaloge.com",
+ "web": "adamlaloge.com",
+ "github": "github.com/AStellarScene",
+ "summary": "UI/UX Software Engineer building human-centered AI systems in regulated medical-device environments. Moderates usability sessions with end users and translates findings into formal, traceable system specifications, then designs, builds, and validates the full stack behind them: HMI interfaces, backend services, AI agent workspaces, and embedded test hardware.",
+ "skills": [
+  {
+   "category": "AI Systems",
+   "items": [
+    "AI agent workspace design",
+    "agent team orchestration",
+    "agentic coding with Muse",
+    "retrieval-augmented generation (RAG) and MCP tool integration",
+    "AI output evaluation and validation",
+    "natural language workflow automation"
+   ]
+  },
+  {
+   "category": "UX Research and HMI Design",
+   "items": [
+    "Moderated usability testing with end users",
+    "user research, requirements, personas, and journey maps",
+    "HMI design for complex technical systems",
+    "wireframes, user flows, and prototypes in Figma, Illustrator, Affinity, and Miro",
+    "graphic design and visual composition",
+    "heuristic evaluation and calibration procedure UX",
+    "accessible design, ADA and Section 508 compliance"
+   ]
+  },
+  {
+   "category": "Software Development",
+   "items": [
+    "Python, C#/.NET, C++, JavaScript, Node.js, and Rust",
+    "HTML/CSS and responsive web development",
+    "WordPress (degree coursework)",
+    "SQL and database design",
+    "embedded microcontrollers and sensor integration",
+    "Git/GitHub, Docker, Linux, and WebSockets"
+   ]
+  },
+  {
+   "category": "Validation and Regulated Systems",
+   "items": [
+    "Requirements traceability",
+    "systems analysis and technical documentation",
+    "medical device verification and validation",
+    "failure investigation and regression testing",
+    "automated test equipment and calibration methods",
+    "test data analysis and validation documentation"
+   ]
+  }
+ ],
+ "experience": [
+  {
+   "org": "**Baxter International, Inc.** | 2025 – Present | Batesville, IN",
+   "role": "**Engineering Test Technician** (Full-Time Work While Completing B.S. Degree)",
+   "bullets": [
+    {
+     "lead": "Usability research:",
+     "text": "Moderate usability test sessions with end users of lab test software. Gather requirements and needs directly from users. Translate findings into formal traceable system specifications for internal tools developed full stack.",
+     "web_only": false
+    },
+    {
+     "lead": "Interface design:",
+     "text": "Design user interfaces and human machine interfaces (HMI) for automated test equipment and test software used daily by lab technicians.",
+     "web_only": false
+    },
+    {
+     "lead": "AI systems development:",
+     "text": "Deliver end to end software development from user interface design through backend implementation. Build specialized AI agent workspaces that support automated testing and software development. Includes natural language protocol ingestion and automated traceability reporting.",
+     "web_only": false
+    },
+    {
+     "lead": "Automated test equipment:",
+     "text": "Design and build automated test equipment for medical device testing. Design, build, and validate test equipment with embedded controllers.",
+     "web_only": false
+    },
+    {
+     "lead": "Medical device verification:",
+     "text": "Perform verification testing of medical devices to rigorous compliance standards. Maintain requirements traceability throughout.",
+     "web_only": false
+    },
+    {
+     "lead": "Innovation and communication:",
+     "text": "Present lab results and AI work at project reviews and internal showcases. Contribute to multiple invention disclosures.",
+     "web_only": false
+    },
+    {
+     "lead": "PLM and issue management:",
+     "text": "Manage document control and validation data in enterprise PLM systems. Document product issues and escalate them to Engineering.",
+     "web_only": true
+    },
+    {
+     "lead": "Electrical and mechanical assembly:",
+     "text": "Perform electrical and mechanical assembly of projects from engineering documentation.",
+     "web_only": true
+    }
+   ],
+   "lines": []
+  },
+  {
+   "org": "**Computer Solutions and Innovations, LLC.** | 2023 – 2024 | Versailles, IN",
+   "role": "**On-Site IT Support** (Part-Time Work While Completing A.A.S. Degree)",
+   "bullets": [
+    {
+     "lead": "Technical Support:",
+     "text": "Delivered in-person and remote support for hardware and software issues.",
+     "web_only": false
+    },
+    {
+     "lead": "IT Operations:",
+     "text": "Assisted with infrastructure planning and hardware asset management.",
+     "web_only": false
+    },
+    {
+     "lead": "Procurement and Upgrades:",
+     "text": "Handled purchasing, planned system upgrades, and configured equipment.",
+     "web_only": false
+    }
+   ],
+   "lines": []
+  }
+ ],
+ "projects": [
+  {
+   "title": "**BenchLab** | Testing simulator",
+   "lines": [
+    {
+     "text": "Clean-room recreation, created from scratch, of the automated test platform built at Baxter: an internal codebase of 20,000+ lines of Python that cannot be shared publicly. Visual test builder, in-browser simulated device, auto-generated traceability reporting, and an agent layer that converts plain-English protocols into executable test steps.",
+     "web_only": false
+    },
+    {
+     "text": "Project page: adamlaloge.com/benchlab.html",
+     "web_only": true
+    }
+   ]
+  },
+  {
+   "title": "**Lucent Launcher** | Native Minecraft launcher in Rust",
+   "lines": [
+    {
+     "text": "Native launcher built with Rust, GTK4, and Libadwaita. Launcher core builds clean with 38 passing tests; features resource-pack management, Flatpak packaging, and a readiness-aware launch flow. github.com/AStellarScene/lucent-launcher",
+     "web_only": false
+    },
+    {
+     "text": "Project page: adamlaloge.com/lucent.html",
+     "web_only": true
+    }
+   ]
+  }
+ ],
+ "education": [
+  {
+   "school": "**WGU School of Business (Online)** | B.S. User Experience Design | August 2024 – Expected January 2027",
+   "lines": []
+  },
+  {
+   "school": "**Ivy Tech Community College (Columbus, IN)** | A.A.S. Software Development | Graduated May 2024",
+   "lines": [
+    {
+     "text": "Additional completed coursework: marketing, customer contact, art theory and design principles, database design",
+     "web_only": false
+    }
+   ]
+  }
+ ],
+ "certifications": [
+  {
+   "title": "**CompTIA Project+** | CompTIA | Certified 2024",
+   "lines": [
+    {
+     "text": "Planning, executing, and delivering projects on time and within scope.",
+     "web_only": false
+    }
+   ]
+  },
+  {
+   "title": "**Google UX Design Certificate** | Google | In Progress (Expected 2027)",
+   "lines": [
+    {
+     "text": "UX research, wireframing, and prototyping fundamentals, completed through the WGU B.S. UX Design program.",
+     "web_only": false
+    }
+   ]
+  }
+ ]
+}

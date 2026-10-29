@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Generate the multi-page AStellarSite from shared partials.
-Extracts the resume section, photography section, and both scripts verbatim
-from the current single-page index.html, then rebuilds every page."""
-import re, os, zlib
+Extracts the photography section and both scripts verbatim from the
+current pages, then rebuilds every page. The resume page is rendered from
+resume-data.json, exported by the private resume generator from the same
+markdown that produces the resume PDFs (single source of truth)."""
+import re, os, zlib, json
+import html as _html
 
 SITE = os.path.expanduser("~/workspace/astellarsite")
 
@@ -19,7 +22,6 @@ def section(html, sid):
 # Verbatim blocks live on their own pages since the multi-page split.
 sky_js = first_script(read_page("index.html"))
 gallery_js = first_script(read_page("photography.html"))
-resume_section = section(read_page("resume.html"), "resume")
 photo_section = section(read_page("photography.html"), "photography")
 
 HEAD = """<!DOCTYPE html>
@@ -41,7 +43,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=69">
+{schema}<link rel="stylesheet" href="styles.css?v=70">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -1645,7 +1647,98 @@ page("bookshelf.html", "Bookshelf — Adam Laloge",
      "Adam Laloge's bookshelf: historical horror, dark fantasy, and sci-fi — what he's reading and what's next.",
      "bookshelf.html", bookshelf_body, BOOKSHELF_JS)
 
-# ---------- Photography / Resume (verbatim sections) ----------
+
+# ---------- Resume (rendered from resume-data.json) ----------
+# The web rendering is the expanded edition of the print resume:
+# itemized skills, every bullet (including web-only ones), project
+# cards with links. Print stays a strict subset of this content.
+
+def _md(text):
+    t = _html.escape(text, quote=False)
+    t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+    t = re.sub(r"(adamlaloge\.com/[\w.\-]+|github\.com/[\w./\-]+)",
+               r'<a href="https://\1">\1</a>', t)
+    return t
+
+
+def _cap(item):
+    return item[:1].upper() + item[1:] if item else item
+
+
+def resume_body():
+    data = json.load(open(os.path.join(SITE, "resume-data.json"), encoding="utf-8"))
+    out = ['<section id="resume">']
+    out.append('  <p class="label">Resume</p>')
+    out.append('  <h2>%s</h2>' % _md(data["name"]))
+    meta = [data["headline"], data["location"],
+            '<a href="https://%s">%s</a>' % (data["web"], data["web"]),
+            '<a href="https://%s">%s</a>' % (data["github"], data["github"]),
+            '<a href="mailto:%s">%s</a>' % (data["email"], data["email"])]
+    out.append('  <p class="resume-meta">%s</p>' % "<br>\n  ".join(meta))
+    out.append('  <p><a class="pill pill-teal" href="resume.pdf" download>Download PDF &#8599;</a></p>')
+    out.append('  <h3>Summary</h3>')
+    out.append('  <p class="res-summary">%s</p>' % _md(data["summary"]))
+    out.append('  <h3>Skills</h3>')
+    out.append('  <div class="skills-grid">')
+    for cat in data["skills"]:
+        out.append('    <div class="skill-panel">')
+        out.append('      <p class="label card-label">%s</p>' % _md(cat["category"]))
+        out.append('      <ul class="plain">')
+        for item in cat["items"]:
+            out.append('        <li>%s</li>' % _md(_cap(item)))
+        out.append('      </ul>')
+        out.append('    </div>')
+    out.append('  </div>')
+    out.append('  <h3>Experience</h3>')
+    for job in data["experience"]:
+        parts = [p.strip() for p in job["org"].split("|")]
+        company = parts[0]
+        dates = parts[1] if len(parts) > 1 else ""
+        loc = parts[2] if len(parts) > 2 else ""
+        out.append('  <div class="job-head">')
+        out.append('    <div class="job-main">')
+        out.append('      <p class="job-company">%s <span class="job-loc">%s</span></p>' % (_md(company), _md(loc)))
+        out.append('      <p class="job-role">%s</p>' % _md(job["role"]))
+        out.append('    </div>')
+        out.append('    <p class="job-dates">%s</p>' % _md(dates))
+        out.append('  </div>')
+        out.append('  <ul>')
+        for b in job["bullets"]:
+            lead = '<strong>%s:</strong> ' % _md(b["lead"]) if b["lead"] else ""
+            out.append('    <li>%s%s</li>' % (lead, _md(b["text"])))
+        out.append('  </ul>')
+    out.append('  <h3>Projects</h3>')
+    out.append('  <div class="proj-grid">')
+    for proj in data["projects"]:
+        out.append('    <div class="proj-card">')
+        out.append('      <p class="proj-title">%s</p>' % _md(proj["title"]))
+        for ln in proj["lines"]:
+            text = ln["text"]
+            if text.startswith("Project page: "):
+                url = text.split(": ", 1)[1]
+                out.append('      <p><a class="pill pill-teal" href="https://%s">Project page &#8599;</a></p>' % url)
+            else:
+                out.append('      <p>%s</p>' % _md(text))
+        out.append('    </div>')
+    out.append('  </div>')
+    out.append('  <h3>Education</h3>')
+    out.append('  <ul class="plain">')
+    for ed in data["education"]:
+        out.append('    <li>%s</li>' % _md(ed["school"]))
+        for ln in ed["lines"]:
+            out.append('    <li class="res-sub">%s</li>' % _md(ln["text"]))
+    out.append('  </ul>')
+    out.append('  <h3>Certifications</h3>')
+    out.append('  <ul class="plain">')
+    for cert in data["certifications"]:
+        desc = " ".join(ln["text"] for ln in cert["lines"])
+        out.append('    <li>%s<br><span class="res-sub">%s</span></li>' % (_md(cert["title"]), _md(desc)))
+    out.append('  </ul>')
+    out.append('</section>')
+    return "\n".join(out)
+
+
+# ---------- Photography (verbatim section) ----------
 page("photography.html", "Photography — Adam Laloge",
      "Photographs by Adam Laloge: landscapes and sunsets.", "photography.html",
      "  " + photo_section.replace("\n", "\n  ").rstrip(),
@@ -1653,7 +1746,7 @@ page("photography.html", "Photography — Adam Laloge",
 
 page("resume.html", "Resume — Adam Laloge",
      "Resume of Adam Laloge, UI/UX software engineer.", "resume.html",
-     "  " + resume_section.replace("\n", "\n  ").rstrip())
+     "  " + resume_body().replace("\n", "\n  ").rstrip())
 
 # ---------- Latent Sitemap ----------
 # The art visualizer, promoted to a real page: a map of the whole site
