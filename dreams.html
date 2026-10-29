@@ -465,6 +465,22 @@ function initDreamQuilt(quilt, canvas) {
   }
   F.push('  ' + OUTC + ' = vec4(' + (es3 ? 'srgbEncode(col)' : 'col') + ', 1.0);', '}');
     FRAG = F.join('\n');
+    // DIAGNOSTIC (2026-10-28, temporary): ?diag=N swaps exactly one
+    // seam ingredient for this load only, to bisect the straight
+    // hairline on Adam's phone that survived the row fix, the
+    // epsilon, and the edge glue. Inert without the parameter; the
+    // assembled shader above is byte-identical to v6.2 either way.
+    var DIAG = '';
+    try { DIAG = (location.search.match(/diag=(\d)/) || [])[1] || ''; } catch (e) {}
+    if (DIAG === '1') FRAG = FRAG.split('* 0.13').join('* 0.0').split('* 0.08 * act').join('* 0.0 * act');
+    if (DIAG === '2') FRAG = FRAG.split('smoothstep(-0.0015, 0.0015, d').join('smoothstep(-0.02, 0.02, d');
+    if (DIAG === '3') FRAG = FRAG.split(' + refrSum * breathe').join('')
+      .split('rf0 * 1.6 * breathe').join('0.0').split('rf1 * 1.6 * breathe').join('0.0')
+      .split('rf2 * 1.6 * breathe').join('0.0').split('rf3 * 1.6 * breathe').join('0.0');
+    if (DIAG === '4') FRAG = FRAG.replace('vec2 driftFor(float idx, float t){',
+      'vec2 driftFor(float idx, float t){ if (idx > -1.0) return vec2(0.0);');
+    if (DIAG === '5') FRAG = FRAG.split('0.011 * sin').join('0.0 * sin')
+      .split('0.006 * sin').join('0.0 * sin').split('0.0025 * sin').join('0.0 * sin');
   }
 
   function shader(type, src) {
