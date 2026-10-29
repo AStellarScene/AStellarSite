@@ -751,6 +751,8 @@ latent_js = "<script>\n" + r'''(function () {
       .split('mix(ncol3, col,').join('mix(col, col,');
     if (DIAG === '0') FRAG = FRAG.replace('vec3 sampleWorld(int idx, vec2 uv){',
       'vec3 sampleWorld(int idx, vec2 uv){ return vec3(0.30 + 0.09 * mod(float(idx), 6.0), 0.42, 0.72);');
+    if (DIAG === '7') FRAG = FRAG.split('vec2 gx = dFdx(uv); vec2 gy = dFdy(uv);')
+      .join('vec2 gx = vec2(0.001, 0.0); vec2 gy = vec2(0.0, 0.001);');
   }
 
   function shader(type, src) {
