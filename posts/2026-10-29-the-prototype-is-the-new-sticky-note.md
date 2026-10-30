@@ -10,7 +10,7 @@ It's a good method. But the sticky-note board is the tell. The sticky note was t
 
 ## A machine built around scarcity
 
-Read the sprint's structure closely and its real subject is scarcity. Prototyping used to be expensive — a week of developer time to fake one product honestly — so the sprint rations it: four days of thinking stand guard over one day of building, because building is the part you can't afford to get wrong twice. User time is rationed just as carefully. Five interviews, one day, scheduled like court dates.
+Read the sprint's structure closely and its real subject is scarcity. Prototyping used to be expensive — a week of developer time to fake one product honestly — so the sprint rations it: four days of thinking stand guard over one day of building because building is the part you can't afford to get wrong twice. User time is rationed just as carefully. Five interviews, one day, scheduled like court dates.
 
 The ceremony makes sense when the materials are precious. Of course you argue for three days before touching anything. Touching things was the expensive part.
 
@@ -28,7 +28,7 @@ That's why, when the course schedules a full day for the prototype, I can feel t
 
 Here's what didn't get cheaper: knowing whether the thing is right.
 
-Users are still scarce. Not their time in the abstract — their truth. A person reacting honestly to something they believe is real cannot be generated. Five of them on a Friday will teach you more than five hundred simulated opinions, because a simulation tells you what someone like that would probably say, and the entire point of Friday is hearing what nobody predicted.
+Users are still scarce. Not their time in the abstract — their truth. A person reacting honestly to something they believe is real cannot be generated. Five of them on a Friday will teach you more than five hundred simulated opinions because a simulation tells you what someone like that would probably say, and the entire point of Friday is hearing what nobody predicted.
 
 There's a second scarcity the old sprint never had to ration: judgment across abundance. When one prototype takes a week, the argument about which idea deserves it runs itself. When twenty directions can be built in the time one used to take, the scarce skill stops being making. It's choosing — and being able to say why, with evidence that survives contact with a user.
 

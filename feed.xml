@@ -5,6 +5,13 @@
     <link>https://adamlaloge.com/blog.html</link>
     <description>Blog by Adam Laloge: notes and essays on building software, testing, design, and whatever else is on the workbench.</description>
     <item>
+      <title>There&#x27;s No Point Safekeeping Code</title>
+      <link>https://adamlaloge.com/blog-no-point-safekeeping-code.html</link>
+      <guid isPermaLink="true">https://adamlaloge.com/blog-no-point-safekeeping-code.html</guid>
+      <pubDate>Fri, 30 Oct 2026 12:00:00 +0000</pubDate>
+      <description>Code used to be the asset you locked up. But behavior is a spec, and where behavior can be checked, code can be regrown — so secrecy stopped protecting the thing it was protecting. An observation, not an argument.</description>
+    </item>
+    <item>
       <title>The Prototype Is the New Sticky Note</title>
       <link>https://adamlaloge.com/blog-the-prototype-is-the-new-sticky-note.html</link>
       <guid isPermaLink="true">https://adamlaloge.com/blog-the-prototype-is-the-new-sticky-note.html</guid>

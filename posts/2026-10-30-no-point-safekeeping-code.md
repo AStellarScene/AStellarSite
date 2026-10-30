@@ -1,0 +1,47 @@
+---
+title: There's No Point Safekeeping Code
+date: 2026-10-30
+description: Code used to be the asset you locked up. But behavior is a spec, and where behavior can be checked, code can be regrown — so secrecy stopped protecting the thing it was protecting. An observation, not an argument.
+---
+
+This website is public. Not just the pages — the generator that builds them, every function, every workaround, sitting in an open repository for anyone to read. A few years ago that would have felt like leaving the machinery exposed. Lately I notice I don't think about it at all, and I've been trying to work out why.
+
+I think it's this: I no longer believe the code is the part worth protecting. Not because code stopped mattering. Because it stopped being scarce in the way secrecy assumes.
+
+## Behavior is a spec
+
+Safekeeping code rests on an assumption: that the text is the hard part and if you guard the text, you guard the thing. That was true when turning behavior back into code took a team of engineers a year. Clean-room reimplementation has existed for decades — the early PC clone makers famously rebuilt IBM's BIOS from its observable behavior, one team writing the spec, another team that had never seen the original writing code to match it. It was legal, it was known, and it was so expensive that almost nobody did it.
+
+What's changed isn't the possibility. It's the price.
+
+In November 2025 a developer named Chris Lewis pointed Claude at Snowboard Kids 2, an N64 game being decompiled the slow way, function by function. His setup was simple: a scorer that picks the easiest unmatched function, a model that takes a small number of attempts to produce code that compiles to the exact same bytes, and a loop that runs while he isn't watching. He reported more progress in three weeks than in the three months before, including stretches of eight hours nobody attended. The binary itself is the check. Either the bytes match or they don't, and because they can be checked, the code can be regrown.
+
+That pattern — a checkable target — is where the honest version of this story lives. Where the output can be verified automatically, reimplementation works startlingly well. Where it can't, the clones come out buggy and unfinished, and most of the viral stories quietly leave that part out.
+
+## The argument is now about whether the machine peeked
+
+My favorite recent example is a small one. Chardet is a Python library that detects text encodings; in early 2026 its maintainer released version 7 as a ground-up rewrite produced with Claude, starting from the library's public API and tests. Measured against the original, the new code came out with almost nothing in common. The original author disputed whether the process was truly clean — whether the model had seen the old source somewhere along the way.
+
+I don't have a verdict on that dispute, and it isn't really my business. What I notice is the shape of it. Twenty years ago the argument would have been about whether a rewrite like that was possible at all. Now the argument is about whether the machine peeked. The capability stopped being the question.
+
+I'm not arguing anyone should go reimplement other people's software. I'm watching what happens to secrecy when doing it stops being expensive — because secrecy was priced for the old world, and the price moved.
+
+## Libraries should explode
+
+Here's the part I keep turning over. Open source taught us that code wants to be shared: one library, maintained in public, solving a problem for thousands of strangers at once. The compromise is baked in — a shared library has to serve everyone's needs, so it serves each of them approximately.
+
+But if code can be regrown from a need and a check, the unit can shrink. Not one library for everyone. A library for one codebase, one person, one exact problem — derived fresh from the situation instead of downloaded into it.
+
+That's already how this site works, and I built it that way without quite seeing the pattern. There's no framework underneath it. A generator reads my content — my posts, my photos, my resume — and derives everything else: the pages, the sitemap, the map, even the map's points and colors. My resume is a single document and a small renderer that turns it into two PDFs and a web page. Every piece of that plumbing solves exactly one of my problems, in exactly my shape. Most of it would be useless to anyone else. That's not a flaw in it. That's the point of it.
+
+It's descended from open source — the inspectability, the building in the open, the standing on decades of other people's published work. But it isn't shared code. It's derived code. And derivation doesn't approximate: when I changed my mind about how the sitemap should work, the fix wasn't to patch a library into a shape it wasn't. The generator now derives the entries from the posts that exist, and a renamed post simply stops appearing. The spec was my content. The check was the rendered site. Nothing had to be approximated because nothing had to be translated from somebody else's problem into mine.
+
+## What I actually own
+
+Which brings me back to the open repository. If the plumbing can be regrown from the content it serves, then someone reading all of it has the part that was never scarce. What they don't have is the trail of decisions behind it: the versions I rejected, the rendering bug that took a day of bisection on a phone to convict, the conventions I wrote down so the next change wouldn't repeat an old mistake. That trail lives in my notes, my corrections, my taste. It's the spec behind the spec.
+
+Safekeeping assumed the code was the asset, so you locked the code. I keep my site's code in the open and my judgment in my head, and I couldn't swap those if I tried.
+
+The code was never the thing I owned. I'm still figuring out what the thing is.
+
+*Drafted with an AI's help and edited by me. The examples are real and linked in my notes; the developers quoted are the ones who reported them, and where a claim is disputed or a clone is unfinished, the post says so. Publishing this adds a forty-third point to the Atlas, under WRITING.*

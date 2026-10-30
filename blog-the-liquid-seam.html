@@ -94,7 +94,7 @@
 </figure>
 
 <h2>What "done" meant</h2>
-<p>Before the attempts, the acceptance bar, because several failures below are failures against a specific line of it:</p>
+<p>Before the attempts, here is the acceptance bar because several failures below are failures against a specific line of it:</p>
 <ol>
 <li><strong>True refraction</strong> — pixels displace, in both worlds, driven by the wave's slope.</li>
 <li><strong>One line, two computations</strong> — the boundary must be a single function both cells agree on, or it tears.</li>
@@ -165,12 +165,12 @@
 <h2>First working version: one engine per pair (v3–v4)</h2>
 <p>The research that killed CSS named the winner: a hand-written WebGL fragment shader. The first working build (October 26) gave the original pair its own engine — one canvas, painting both artworks cover-fit, with the seam computed in the fragment shader:</p>
 <ul>
-<li>The boundary is a sum of three sines (swell, chop, detail) at incommensurate frequencies, parameterised along the seam.</li>
+<li>The boundary is a sum of three sines (swell, chop, detail) at incommensurate frequencies, parameterized along the seam.</li>
 <li>Inside a narrow band around the boundary, each world is sampled with an offset proportional to the wave's <em>slope</em> — that is the refraction. Steep slope, strong bend.</li>
 <li>Light is coupled to the same slope: a highlight on one face of the wave, shadow on the other, a specular line at the crest. This is what makes it read as a surface instead of a warp.</li>
 <li>The two worlds drift at different rates (roughly 1 : 0.6), which sells depth — the seam feels like a surface <em>between</em> two spaces, not a crack in one picture.</li>
 </ul>
-<p>It worked, and it worked on Safari, because a fragment shader doesn't care which browser hosts it. But the architecture had a ceiling, and the ceiling was the scope: one engine per pair. The seams existed only <em>within</em> a pair, never between pairs, and every new pair meant new machinery. Against the growth property of the concept, that was a prototype wearing a production costume.</p>
+<p>It worked, and it worked on Safari because a fragment shader doesn't care which browser hosts it. But the architecture had a ceiling, and the ceiling was the scope: one engine per pair. The seams existed only <em>within</em> a pair, never between pairs, and every new pair meant new machinery. Against the growth property of the concept, that was a prototype wearing a production costume.</p>
 <p>The seam's vocabulary, for the chapters ahead:</p>
 <table>
 <thead>
@@ -212,7 +212,7 @@
 </table>
 <h2>The scope expands: the quilt and the atlas (v5)</h2>
 <p>Then the second pair arrived — The Drowned Bells and The Far Shore — and one seam became a scope problem. Two pairs could have meant two engines, forever: every new pair another canvas, another copy of the machinery, and no seam at all where the pairs met. Or the scope could change underneath the effect: stop thinking in pairs entirely, and quilt everything into one surface.</p>
-<p>The fix was to stop thinking in pairs. One engine renders the entire page as a single grid — the <em>quilt</em> — up to twelve cells. Each cell knows its neighbours; every interior edge runs the same seam math, horizontally and vertically, including the centre cross where four worlds meet. Adding worlds became adding cells: data, not code. The whole page is one canvas, one shader, one draw.</p>
+<p>The fix was to stop thinking in pairs. One engine renders the entire page as a single grid — the <em>quilt</em> — up to twelve cells. Each cell knows its neighbors; every interior edge runs the same seam math, horizontally and vertically, including the center cross where four worlds meet. Adding worlds became adding cells: data, not code. The whole page is one canvas, one shader, one draw.</p>
 <figure>
 <div class="figbox">
 <svg viewBox="0 0 680 250" role="img" aria-label="Diagram of the scope change from one pair to the quilt">
@@ -241,12 +241,12 @@
   <text x="480" y="214" fill="#9fb4c8" font-family="var(--mono)" font-size="11">one engine, every edge · v5</text>
 </svg>
 </div>
-<figcaption>FIG. 2 — THE SCOPE CHANGE. THE EFFECT STARTED AS ONE SEAM BETWEEN TWO IMAGES (LEFT). A SECOND PAIR WOULD HAVE MEANT A SECOND ENGINE AND NO SEAMS BETWEEN PAIRS (CENTRE). THE QUILT (RIGHT) MADE EVERY EDGE — INCLUDING THE FOUR-WAY CROSS — THE SAME LIQUID.</figcaption>
+<figcaption>FIG. 2 — THE SCOPE CHANGE. THE EFFECT STARTED AS ONE SEAM BETWEEN TWO IMAGES (LEFT). A SECOND PAIR WOULD HAVE MEANT A SECOND ENGINE AND NO SEAMS BETWEEN PAIRS (CENTER). THE QUILT (RIGHT) MADE EVERY EDGE — INCLUDING THE FOUR-WAY CROSS — THE SAME LIQUID.</figcaption>
 </figure>
 
 <p>Two problems surfaced immediately:</p>
 <h3>The cross ledged</h3>
-<p>With the wave parameterised globally, the four edges arrived at the centre point carrying four different displacement values — so the boundary visibly <em>jumped</em> at the cross, a ledge in the melt. The fix is structural: parameterise the wave <em>per segment</em> (each edge computes its own 0-to-1 coordinate) and taper displacement to zero at both ends. If every edge is exactly at its nominal position at the corners, all four agree at the cross <em>by construction</em> — no tuning, no special case. Neighbours sharing an edge compute the identical segment coordinate, so the line still cannot tear mid-edge.</p>
+<p>With the wave parameterized globally, the four edges arrived at the center point carrying four different displacement values — so the boundary visibly <em>jumped</em> at the cross, a ledge in the melt. The fix is structural: parameterize the wave <em>per segment</em> (each edge computes its own 0-to-1 coordinate) and taper displacement to zero at both ends. If every edge is exactly at its nominal position at the corners, all four agree at the cross <em>by construction</em> — no tuning, no special case. Neighbors sharing an edge compute the identical segment coordinate, so the line still cannot tear mid-edge.</p>
 <h3>The atlas taxed growth</h3>
 <p>One shader needs the artworks in GPU memory, and the v5 way was a single texture atlas: all worlds packed into one 4096² texture. That is a fixed budget divided by the number of worlds — each world got a 2048² cell at four worlds, and the share halves with every doubling. I shipped it; the person who caught the flaw was the one reading over my shoulder, in one sentence: <em>"adding more images will over time reduce quality."</em> Correct, and it's an asymptote, not a bug — the architecture itself expires as the collection grows. A tablet also exposed a related failure: the atlas path could fall back to a half-resolution mosaic when the packed texture pressed against device limits. The atlas had to go.</p>
 <figure>
@@ -283,7 +283,7 @@
 <p>The v6 shader indexed its texture array with a loop variable — legal GLSL ES 3.00. It compiled nowhere that matters: ANGLE, the translation layer inside both Chrome's and Safari's WebGL stacks, rejects it outright:</p>
 <pre><code>ERROR: 0:32: '[' : array index for samplers must be constant integral expressions
 </code></pre>
-<p>That error was not found in a console I couldn't read (the checking browser can't evaluate JavaScript or show console output). It was found by building a throwaway page that compiles the exact production shaders and prints the compiler's verdicts as page text. One round trip ended hours of screenshot arguments. The fix — branching on literal texture indices — was verified against ANGLE <em>before</em> it shipped, and the engine grew a <strong>degradation ladder</strong> so no single rejected construct can ever dark the quilt again:</p>
+<p>That error was not found in a console I couldn't read (the checking browser can't evaluate JavaScript or show console output). It was found by building a throwaway page that compiles the exact production shaders and prints the compiler's verdicts as page text. One round trip ended hours of screenshot arguments. The fix — branching on literal texture indices — was verified against ANGLE <em>before</em> it shipped, and the engine grew a <strong>degradation ladder</strong> so no single rejected construct can ever darken the quilt again:</p>
 <table>
 <thead>
 <tr>
@@ -326,7 +326,7 @@
 <tr>
 <th>Variant</th>
 <th>Change</th>
-<th>Centre line</th>
+<th>Center line</th>
 <th>Seam character</th>
 </tr>
 </thead>
@@ -339,7 +339,7 @@
 </tr>
 <tr>
 <td>B</td>
-<td>Neighbour refraction ×1.6 → ×1.0</td>
+<td>Neighbor refraction ×1.6 → ×1.0</td>
 <td>Present</td>
 <td>Dimensional</td>
 </tr>
@@ -379,10 +379,10 @@
 <p>Variant G is the instructive one: softening everything <em>almost</em> worked, but the trace remained because the groove survived at 0.02. Half-measures kept the culprit alive; removing it (v6.2) killed the bold line outright while the slope light and glow kept the seam's dimension. The heavy dark band visible along the seams on iPhone Safari was the same term.</p>
 <p class="lesson"><strong>Lesson 6: when an artifact has multiple plausible parents, bisect by rendering variants — one variable per render.</strong> Guessing would have "fixed" the refraction first (it was the most suspicious-looking term) and changed nothing, twice.</p>
 <h2>The last streak</h2>
-<p>One remnant survived v6.2: a one-pixel grey streak at the exact centre of the bottom row, visible only where The Far Shore's bright sky and grass gave it contrast, in the stretches where the wave bulges far from the boundary. This one was not a shading term at all — it was in the <em>sampled field</em>. A world is sampled through two code paths: as the cell that owns a pixel (with its accumulated refraction), and as the <em>neighbour</em> of the cell that owns the pixel across the boundary (with that side's refraction, amplified ×1.6). Two different refraction values for the same world means the world's image steps sideways where the paths hand over — which is, precisely, the straight boundary.</p>
+<p>One remnant survived v6.2: a one-pixel gray streak at the exact center of the bottom row, visible only where The Far Shore's bright sky and grass gave it contrast, in the stretches where the wave bulges far from the boundary. This one was not a shading term at all — it was in the <em>sampled field</em>. A world is sampled through two code paths: as the cell that owns a pixel (with its accumulated refraction), and as the <em>neighbor</em> of the cell that owns the pixel across the boundary (with that side's refraction, amplified ×1.6). Two different refraction values for the same world mean the world's image steps sideways where the paths hand over — which is, precisely, the straight boundary.</p>
 <p>Busy artwork hides a few texels of sideways step. A smooth sky gradient cannot.</p>
-<p>The fix (v6.3) is a principle rather than a patch: <strong>a world's sampled image must be a single function of position.</strong> The neighbour sample recomputes the neighbour's <em>own</em> refraction field at that point — its four side terms, its rect, its tables — so both paths evaluate the identical function. Continuity across the boundary stops being tuned and becomes true by construction.</p>
-<p>And then v6.3 was rolled back, the same day, on my call — which is also part of the record. It compiled cleanly, it rendered identically, and on a real phone it <em>stuttered</em>: recomputing four side terms for every neighbour sample roughly tripled the fragment cost inside the seam band, and the band is exactly where the eye lives. The streak it removed was visible at capture resolution, to a checker zoomed into the brightest sky on the page. It was not visible to me, on my devices, looking at the thing I built. I had already called v6.2 perfect once, in passing, and the rollback made it official: <strong>v6.2 is the final engine.</strong> The unified field stays in the version history as the correct answer to a question that turned out not to need asking at that price.</p>
+<p>The fix (v6.3) is a principle rather than a patch: <strong>a world's sampled image must be a single function of position.</strong> The neighbor sample recomputes the neighbor's <em>own</em> refraction field at that point — its four side terms, its rect, its tables — so both paths evaluate the identical function. Continuity across the boundary stops being tuned and becomes true by construction.</p>
+<p>And then v6.3 was rolled back, the same day, on my call — which is also part of the record. It compiled cleanly, it rendered identically, and on a real phone it <em>stuttered</em>: recomputing four side terms for every neighbor sample roughly tripled the fragment cost inside the seam band, and the band is exactly where the eye lives. The streak it removed was visible at capture resolution, to a checker zoomed into the brightest sky on the page. It was not visible to me, on my devices, looking at the thing I built. I had already called v6.2 perfect once, in passing, and the rollback made it official: <strong>v6.2 is the final engine.</strong> The unified field stays in the version history as the correct answer to a question that turned out not to need asking at that price.</p>
 <p class="lesson"><strong>Lesson 7: if the same quantity is computed two ways, the seam between the two ways will eventually become visible.</strong> Unify the function; don't tune the discrepancy. <strong>Corollary: a fix is priced per frame.</strong> An artifact nobody can see does not get to tax every pixel, forever, to erase itself.</p>
 <h2>The record</h2>
 <p>Nine engine versions in three days. The pace is part of the record, not a footnote to it: every version below was live, on real devices, within hours of the one before it, and most of what the later versions know was taught by a screenshot of the earlier one failing.</p>
@@ -486,13 +486,13 @@
 </tbody>
 </table>
 <h2>Postscript: the third pair, and the line that wasn't a seam</h2>
-<p>The same evening, two more worlds arrived. <strong>The Vending Hall</strong> is from a dream of mine that stuck with me: a clean black warehouse under a radiant glass ceiling, full of vending machines, each given an uncomfortable amount of room. <strong>The Long Watch</strong> is its companion: thousands of cameras on tripods across a frozen lake, photographing a sunset for someone who never came back. Six worlds — and the record above claims adding one is "data only." That claim got its first real test within the hour, and failed it twice.</p>
+<p>The same evening two more worlds arrived. <strong>The Vending Hall</strong> is from a dream of mine that stuck with me: a clean black warehouse under a radiant glass ceiling, full of vending machines, each given an uncomfortable amount of room. <strong>The Long Watch</strong> is its companion: thousands of cameras on tripods across a frozen lake, photographing a sunset for someone who never came back. Six worlds — and the record above claims adding one is "data only." That claim got its first real test within the hour, and failed it twice.</p>
 <p><strong>Failure one: the third row didn't exist.</strong> The markup was correct and the live page was byte-identical to the build, but the stylesheet still declared the four-world grid — two explicit rows, four in portrait, fixed heights, overflow hidden — so the new row was laid out below the quilt's box and clipped away, canvas and all. A byte check proved the file; only a render check could prove the page, and I hadn't run one. The fix follows the rule this site keeps relearning: the generator now counts the slices itself and hands the stylesheet the count (<code>--rows</code>, <code>--cells</code>), so the grid derives from the content instead of remembering it.</p>
-<p><strong>Failure two: a straight line on the boundaries.</strong> Once the row existed, a ruler-straight hairline sat exactly on the grid lines — while the melt waves moved around it. It was bright over dark content and dark over bright content. Measured rather than argued about: I averaged 109 frames of a screen recording of my own phone, the waves cancelled, and the line survived untouched — a whitish ridge a few pixels wide, +37 luminance over The Drowned Bells' dark sky, present in every frame at the same height across the whole quilt. It also reproduced on a desktop checker at the horizontal boundary while the vertical stayed clean. That selectivity was a clue, not noise.</p>
-<p>The hunt burned three plausible fixes first — a sub-pixel crack between measured rectangles (would paint black), an overlap (would offset the two seam lines), averaging shared edges into both cells (exact, and irrelevant). Then the A–G method, scaled up: diagnostic builds of the real page, one variable killed per build, judged on the phone that showed the line. Seam light: innocent. Glow: innocent. Crossfade width, refraction, per-world drift, the neighbour blends themselves, the visibility window, the page's own glass seam strips: innocent, all. I had said early on that it didn't look like the seam animation itself. That was the correct instrument reading, and the bisection proved it the expensive way.</p>
-<p>The cut that mattered removed the textures entirely: flat-colour worlds, no sampling at all — and no line. Not the compositor, not the DOM. The sampling.</p>
-<p>Here is the mechanism. A GPU chooses a texture's sharpness level (its mip) from how fast the texture coordinates change across each 2×2 block of pixels. A block straddling a boundary between worlds holds coordinates from <em>two different textures</em> — the change across it reads as enormous, so those pixels sample the <strong>coarsest mip: the entire world averaged into a single colour</strong>, and paint that average along the boundary. Brighter than a dark sky, darker than bright clouds — the sign flips exactly the way the screenshots showed. And whether a boundary straddles a block depends on its pixel parity: the taller six-world quilt moved the boundaries onto straddling positions, one screen caught the horizontal line and not the vertical, and — in hindsight — the faint streak that survived v6.2 in The Far Shore's sky was this same artifact on a weaker parity, misfiled as a sampling-field step.</p>
-<p>The fix is one line: the sampler no longer infers its gradients from neighbouring pixels. It is handed a fixed, fine gradient, so no block can poison the estimate. The melt, the light, the glow — everything this post spent its length tuning — is untouched. It ships as <strong>v6.4</strong>, the number after the rolled-back v6.3. Verdict, on the phone that found the line: <em>finally, it's perfect.</em></p>
+<p><strong>Failure two: a straight line on the boundaries.</strong> Once the row existed, a ruler-straight hairline sat exactly on the grid lines — while the melt waves moved around it. It was bright over dark content and dark over bright content. Measured rather than argued about: I averaged 109 frames of a screen recording of my own phone, the waves canceled, and the line survived untouched — a whitish ridge a few pixels wide, +37 luminance over The Drowned Bells' dark sky, present in every frame at the same height across the whole quilt. It also reproduced on a desktop checker at the horizontal boundary while the vertical stayed clean. That selectivity was a clue, not noise.</p>
+<p>The hunt burned three plausible fixes first — a sub-pixel crack between measured rectangles (would paint black), an overlap (would offset the two seam lines), averaging shared edges into both cells (exact, and irrelevant). Then the A–G method, scaled up: diagnostic builds of the real page, one variable killed per build, judged on the phone that showed the line. Seam light: innocent. Glow: innocent. Crossfade width, refraction, per-world drift, the neighbor blends themselves, the visibility window, the page's own glass seam strips: innocent, all. I had said early on that it didn't look like the seam animation itself. That was the correct instrument reading, and the bisection proved it the expensive way.</p>
+<p>The cut that mattered removed the textures entirely: flat-color worlds, no sampling at all — and no line. Not the compositor, not the DOM. The sampling.</p>
+<p>Here is the mechanism. A GPU chooses a texture's sharpness level (its mip) from how fast the texture coordinates change across each 2×2 block of pixels. A block straddling a boundary between worlds holds coordinates from <em>two different textures</em> — the change across it reads as enormous, so those pixels sample the <strong>coarsest mip: the entire world averaged into a single color</strong>, and paint that average along the boundary. Brighter than a dark sky, darker than bright clouds — the sign flips exactly the way the screenshots showed. And whether a boundary straddles a block depends on its pixel parity: the taller six-world quilt moved the boundaries onto straddling positions, one screen caught the horizontal line and not the vertical, and — in hindsight — the faint streak that survived v6.2 in The Far Shore's sky was this same artifact on a weaker parity, misfiled as a sampling-field step.</p>
+<p>The fix is one line: the sampler no longer infers its gradients from neighboring pixels. It is handed a fixed, fine gradient, so no block can poison the estimate. The melt, the light, the glow — everything this post spent its length tuning — is untouched. It ships as <strong>v6.4</strong>, the number after the rolled-back v6.3. Verdict, on the phone that found the line: <em>finally, it's perfect.</em></p>
 <p>The record, extended:</p>
 <table>
 <thead>
@@ -525,7 +525,7 @@
 </tbody>
 </table>
 <p class="lesson"><strong>Lesson 8: an instance count hides anywhere a number is written down — CSS rows, a palette table, a texture parity. If adding one is "data only," every consumer has to derive from the data. The ones that don't will be found by the addition.</strong></p>
-<p class="lesson"><strong>Lesson 9: when an artifact survives every term you can name, change what you're measuring. Average the video. Flatten the colours. And treat "it doesn't look like the seam" — from the person staring at the screen — as data, not as a hunch to argue with.</strong></p>
+<p class="lesson"><strong>Lesson 9: when an artifact survives every term you can name, change what you're measuring. Average the video. Flatten the colors. And treat "it doesn't look like the seam" — from the person staring at the screen — as data, not as a hunch to argue with.</strong></p>
 <h2>Why any of this matters</h2>
 <p>Strip the specifics away and the day's lessons are not really about shaders:</p>
 <ol>
