@@ -5,7 +5,7 @@
  "email": "hello@adamlaloge.com",
  "web": "adamlaloge.com",
  "github": "github.com/AStellarScene",
- "summary": "UI/UX Software Engineer building human-centered AI systems in regulated medical-device environments. Moderates usability sessions with end users and translates findings into formal, traceable system specifications, then designs, builds, and validates the full stack behind them: HMI interfaces, backend services, AI agent workspaces, and embedded test hardware.",
+ "summary": "Design engineer and UI/UX software engineer building human-centered AI systems in regulated medical-device environments. Researches users, designs the interface, and writes the code behind it: HMI interfaces, backend services, AI agent workspaces, and embedded test hardware. Moderates usability sessions with end users, translates findings into formal, traceable system specifications, and validates the full stack against them.",
  "skills": [
   {
    "category": "UX Research and HMI Design",
@@ -14,6 +14,7 @@
     "user research, requirements, personas, and journey maps",
     "HMI design for complex technical systems",
     "wireframes, user flows, and prototypes in Figma, Illustrator, Affinity, and Miro",
+    "functional coded prototypes",
     "graphic design and visual composition",
     "heuristic evaluation and calibration procedure UX",
     "accessible design, ADA and Section 508 compliance"
