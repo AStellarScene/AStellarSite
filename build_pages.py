@@ -43,7 +43,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=71">
+{schema}<link rel="stylesheet" href="styles.css?v=72">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -1669,8 +1669,9 @@ def resume_body():
     data = json.load(open(os.path.join(SITE, "resume-data.json"), encoding="utf-8"))
     out = ['<section id="resume">']
     out.append('  <p class="label">Resume</p>')
-    out.append('  <h2>%s</h2>' % _md(data["name"]))
-    meta = [data["headline"], data["location"],
+    out.append('  <h1>%s</h1>' % _md(data["name"]))
+    out.append('  <p class="resume-headline">%s</p>' % _md(data["headline"]))
+    meta = [data["location"],
             '<a href="https://%s">%s</a>' % (data["web"], data["web"]),
             '<a href="https://%s">%s</a>' % (data["github"], data["github"]),
             '<a href="mailto:%s">%s</a>' % (data["email"], data["email"])]
@@ -1725,12 +1726,20 @@ def resume_body():
         out.append('    </div>')
     out.append('  </div>')
     out.append('  <h3>Education</h3>')
-    out.append('  <ul class="plain">')
     for ed in data["education"]:
-        out.append('    <li>%s</li>' % _md(ed["school"]))
+        eparts = [p.strip() for p in ed["school"].split("|")]
+        eschool = eparts[0]
+        edegree = eparts[1] if len(eparts) > 1 else ""
+        edates = eparts[2] if len(eparts) > 2 else ""
+        out.append('  <div class="job-head">')
+        out.append('    <div class="job-main">')
+        out.append('      <p class="job-company">%s</p>' % _md(eschool))
+        out.append('      <p class="job-role">%s</p>' % _md(edegree))
+        out.append('    </div>')
+        out.append('    <p class="job-dates">%s</p>' % _md(edates))
+        out.append('  </div>')
         for ln in ed["lines"]:
-            out.append('    <li class="res-sub">%s</li>' % _md(ln["text"]))
-    out.append('  </ul>')
+            out.append('  <p class="res-sub">%s</p>' % _md(ln["text"]))
     out.append('  <h3>Certifications</h3>')
     out.append('  <ul class="plain">')
     for cert in data["certifications"]:
@@ -1748,7 +1757,7 @@ page("photography.html", "Photography — Adam Laloge",
      "<script>" + gallery_js + "</script>\n")
 
 page("resume.html", "Resume — Adam Laloge",
-     "Resume of Adam Laloge, UI/UX software engineer.", "resume.html",
+     "Resume of Adam Laloge, design engineer building human-centered AI systems.", "resume.html",
      "  " + resume_body().replace("\n", "\n  ").rstrip())
 
 # ---------- Latent Sitemap ----------

@@ -494,6 +494,13 @@ html, body { overflow-x: clip; }
 
 /* Resume */
 .resume-meta { color: var(--body); }
+#resume h1 { font-size: 28px; margin: 6px 0 12px; }
+.resume-headline {
+  color: var(--heading);
+  font-size: 20px;
+  font-weight: 600;
+  margin: 2px 0 8px;
+}
 
 /* ---------- Resume ---------- */
 #resume { max-width: 840px; }
@@ -502,7 +509,8 @@ html, body { overflow-x: clip; }
   padding-bottom: 8px;
   margin: 36px 0 14px;
 }
-#resume .skills-grid { gap: 18px; }
+#resume .skills-grid { gap: 18px; align-items: start; }
+#resume > ul li { margin: 8px 0; }
 .job-head {
   display: flex;
   justify-content: space-between;
@@ -517,7 +525,7 @@ html, body { overflow-x: clip; }
   font-family: var(--mono);
   font-size: 12.5px;
   letter-spacing: 0.08em;
-  color: var(--dim);
+  color: var(--body);
   white-space: nowrap;
   margin: 0;
 }
@@ -547,6 +555,8 @@ html, body { overflow-x: clip; }
   .job-loc, .job-dates { color: #444 !important; }
   #resume h3 { border-bottom-color: #bbb; }
   .skill-panel { background: #fff !important; border-color: #bbb; }
+  .proj-card { background: #fff !important; border-color: #bbb; }
+  .proj-status { color: #7a5c14 !important; }
   .gold-note { color: #7a5c14 !important; }
   a { color: #000 !important; text-decoration: none !important; }
 }
@@ -1361,6 +1371,13 @@ body.sitemap-body .latent-scrollzone {
 .proj-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .proj-card { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px; padding: 18px 20px; }
 .proj-card p { margin: 6px 0; }
+.proj-status {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
 .proj-title { color: var(--heading); font-size: 17px; margin-top: 0; }
 .res-sub { color: var(--dim); font-size: 14.5px; }
 @media (max-width: 700px) { .proj-grid { grid-template-columns: 1fr; } }
