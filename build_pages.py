@@ -43,7 +43,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=72">
+{schema}<link rel="stylesheet" href="styles.css?v=73">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -1680,14 +1680,15 @@ def resume_body():
     out.append('  <h3>Summary</h3>')
     out.append('  <p class="res-summary">%s</p>' % _md(data["summary"]))
     out.append('  <h3>Skills</h3>')
-    out.append('  <div class="skills-grid">')
-    for cat in data["skills"]:
-        out.append('    <div class="skill-panel">')
-        out.append('      <p class="label card-label">%s</p>' % _md(cat["category"]))
-        out.append('      <ul class="plain">')
-        for item in cat["items"]:
-            out.append('        <li>%s</li>' % _md(_cap(item)))
-        out.append('      </ul>')
+    out.append('  <div class="skills-ledger">')
+    for i, cat in enumerate(data["skills"], 1):
+        out.append('    <div class="ledger-row">')
+        out.append('      <div class="ledger-rail">')
+        out.append('        <span class="ledger-num">%02d</span>' % i)
+        out.append('        <p class="label card-label">%s</p>' % _md(cat["category"]))
+        out.append('        <span class="ledger-count">%d entries</span>' % len(cat["items"]))
+        out.append('      </div>')
+        out.append('      <p class="ledger-items">%s</p>' % "; ".join(_md(it) for it in cat["items"]))
         out.append('    </div>')
     out.append('  </div>')
     out.append('  <h3>Experience</h3>')

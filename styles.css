@@ -509,7 +509,35 @@ html, body { overflow-x: clip; }
   padding-bottom: 8px;
   margin: 36px 0 14px;
 }
-#resume .skills-grid { gap: 18px; align-items: start; }
+/* Skills as an editorial ledger: no panels, one row per category,
+   numbered mono rail on the left, skills as a flowing line on the right. */
+.skills-ledger { border-top: 1px solid var(--hairline); }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 4px 28px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.ledger-rail { display: flex; flex-direction: column; gap: 3px; }
+.ledger-rail .label { margin: 0; }
+.ledger-num {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+}
+.ledger-count {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--dim);
+}
+.ledger-items { margin: 0; line-height: 1.65; }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; }
+  .ledger-rail { flex-direction: row; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+}
 #resume > ul li { margin: 8px 0; }
 .job-head {
   display: flex;
@@ -530,13 +558,7 @@ html, body { overflow-x: clip; }
   margin: 0;
 }
 .gold-note { color: var(--gold); }
-.skill-panel {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 14px;
-  padding: 18px 20px;
-}
-.skill-panel li { margin: 5px 0; }
+
 @media (max-width: 560px) {
   .job-head { flex-direction: column; gap: 2px; }
 }
@@ -554,7 +576,9 @@ html, body { overflow-x: clip; }
   .label { color: #555 !important; }
   .job-loc, .job-dates { color: #444 !important; }
   #resume h3 { border-bottom-color: #bbb; }
-  .skill-panel { background: #fff !important; border-color: #bbb; }
+  .skills-ledger { border-top-color: #bbb; }
+  .ledger-row { border-bottom-color: #bbb; }
+  .ledger-num, .ledger-count { color: #444 !important; }
   .proj-card { background: #fff !important; border-color: #bbb; }
   .proj-status { color: #7a5c14 !important; }
   .gold-note { color: #7a5c14 !important; }
@@ -564,11 +588,7 @@ html, body { overflow-x: clip; }
 ul { margin: 6px 0 10px; padding-left: 22px; }
 li { margin: 4px 0; }
 ul.plain { list-style: none; padding-left: 0; }
-.skills-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 36px;
-}
+
 
 /* Footer */
 .site-footer {
@@ -592,7 +612,7 @@ ul.plain { list-style: none; padding-left: 0; }
   h1 { font-size: 30px; }
   h2 { font-size: 24px; }
   .wrap { padding: 0 20px; }
-  .cards, .skills-grid { grid-template-columns: 1fr; }
+  .cards { grid-template-columns: 1fr; }
   section { padding-top: 40px; margin-top: 40px; }
   .hero { padding-top: 48px; }
   .hero .intro { font-size: 17px; }
