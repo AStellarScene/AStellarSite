@@ -40,7 +40,11 @@ The canvas made sense when it was a cheap simulator for an expensive build. Buil
 
 I should be clear that this isn't tool snobbery. I use Figma. It's the team's shared surface, and refusing it would make me a bottleneck with opinions. But Figma answers layout questions. Code answers behavior questions. And the products I care about, AI products especially, are behavior all the way down: state, latency, the weird thing the model does on the fourth prompt. A static flow will lie to you about all of that, politely, in high fidelity.
 
-The honest version is simpler than the market analysis. I'm not strictly a designer. I like code. And I don't want to be prototype support for somebody else's design team, building careful copies of decisions I didn't make. I want the decisions to be mine, and I want to answer for them in working software. Building the thing is how I find out what the design actually is. Half my design opinions don't survive contact with a running prototype, and I'd rather learn that myself in an afternoon than hand a team a beautiful fiction to discover over a sprint. The research still matters. It's what keeps the building pointed at a real person's problem instead of my own amusement. But it's my differentiator, not my whole job.
+The honest version is simpler than the market analysis. I'm not strictly a designer. I like code. And I don't want to be prototype support for somebody else's design team, building careful copies of decisions I didn't make. I want the decisions to be mine, and I want to answer for them in working software.
+
+And this is not abstract for me. I'm a software developer and a UX designer. The stack of capabilities this whole question is about is the one I already work with: the research, the design, and the code, all in the same person.
+
+Building the thing is how I find out what the design actually is. Half my design opinions don't survive contact with a running prototype, and I'd rather learn that myself in an afternoon than hand a team a beautiful fiction to discover over a sprint. The research still matters. It's what keeps the building pointed at a real person's problem instead of my own amusement. But it's my differentiator, not my whole job.
 
 ## It's mine
 
