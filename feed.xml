@@ -5,6 +5,13 @@
     <link>https://adamlaloge.com/blog.html</link>
     <description>Blog by Adam Laloge: notes and essays on building software, testing, design, and whatever else is on the workbench.</description>
     <item>
+      <title>The Title Is Splitting</title>
+      <link>https://adamlaloge.com/blog-the-title-is-splitting.html</link>
+      <guid isPermaLink="true">https://adamlaloge.com/blog-the-title-is-splitting.html</guid>
+      <pubDate>Tue, 03 Nov 2026 12:00:00 +0000</pubDate>
+      <description>Design engineer and UX designer sound like the same job with different business cards. They are not. Implementation got cheap, the handoff collapsed, and the role split in two. I know which half I am.</description>
+    </item>
+    <item>
       <title>There&#x27;s No Point Safekeeping Code</title>
       <link>https://adamlaloge.com/blog-no-point-safekeeping-code.html</link>
       <guid isPermaLink="true">https://adamlaloge.com/blog-no-point-safekeeping-code.html</guid>
