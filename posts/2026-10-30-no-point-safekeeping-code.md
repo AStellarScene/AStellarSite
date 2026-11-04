@@ -1,47 +1,43 @@
 ---
 title: There's No Point Safekeeping Code
-date: 2026-10-30
-description: Code used to be the asset you locked up. But behavior is a spec, and where behavior can be checked, code can be regrown — so secrecy stopped protecting the thing it was protecting. An observation, not an argument.
+date: 2026-11-03
+description: Safekeeping code made sense when rebuilding it cost a million dollars. Compaq paid that in 1982. Cloudflare paid $1,100 for the same kind of job in 2026. What the lock protects now is not what it used to.
 ---
 
-This website is public. Not just the pages — the generator that builds them, every function, every workaround, sitting in an open repository for anyone to read. A few years ago that would have felt like leaving the machinery exposed. Lately I notice I don't think about it at all, and I've been trying to work out why.
+This website is public. Not just the pages. The generator that builds them, every function, every workaround, sits in an open repository for anyone to read. A few years ago that would have felt like leaving the machinery exposed. Lately I notice I don't think about it at all, and I've been trying to work out why.
 
-I think it's this: I no longer believe the code is the part worth protecting. Not because code stopped mattering. Because it stopped being scarce in the way secrecy assumes.
+I think it's this: I no longer believe the code is the part worth protecting. Not because code stopped mattering. Because secrecy was never really protecting the code. It was protected by a price.
 
-## Behavior is a spec
+## The price was the protection
 
-Safekeeping code rests on an assumption: that the text is the hard part and if you guard the text, you guard the thing. That was true when turning behavior back into code took a team of engineers a year. Clean-room reimplementation has existed for decades — the early PC clone makers famously rebuilt IBM's BIOS from its observable behavior, one team writing the spec, another team that had never seen the original writing code to match it. It was legal, it was known, and it was so expensive that almost nobody did it.
+In 1982, Compaq wanted to sell a computer that ran IBM's software, and the one part they could not copy was the BIOS, the small firmware that made the machine an IBM. So they rebuilt it in a clean room. One team documented what the BIOS did, every behavior, and a second team that had never seen IBM's code wrote new code to match. It took around fifteen programmers, months of work, and about a million dollars. For a piece of firmware you could print out and read in an afternoon.
 
-What's changed isn't the possibility. It's the price.
+IBM's protection was never that the rebuilding was impossible, or even that it was illegal. Done cleanly, it was legal. The protection was that almost nobody could afford to do it. Secrecy worked because going around it was irrational. The lock was real. It was just made of money.
 
-In November 2025 a developer named Chris Lewis pointed Claude at Snowboard Kids 2, an N64 game being decompiled the slow way, function by function. His setup was simple: a scorer that picks the easiest unmatched function, a model that takes a small number of attempts to produce code that compiles to the exact same bytes, and a loop that runs while he isn't watching. He reported more progress in three weeks than in the three months before, including stretches of eight hours nobody attended. The binary itself is the check. Either the bytes match or they don't, and because they can be checked, the code can be regrown.
+## The same job, repriced
 
-That pattern — a checkable target — is where the honest version of this story lives. Where the output can be verified automatically, reimplementation works startlingly well. Where it can't, the clones come out buggy and unfinished, and most of the viral stories quietly leave that part out.
+In February 2026, Cloudflare published how one of their engineers, directing an AI, reimplemented the API surface of Next.js, the most widely used front-end framework, on top of a different tool. Under a week. About $1,100 in tokens. The result covered 94 percent of the framework's API and was checked against Next.js's own test suite, which is the part that makes it more than a demo. The behavior was the spec, and the tests were the check. Cloudflare calls it experimental, and it was already running in production for customers when they wrote that.
 
-## The argument is now about whether the machine peeked
+The legal ground had moved before the price finished moving. In 2021 the Supreme Court decided Google v. Oracle, a decade of litigation over Google reimplementing Java's interface for Android. The court sided with Google, and the reasoning is what stayed with me. Justice Breyer wrote that the value of the copied lines lay in the accrued talents of the programmers who had learned them, not in the lines themselves. The interface was worth something because of what people knew. Not because of what the text was.
 
-My favorite recent example is a small one. Chardet is a Python library that detects text encodings; in early 2026 its maintainer released version 7 as a ground-up rewrite produced with Claude, starting from the library's public API and tests. Measured against the original, the new code came out with almost nothing in common. The original author disputed whether the process was truly clean — whether the model had seen the old source somewhere along the way.
+I am not arguing anyone should go reimplement other people's software. I am watching what happens to a protection when the price underneath it falls by a factor of a thousand. The protection does not get repealed. It gets ignored by economics.
 
-I don't have a verdict on that dispute, and it isn't really my business. What I notice is the shape of it. Twenty years ago the argument would have been about whether a rewrite like that was possible at all. Now the argument is about whether the machine peeked. The capability stopped being the question.
+## Both directions at once
 
-I'm not arguing anyone should go reimplement other people's software. I'm watching what happens to secrecy when doing it stops being expensive — because secrecy was priced for the old world, and the price moved.
+I hold both ends of this in my own working life, which is probably why I believe it.
 
-## Libraries should explode
+The code for this site is public, all of it. Someone could take the generator tomorrow and have every page I have. What they would not have is a single decision behind it. They would get a sitemap that derives itself and no idea which of the ten ways it broke on a phone taught it to do that.
 
-Here's the part I keep turning over. Open source taught us that code wants to be shared: one library, maintained in public, solving a problem for thousands of strangers at once. The compromise is baked in — a shared library has to serve everyone's needs, so it serves each of them approximately.
+The platform I built at work is the opposite arrangement. Twenty thousand lines of Python, built from scratch, and I cannot share a line of it. That code is safekept properly, by an employer, behind real walls. And the same fact shows through from this side. If I left, the company keeps every line. What walks out the door is the person who knows why the lines are shaped the way they are, which failure made which check exist. And I could not take the code with me, but give me the behavior and the standards and I could grow it again. I know, because growing it the first time is what I did.
 
-But if code can be regrown from a need and a check, the unit can shrink. Not one library for everyone. A library for one codebase, one person, one exact problem — derived fresh from the situation instead of downloaded into it.
-
-That's already how this site works, and I built it that way without quite seeing the pattern. There's no framework underneath it. A generator reads my content — my posts, my photos, my resume — and derives everything else: the pages, the sitemap, the map, even the map's points and colors. My resume is a single document and a small renderer that turns it into two PDFs and a web page. Every piece of that plumbing solves exactly one of my problems, in exactly my shape. Most of it would be useless to anyone else. That's not a flaw in it. That's the point of it.
-
-It's descended from open source — the inspectability, the building in the open, the standing on decades of other people's published work. But it isn't shared code. It's derived code. And derivation doesn't approximate: when I changed my mind about how the sitemap should work, the fix wasn't to patch a library into a shape it wasn't. The generator now derives the entries from the posts that exist, and a renamed post simply stops appearing. The spec was my content. The check was the rendered site. Nothing had to be approximated because nothing had to be translated from somebody else's problem into mine.
+Locked or published, the text turns out to be the part that matters least in both directions. That is not a theory I read. It is the shape of my own week.
 
 ## What I actually own
 
-Which brings me back to the open repository. If the plumbing can be regrown from the content it serves, then someone reading all of it has the part that was never scarce. What they don't have is the trail of decisions behind it: the versions I rejected, the rendering bug that took a day of bisection on a phone to convict, the conventions I wrote down so the next change wouldn't repeat an old mistake. That trail lives in my notes, my corrections, my taste. It's the spec behind the spec.
+So what is the asset, if it isn't the code? Working it out on this site, it looks like the trail. The versions I rejected. The rendering bug that took a day of bisection on a phone to convict. The conventions I wrote down so the next change would not repeat an old mistake. The standards, the corrections, the taste. It lives in my notes and in my head, and it is the spec behind the spec: the reason the code is this code and not some other code that also passes.
 
 Safekeeping assumed the code was the asset, so you locked the code. I keep my site's code in the open and my judgment in my head, and I couldn't swap those if I tried.
 
-The code was never the thing I owned. I'm still figuring out what the thing is.
+The code was never the thing I owned. I'm getting closer to knowing what the thing is.
 
-*Drafted with an AI's help and edited by me. The examples are real and linked in my notes; the developers quoted are the ones who reported them, and where a claim is disputed or a clone is unfinished, the post says so. Publishing this adds a forty-third point to the Atlas, under WRITING.*
+*Drafted with an AI's help and edited by me. The examples are documented ones: Compaq's clean-room BIOS is a matter of record, the vinext figures are Cloudflare's own, and the case is Google v. Oracle, decided 2021. Originally published October 30, 2026; revised November 3, 2026.*

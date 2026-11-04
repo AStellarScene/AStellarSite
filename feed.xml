@@ -5,18 +5,18 @@
     <link>https://adamlaloge.com/blog.html</link>
     <description>Blog by Adam Laloge: notes and essays on building software, testing, design, and whatever else is on the workbench.</description>
     <item>
+      <title>There&#x27;s No Point Safekeeping Code</title>
+      <link>https://adamlaloge.com/blog-no-point-safekeeping-code.html</link>
+      <guid isPermaLink="true">https://adamlaloge.com/blog-no-point-safekeeping-code.html</guid>
+      <pubDate>Tue, 03 Nov 2026 12:00:00 +0000</pubDate>
+      <description>Safekeeping code made sense when rebuilding it cost a million dollars. Compaq paid that in 1982. Cloudflare paid $1,100 for the same kind of job in 2026. What the lock protects now is not what it used to.</description>
+    </item>
+    <item>
       <title>The Title Is Splitting</title>
       <link>https://adamlaloge.com/blog-the-title-is-splitting.html</link>
       <guid isPermaLink="true">https://adamlaloge.com/blog-the-title-is-splitting.html</guid>
       <pubDate>Tue, 03 Nov 2026 12:00:00 +0000</pubDate>
       <description>Design engineer and UX designer sound like the same job with different business cards. They are not. Implementation got cheap, the handoff collapsed, and the role split in two. I know which half I am.</description>
-    </item>
-    <item>
-      <title>There&#x27;s No Point Safekeeping Code</title>
-      <link>https://adamlaloge.com/blog-no-point-safekeeping-code.html</link>
-      <guid isPermaLink="true">https://adamlaloge.com/blog-no-point-safekeeping-code.html</guid>
-      <pubDate>Fri, 30 Oct 2026 12:00:00 +0000</pubDate>
-      <description>Code used to be the asset you locked up. But behavior is a spec, and where behavior can be checked, code can be regrown — so secrecy stopped protecting the thing it was protecting. An observation, not an argument.</description>
     </item>
     <item>
       <title>The Prototype Is the New Sticky Note</title>
