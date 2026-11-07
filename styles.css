@@ -572,13 +572,12 @@ html, body { overflow-x: clip; }
 }
 
 /* Resume */
-.resume-meta { color: var(--body); }
 .resume-contact {
   display: flex;
   flex-wrap: wrap;
   gap: 16px 48px;
   padding: 20px 0 24px;
-  margin: 10px 0 24px;
+  margin: 10px 0 14px;
   border-top: 1px solid var(--hairline);
   border-bottom: 1px solid var(--hairline);
 }
@@ -617,7 +616,6 @@ html, body { overflow-x: clip; }
 }
 /* Skills as an editorial ledger: no panels, one row per category,
    numbered mono rail on the left, skills as a flowing line on the right. */
-.skills-ledger { border-top: 1px solid var(--hairline); }
 .ledger-row {
   display: grid;
   grid-template-columns: 200px 1fr;
@@ -635,7 +633,7 @@ html, body { overflow-x: clip; }
 }
 .ledger-count {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 12.5px;
   letter-spacing: 0.06em;
   color: var(--dim);
 }
@@ -663,8 +661,6 @@ html, body { overflow-x: clip; }
   white-space: nowrap;
   margin: 0;
 }
-.gold-note { color: var(--gold); }
-
 @media (max-width: 560px) {
   .job-head { flex-direction: column; gap: 2px; }
 }
@@ -677,17 +673,15 @@ html, body { overflow-x: clip; }
   .site-header, .site-footer { display: none !important; }
   #resume { max-width: none; }
   #resume .pill { display: none !important; }
-  body, p, li, .job-role, .resume-meta, .contact-value { color: #1c1c1c !important; }
+  body, p, li, .job-role, .contact-value { color: #1c1c1c !important; }
   h1, h2, h3, strong, .job-company strong { color: #000 !important; }
   .label { color: #555 !important; }
   .job-loc, .job-dates { color: #444 !important; }
   #resume h3 { border-bottom-color: #bbb; }
-  .skills-ledger { border-top-color: #bbb; }
   .ledger-row { border-bottom-color: #bbb; }
   .ledger-num, .ledger-count { color: #444 !important; }
   .proj-card { background: #fff !important; border-color: #bbb; }
   .proj-status { color: #7a5c14 !important; }
-  .gold-note { color: #7a5c14 !important; }
   a { color: #000 !important; text-decoration: none !important; }
 }
 .job-head strong { color: var(--heading); }
@@ -1546,9 +1540,8 @@ body.sitemap-body .latent-scrollzone {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--gold);
+  margin: 2px 0 6px;
 }
 .proj-title { color: var(--heading); font-size: 17px; margin-top: 0; }
 .res-sub { color: var(--dim); font-size: 14.5px; }
 @media (max-width: 700px) { .proj-grid { grid-template-columns: 1fr; } }
-
-.proj-status { color: var(--gold); font-size: 13.5px; letter-spacing: .04em; text-transform: uppercase; margin: 2px 0 6px; }
