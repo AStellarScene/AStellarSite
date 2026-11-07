@@ -1562,3 +1562,8 @@ h2 { font-size: 22px; }
 h3 { font-size: 16px; }
 #resume h1 { font-size: 22px; }
 .latent-phead h1 { font-size: 22px; }
+
+/* Line breaking: keep the last line of a paragraph from stranding a
+   single word, and balance multi-line headings. */
+p { text-wrap: pretty; }
+h1, h2, h3 { text-wrap: balance; }
