@@ -1,11 +1,11 @@
-@font-face { font-family: 'Michroma'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/Michroma-400.woff2) format('woff2'); }
-@font-face { font-family: 'Titillium Web'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/TitilliumWeb-400.woff2) format('woff2'); }
-@font-face { font-family: 'Titillium Web'; font-style: italic; font-weight: 400; font-display: swap; src: url(fonts/TitilliumWeb-400i.woff2) format('woff2'); }
-@font-face { font-family: 'Titillium Web'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/TitilliumWeb-600.woff2) format('woff2'); }
-@font-face { font-family: 'Titillium Web'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/TitilliumWeb-700.woff2) format('woff2'); }
-@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/JetBrainsMono-400.woff2) format('woff2'); }
-@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/JetBrainsMono-600.woff2) format('woff2'); }
-@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/JetBrainsMono-700.woff2) format('woff2'); }
+@font-face { font-family: 'Michroma'; font-style: normal; font-weight: 400; font-display: swap; src: url(Michroma-400.woff2) format('woff2'); }
+@font-face { font-family: 'Titillium Web'; font-style: normal; font-weight: 400; font-display: swap; src: url(TitilliumWeb-400.woff2) format('woff2'); }
+@font-face { font-family: 'Titillium Web'; font-style: italic; font-weight: 400; font-display: swap; src: url(TitilliumWeb-400i.woff2) format('woff2'); }
+@font-face { font-family: 'Titillium Web'; font-style: normal; font-weight: 600; font-display: swap; src: url(TitilliumWeb-600.woff2) format('woff2'); }
+@font-face { font-family: 'Titillium Web'; font-style: normal; font-weight: 700; font-display: swap; src: url(TitilliumWeb-700.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(JetBrainsMono-400.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url(JetBrainsMono-600.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url(JetBrainsMono-700.woff2) format('woff2'); }
 
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 /* Adam Laloge — portfolio
