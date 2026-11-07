@@ -1442,7 +1442,7 @@ BOOKS = [
     {"t": "Of Blood and Fire", "a": "Ryan Cahill", "s": "Up next",
      "b": "Classic-shape epic with dragon riders.",
      "style": ("#6b3410", 46, 212, 30)},
-    {"t": "Gardens of the Moon", "a": "Steven Erikson", "s": "Reading now",
+    {"t": "Gardens of the Moon", "a": "Steven Erikson", "s": "Up next",
      "b": "Malazan, book one. The deep end: a huge world that explains nothing and trusts you to keep up.",
      "style": ("#1c2b26", 60, 226, 40)},
     {"t": "The Darkness That Comes Before", "a": "R. Scott Bakker", "s": "Up next",
