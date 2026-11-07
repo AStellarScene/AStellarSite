@@ -50,10 +50,10 @@ HEAD = """<!DOCTYPE html>
 """
 
 NAV_MAIN = [
-    ("work.html", "Projects"),
     ("resume.html", "Resume"),
-    ("about.html", "About"),
+    ("work.html", "Projects"),
     ("latent-sitemap.html", "Atlas"),
+    ("about.html", "About"),
 ]
 
 NAV_PERSONAL = [
