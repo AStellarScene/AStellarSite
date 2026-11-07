@@ -583,16 +583,14 @@ html, body { overflow-x: clip; }
   border-bottom: 1px solid var(--hairline);
 }
 .contact-item { display: flex; flex-direction: row; align-items: baseline; gap: 8px; }
-/* Spacer between Location and the contact links: a hairline rule —
-   vertical in the wide row, full-width when the row wraps. */
+/* Location sits on its own row above the contact links, split off by
+   a full-width hairline spacer (Adam, 2026-11-07). */
+.resume-contact > .contact-item:first-child { flex-basis: 100%; }
 .contact-spacer {
-  flex: 0 0 auto;
-  width: 1px;
-  align-self: stretch;
+  flex-basis: 100%;
+  width: 100%;
+  height: 1px;
   background: rgba(140, 160, 190, 0.35);
-}
-@media (max-width: 760px) {
-  .contact-spacer { width: 100%; height: 1px; align-self: auto; }
 }
 .contact-label {
   font-family: var(--mono);
