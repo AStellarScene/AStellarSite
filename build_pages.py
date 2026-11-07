@@ -33,7 +33,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="description" content="{desc}">
 <link rel="canonical" href="{url}">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Adam Laloge">
+<meta property="og:site_name" content="Adam Joseph Laloge">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="{url}">
@@ -44,7 +44,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
 {schema}<link rel="stylesheet" href="styles.css?v=77">
-<link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
+<link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
 """
@@ -236,7 +236,7 @@ home_body = """  <section class="hero">
     <h2>Get in touch</h2>
     <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
   </section>"""
-page("index.html", "Adam Laloge", DESC, "index.html",
+page("index.html", "Adam Joseph Laloge", DESC, "index.html",
      home_body, "<script>" + sky_js + "</script>\n", schema=PERSON_LD, og_image="https://adamlaloge.com/art/hero-card.jpg")
 
 # ---------- Work index ----------
@@ -283,7 +283,7 @@ work_body = """  <section id="work">
       </article>
     </div>
   </section>"""
-page("work.html", "Projects — Adam Laloge", WORK_DESC, "work.html", work_body)
+page("work.html", "Projects — Adam Joseph Laloge", WORK_DESC, "work.html", work_body)
 
 # ---------- Project pages ----------
 def project(fname, name, status, paras, bullets=None):
@@ -298,7 +298,7 @@ def project(fname, name, status, paras, bullets=None):
 %s%s
     <p><a href="work.html">&#8592; All projects</a></p>
   </section>""" % (name, status, "\n".join("    <p>%s</p>" % p for p in paras), bl)
-    page(fname, "%s — Adam Laloge" % name, PROJ_DESCS.get(fname, DESC), "work.html", body)
+    page(fname, "%s — Adam Joseph Laloge" % name, PROJ_DESCS.get(fname, DESC), "work.html", body)
 
 project("benchlab.html", "BenchLab", "In planning",
     ["A testing simulator that runs in the browser. It's the public twin of the test-platform work I do at my job, rebuilt from scratch with nothing proprietary: the workflow is real, the device under test is simulated.",
@@ -355,7 +355,7 @@ about_body = """  <section id="about">
     <h2>Get in touch</h2>
     <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
   </section>"""
-page("about.html", "About — Adam Laloge", ABOUT_DESC, "about.html", about_body)
+page("about.html", "About — Adam Joseph Laloge", ABOUT_DESC, "about.html", about_body)
 
 # ---------- Latent Dreams ----------
 # Layout rule (Adam, 2026-10-25): artwork is added in pairs. Each pair is
@@ -1417,7 +1417,7 @@ _cells = latent_body.count('class="slice"')
 latent_body = latent_body.replace(
     '<div class="quilt" id="quilt">',
     '<div class="quilt" id="quilt" style="--rows:%d;--cells:%d">' % ((_cells + 1) // 2, _cells))
-page("dreams.html", "Dreamscape — Adam Laloge",
+page("dreams.html", "Dreamscape — Adam Joseph Laloge",
      "AI artwork directed by Adam Laloge. Worlds are quilted into a single grid, with liquid seams between every pair. Open one and it fills the screen while the page takes on its colors.",
      "dreams.html", latent_body, latent_js)
 
@@ -1688,7 +1688,7 @@ BOOKSHELF_JS = """<script>
 })();
 </script>
 """
-page("bookshelf.html", "Bookshelf — Adam Laloge",
+page("bookshelf.html", "Bookshelf — Adam Joseph Laloge",
      "Adam Laloge's bookshelf: historical horror, dark fantasy, and sci-fi — what he's reading and what's next.",
      "bookshelf.html", bookshelf_body, BOOKSHELF_JS)
 
@@ -1804,12 +1804,12 @@ def resume_body():
 
 
 # ---------- Photography (verbatim section) ----------
-page("photography.html", "Photography — Adam Laloge",
+page("photography.html", "Photography — Adam Joseph Laloge",
      "Photographs by Adam Laloge: landscapes and sunsets.", "photography.html",
      "  " + photo_section.replace("\n", "\n  ").rstrip(),
      "<script>" + gallery_js + "</script>\n")
 
-page("resume.html", "Resume — Adam Laloge",
+page("resume.html", "Resume — Adam Joseph Laloge",
      "Resume of Adam Laloge, design engineer building human-centered AI systems.", "resume.html",
      "  " + resume_body().replace("\n", "\n  ").rstrip())
 
@@ -1969,7 +1969,7 @@ def write_feed():
     feed = """<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>Adam Laloge - Blog</title>
+    <title>Adam Joseph Laloge - Blog</title>
     <link>https://adamlaloge.com/blog.html</link>
     <description>%s</description>
 %s
@@ -3192,13 +3192,13 @@ LATENT_MAP_JS = r"""<script>
 </script>
 """.replace("/*__DATA__*/null", json.dumps(LATENT_DATA))
 
-page("blog.html", "Blog \u2014 Adam Laloge", BLOG_DESC, "blog.html", blog_index_body())
+page("blog.html", "Blog \u2014 Adam Joseph Laloge", BLOG_DESC, "blog.html", blog_index_body())
 for _p in POSTS:
-    page(_p["fname"], _p["title"] + " \u2014 Adam Laloge", _p["desc"] or BLOG_DESC, "blog.html", blog_post_body(_p))
+    page(_p["fname"], _p["title"] + " \u2014 Adam Joseph Laloge", _p["desc"] or BLOG_DESC, "blog.html", blog_post_body(_p))
 write_feed()
 write_sitemap()
 
-page("latent-sitemap.html", "Atlas — Adam Laloge",
+page("latent-sitemap.html", "Atlas — Adam Joseph Laloge",
      "A sitemap drawn as a latent space: every photo, book, artwork, and project on Adam Laloge's site as a point in one flowing map.",
      "latent-sitemap.html", sitemap_body, LATENT_MAP_JS)
 
