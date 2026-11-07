@@ -1,3 +1,12 @@
+@font-face { font-family: 'Michroma'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/Michroma-400.woff2) format('woff2'); }
+@font-face { font-family: 'Titillium Web'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/TitilliumWeb-400.woff2) format('woff2'); }
+@font-face { font-family: 'Titillium Web'; font-style: italic; font-weight: 400; font-display: swap; src: url(fonts/TitilliumWeb-400i.woff2) format('woff2'); }
+@font-face { font-family: 'Titillium Web'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/TitilliumWeb-600.woff2) format('woff2'); }
+@font-face { font-family: 'Titillium Web'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/TitilliumWeb-700.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/JetBrainsMono-400.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/JetBrainsMono-600.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/JetBrainsMono-700.woff2) format('woff2'); }
+
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 /* Adam Laloge — portfolio
    Theme: Mission Control in a Nebula (as rendered in Adam's Canva draft)
@@ -5,17 +14,17 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
    Accents: teal = primary (labels, links). Gold = status and proof markers only. */
 
 :root {
-  --base: #070b16;
+  --base: #0A0A0A;
   --panel: rgba(255, 255, 255, 0.03);
-  --panel-border: rgba(255, 255, 255, 0.09);
-  --heading: #f4f7fb;
-  --body: #a7b3c7;
-  --dim: #77839a;
-  --teal: #5eead4;
-  --gold: #d9b36a;
-  --hairline: rgba(255, 255, 255, 0.08);
-  --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, "Liberation Mono", monospace;
+  --panel-border: rgba(255, 255, 255, 0.10);
+  --heading: #F2F2F2;
+  --body: #C9C9C9;
+  --dim: #9C9C9C;
+  --teal: #F5F5F5;
+  --gold: #D9D9D9;
+  --hairline: rgba(255, 255, 255, 0.09);
+  --sans: "Titillium Web", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -39,10 +48,10 @@ body::before {
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(640px 420px at 12% -4%, rgba(45, 212, 191, 0.13), transparent 62%),
-    radial-gradient(760px 520px at 92% 2%, rgba(124, 93, 250, 0.12), transparent 62%),
-    radial-gradient(820px 620px at 88% 86%, rgba(190, 80, 140, 0.06), transparent 62%),
-    radial-gradient(600px 500px at 4% 70%, rgba(45, 212, 191, 0.05), transparent 60%);
+    radial-gradient(640px 420px at 12% -4%, rgba(255, 255, 255, 0.055), transparent 62%),
+    radial-gradient(760px 520px at 92% 2%, rgba(255, 255, 255, 0.04), transparent 62%),
+    radial-gradient(820px 620px at 88% 86%, rgba(215, 215, 215, 0.035), transparent 62%),
+    radial-gradient(600px 500px at 4% 70%, rgba(255, 255, 255, 0.03), transparent 60%);
   pointer-events: none;
 }
 
@@ -126,7 +135,7 @@ html.sky-on .hero::before { display: none; }
   min-width: 212px;
   padding: 8px 0;
   border-radius: 12px;
-  background: rgba(9, 13, 24, 0.88);
+  background: rgba(17, 17, 17, 0.88);
   backdrop-filter: blur(14px) saturate(1.4);
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
   border: 1px solid var(--panel-border);
@@ -195,7 +204,7 @@ img { max-width: 100%; }
 }
 
 /* Type */
-h1, h2, h3 { color: var(--heading); font-weight: 600; line-height: 1.25; }
+h1, h2, h3 { color: var(--heading); font-weight: 400; line-height: 1.25; font-family: "Michroma", var(--sans); }
 h1 { font-size: 40px; margin: 10px 0 18px; }
 h2 { font-size: 28px; margin: 6px 0 12px; }
 h3 { font-size: 20px; margin: 30px 0 8px; }
@@ -267,8 +276,8 @@ html, body { overflow-x: clip; }
   background: rgba(255, 255, 255, 0.04);
 }
 .pill:hover { text-decoration: none; border-color: var(--teal); }
-.pill-teal { background: rgba(45, 212, 191, 0.10); }
-.pill-violet { background: rgba(124, 93, 250, 0.12); }
+.pill-teal { background: rgba(255, 255, 255, 0.10); }
+.pill-violet { background: rgba(255, 255, 255, 0.04); }
 
 /* Work cards */
 .section-note { color: var(--dim); max-width: 640px; }
@@ -284,7 +293,7 @@ html, body { overflow-x: clip; }
   border-radius: 14px;
   padding: 24px 26px;
 }
-.card:hover { border-color: rgba(94, 234, 212, 0.45); }
+.card:hover { border-color: rgba(255, 255, 255, 0.45); }
 .card p { margin: 8px 0; }
 .card-label { font-size: 13px; }
 .status {
@@ -312,7 +321,7 @@ html, body { overflow-x: clip; }
 .chip:hover { color: var(--heading); border-color: var(--teal); }
 .chip.active { color: var(--base); background: var(--teal); border-color: var(--teal); font-weight: 700; }
 .pflow-scene {
-  background: radial-gradient(120% 90% at 50% 0%, rgba(94, 234, 212, 0.05), transparent 60%), var(--panel);
+  background: radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%), var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: 14px;
   padding: 10px 0 16px;
@@ -438,16 +447,16 @@ html, body { overflow-x: clip; }
     inset 0 0 0 1px rgba(255, 255, 255, 0.05),
     0 6px 18px rgba(0, 0, 0, 0.25);
 }
-.pill-teal { background: rgba(45, 212, 191, 0.13); border-color: rgba(45, 212, 191, 0.45); }
-.pill-violet { background: rgba(124, 93, 250, 0.15); border-color: rgba(124, 93, 250, 0.5); }
-.chip.active { background: rgba(45, 212, 191, 0.85); }
+.pill-teal { background: rgba(255, 255, 255, 0.055); border-color: rgba(255, 255, 255, 0.45); }
+.pill-violet { background: rgba(215, 215, 215, 0.15); border-color: rgba(215, 215, 215, 0.5); }
+.chip.active { background: rgba(255, 255, 255, 0.85); }
 .nav-toggle { background: rgba(255, 255, 255, 0.05); }
 .pd-arrow { background: rgba(255, 255, 255, 0.05); }
 .pane-close { background: rgba(10, 15, 30, 0.45); }
 
 /* Bookshelf — Cover Flow */
 .flow-scene {
-  background: radial-gradient(120% 90% at 50% 0%, rgba(94, 234, 212, 0.05), transparent 60%), var(--panel);
+  background: radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%), var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: 14px;
   padding: 10px 0 18px;
@@ -1087,7 +1096,7 @@ html.latent-live[data-world="shore"] .site-header::after { background: rgba(6, 1
 html.latent-live[data-world="vending"] .site-header::before { background-image: url("art/vending-hall.jpg"); }
 html.latent-live[data-world="watch"] .site-header::before { background-image: url("art/the-long-watch.jpg"); }
 html.latent-live[data-world="vending"] .site-header::after { background: rgba(4, 10, 16, 0.42); }
-html.latent-live[data-world="watch"] .site-header::after { background: rgba(8, 10, 20, 0.42); }
+html.latent-live[data-world="watch"] .site-header::after { background: rgba(17, 17, 17, 0.42); }
 
 /* When a world opens, the text above it fades away entirely */
 html.latent-live .latent-head { transition: opacity 0.7s ease; }
@@ -1108,8 +1117,8 @@ html.latent-live[data-world="golden"] {
   --dim: #a68d6d;
   --teal: #ffb347;
   --gold: #f5c86e;
-  --panel: rgba(255, 179, 71, 0.06);
-  --panel-border: rgba(255, 179, 71, 0.22);
+  --panel: rgba(255, 255, 255, 0.06);
+  --panel-border: rgba(255, 255, 255, 0.22);
 }
 html.latent-live[data-world="ember"] {
   --base: #0e0605;
@@ -1128,8 +1137,8 @@ html.latent-live[data-world="abyss"] {
   --dim: #71948a;
   --teal: #46e8c0;
   --gold: #ffb36b;
-  --panel: rgba(70, 232, 192, 0.06);
-  --panel-border: rgba(70, 232, 192, 0.22);
+  --panel: rgba(255, 255, 255, 0.06);
+  --panel-border: rgba(255, 255, 255, 0.22);
 }
 html.latent-live[data-world="shore"] {
   --base: #07130a;
@@ -1155,7 +1164,7 @@ html.latent-live[data-world="shore"] {
 html.latent-live[data-world="golden"] .world-ambient {
   opacity: 1;
   background:
-    radial-gradient(720px 480px at 14% -4%, rgba(255, 179, 71, 0.22), transparent 62%),
+    radial-gradient(720px 480px at 14% -4%, rgba(255, 255, 255, 0.22), transparent 62%),
     radial-gradient(820px 560px at 92% 4%, rgba(255, 122, 40, 0.14), transparent 62%),
     radial-gradient(900px 700px at 85% 90%, rgba(150, 90, 30, 0.10), transparent 62%),
     #140c05;
@@ -1337,7 +1346,7 @@ body[data-view="content"] #latent-hit { pointer-events: none; }
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  background: rgba(6, 8, 16, 0.55);
+  background: rgba(10, 10, 10, 0.55);
 }
 body.sitemap-body .site-header,
 body.sitemap-body .site-footer { position: relative; z-index: 4; }
@@ -1345,7 +1354,7 @@ body.sitemap-body .site-footer { position: relative; z-index: 4; }
    the opened nav menu get the frosted glass the other pages don't
    need: same header, glassed. */
 body.sitemap-body .site-header {
-  background: rgba(8, 11, 22, 0.42);
+  background: rgba(17, 17, 17, 0.42);
   backdrop-filter: blur(14px) saturate(1.4);
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
 }
@@ -1353,7 +1362,7 @@ body.sitemap-body .site-header {
 .sitemap-flow a, .sitemap-flow button { pointer-events: auto; }
 /* The Latent Dreams glass: tinted translucency, backdrop blur, a lit rim. */
 .latent-glass {
-  background: rgba(8, 11, 22, 0.44);
+  background: rgba(17, 17, 17, 0.44);
   backdrop-filter: blur(12px) saturate(1.4);
   -webkit-backdrop-filter: blur(12px) saturate(1.4);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09),
@@ -1379,11 +1388,11 @@ body.sitemap-body .site-header {
   background:
     radial-gradient(120% 150% at 8% 0%, rgba(34, 190, 205, 0.16), rgba(34, 190, 205, 0) 55%),
     radial-gradient(120% 160% at 96% 110%, rgba(216, 96, 158, 0.13), rgba(216, 96, 158, 0) 55%),
-    linear-gradient(120deg, rgba(34, 190, 205, 0.07), rgba(124, 93, 250, 0.07) 55%, rgba(228, 96, 52, 0.06)),
-    rgba(8, 11, 22, 0.36);
+    linear-gradient(120deg, rgba(34, 190, 205, 0.07), rgba(215, 215, 215, 0.07) 55%, rgba(228, 96, 52, 0.06)),
+    rgba(17, 17, 17, 0.36);
 }
 .latent-phead h1 { font-size: 30px; color: var(--heading); margin: 3px 0 5px; }
-.latent-phead .phead-note { color: #a7b3c7; font-size: 14.5px; margin: 0; }
+.latent-phead .phead-note { color: #C9C9C9; font-size: 14.5px; margin: 0; }
 /* The scroll zone: a real button and the first screen's one
    scrollable surface -- this page's bottom-sheet peek. Full width,
    flush to the bottom edge (it has to reach the screen edges, not
@@ -1406,7 +1415,7 @@ body.sitemap-body .latent-scrollzone {
   padding: 9px 16px calc(9px + env(safe-area-inset-bottom, 0px));
   border: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.09);
-  background: linear-gradient(to top, rgba(6, 8, 16, 0.8), rgba(6, 8, 16, 0.58));
+  background: linear-gradient(to top, rgba(10, 10, 10, 0.8), rgba(10, 10, 10, 0.58));
   backdrop-filter: blur(10px) saturate(1.4);
   -webkit-backdrop-filter: blur(10px) saturate(1.4);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
@@ -1428,8 +1437,8 @@ body.sitemap-body .latent-scrollzone {
 .cue-arrow i {
   width: 14px;
   height: 14px;
-  border-right: 2.5px solid rgba(94, 234, 212, 0.9);
-  border-bottom: 2.5px solid rgba(94, 234, 212, 0.9);
+  border-right: 2.5px solid rgba(255, 255, 255, 0.9);
+  border-bottom: 2.5px solid rgba(255, 255, 255, 0.9);
   transform: rotate(45deg);
   margin-top: -5px;
   animation: cueDrop 1.8s ease-in-out infinite;
@@ -1458,8 +1467,8 @@ body.sitemap-body .latent-scrollzone {
 .map-group h3 a { color: var(--teal); text-decoration: none; }
 .map-group ul { list-style: none; }
 .map-group li { margin: 5px 0; }
-.map-group li a { color: #a7b3c7; text-decoration: none; }
-.map-group li a:hover, .map-group h3 a:hover { color: #f4f7fb; }
+.map-group li a { color: #C9C9C9; text-decoration: none; }
+.map-group li a:hover, .map-group h3 a:hover { color: #F2F2F2; }
 @media (max-width: 720px) {
   .latent-intro { min-height: 400px; }
   .latent-phead { padding: 13px 15px 12px; }
@@ -1469,7 +1478,7 @@ body.sitemap-body .latent-scrollzone {
 /* Blog */
 .blog-head .intro { max-width: 62ch; }
 .post-list { display: grid; gap: 18px; margin: 26px 0 10px; }
-.post-card { border: 1px solid rgba(148, 163, 184, .18); border-radius: 14px; padding: 20px 22px; background: rgba(148, 163, 184, .05); }
+.post-card { border: 1px solid rgba(165, 165, 165, .18); border-radius: 14px; padding: 20px 22px; background: rgba(165, 165, 165, .05); }
 .post-card h2 { margin: 0 0 6px; font-size: 24px; }
 .post-card h2 a { color: var(--heading); text-decoration: none; }
 .post-card h2 a:hover { color: var(--teal); }
@@ -1480,18 +1489,18 @@ body.sitemap-body .latent-scrollzone {
 .post-body h2 { margin-top: 34px; }
 .post-body h3 { margin-top: 26px; }
 .post-body img { max-width: 100%; border-radius: 10px; }
-.post-body pre { overflow-x: auto; padding: 14px 16px; border-radius: 10px; background: rgba(2, 6, 17, .6); border: 1px solid rgba(148, 163, 184, .18); font-size: 14px; }
+.post-body pre { overflow-x: auto; padding: 14px 16px; border-radius: 10px; background: rgba(2, 6, 17, .6); border: 1px solid rgba(165, 165, 165, .18); font-size: 14px; }
 .post-body code { font-family: var(--mono); font-size: .92em; }
 .post-body blockquote { margin: 20px 0; padding: 4px 18px; border-left: 3px solid var(--teal); }
 .post-body table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 15px; line-height: 1.55; }
-.post-body th { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); text-align: left; padding: 8px 12px; border-bottom: 2px solid rgba(45, 212, 191, .35); white-space: nowrap; }
-.post-body td { padding: 8px 12px; border-bottom: 1px solid rgba(148, 163, 184, .14); vertical-align: top; }
+.post-body th { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); text-align: left; padding: 8px 12px; border-bottom: 2px solid rgba(255, 255, 255, .35); white-space: nowrap; }
+.post-body td { padding: 8px 12px; border-bottom: 1px solid rgba(165, 165, 165, .14); vertical-align: top; }
 .post-body tbody tr:last-child td { border-bottom: none; }
 .post-body td.ok { color: var(--teal); }
 .post-body td.no { color: #f0a35e; }
 @media (max-width: 760px) { .post-body table { display: block; overflow-x: auto; font-size: 13.5px; } }
 .post-body figure { margin: 28px 0; }
-.post-body .figbox { border: 1px solid rgba(148, 163, 184, .18); border-radius: 14px; padding: 18px 18px 10px; background: rgba(148, 163, 184, .05); }
+.post-body .figbox { border: 1px solid rgba(165, 165, 165, .18); border-radius: 14px; padding: 18px 18px 10px; background: rgba(165, 165, 165, .05); }
 .post-body .figbox svg { display: block; width: 100%; height: auto; }
 .post-body figcaption { font-family: var(--mono); font-size: 12.5px; letter-spacing: .04em; color: var(--teal); margin-top: 10px; }
 /* Blog layout system (v66): lede, lesson callouts, stat band, heading
@@ -1503,17 +1512,17 @@ body.sitemap-body .latent-scrollzone {
 .post-body h2 { margin-top: 48px; padding-top: 26px; border-top: 1px solid var(--hairline); font-size: 27px; }
 .post-body h3 { margin-top: 32px; font-size: 19.5px; color: var(--heading); }
 .post-body blockquote { font-size: 20.5px; line-height: 1.6; font-style: italic; color: var(--heading); margin: 30px 0; padding: 6px 22px; }
-.post-body .lesson { background: rgba(94, 234, 212, .05); border: 1px solid rgba(94, 234, 212, .22); border-left: 3px solid var(--teal); border-radius: 10px; padding: 15px 19px; margin: 26px 0; }
+.post-body .lesson { background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .22); border-left: 3px solid var(--teal); border-radius: 10px; padding: 15px 19px; margin: 26px 0; }
 .post-body .lesson strong { color: var(--teal); }
-.post-body tbody tr:nth-child(even) td { background: rgba(148, 163, 184, .03); }
+.post-body tbody tr:nth-child(even) td { background: rgba(165, 165, 165, .03); }
 .post-body .statband { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 28px 0 6px; }
-.post-body .stat { border: 1px solid rgba(148, 163, 184, .18); border-radius: 12px; background: rgba(148, 163, 184, .05); padding: 15px 16px 12px; }
+.post-body .stat { border: 1px solid rgba(165, 165, 165, .18); border-radius: 12px; background: rgba(165, 165, 165, .05); padding: 15px 16px 12px; }
 .post-body .stat b { display: block; font-size: 29px; line-height: 1.1; color: var(--heading); font-weight: 650; }
 .post-body .stat span { display: block; margin-top: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--teal); }
-.post-body .seefirst { border: 1px solid rgba(94, 234, 212, .28); border-radius: 12px; background: rgba(94, 234, 212, .05); padding: 16px 19px 15px; margin: 2px 0 28px; }
+.post-body .seefirst { border: 1px solid rgba(255, 255, 255, .28); border-radius: 12px; background: rgba(255, 255, 255, .05); padding: 16px 19px 15px; margin: 2px 0 28px; }
 .post-body .seefirst-k { font-family: var(--mono); font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--teal); }
 .post-body .seefirst-t { margin-top: 8px; font-size: 16.5px; line-height: 1.6; }
-.post-body .seefirst-a { display: inline-block; margin-top: 10px; font-family: var(--mono); font-size: 14px; color: var(--teal); text-decoration: none; border-bottom: 1px solid rgba(94, 234, 212, .45); padding-bottom: 1px; }
+.post-body .seefirst-a { display: inline-block; margin-top: 10px; font-family: var(--mono); font-size: 14px; color: var(--teal); text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, .45); padding-bottom: 1px; }
 @media (max-width: 760px) { .post-body .statband { grid-template-columns: repeat(2, 1fr); } .post-body .lede { font-size: 18.5px; } .post-body blockquote { font-size: 19px; } }
 .post-foot { margin-top: 40px; }
 
@@ -1545,3 +1554,11 @@ body.sitemap-body .latent-scrollzone {
 .proj-title { color: var(--heading); font-size: 17px; margin-top: 0; }
 .res-sub { color: var(--dim); font-size: 14.5px; }
 @media (max-width: 700px) { .proj-grid { grid-template-columns: 1fr; } }
+
+/* === Michroma concept: display sizing (Michroma is wide; sizes tuned down) === */
+.brand { font-family: "Michroma", var(--sans); font-size: 15px; letter-spacing: 0.02em; }
+h1 { font-size: 32px; }
+h2 { font-size: 22px; }
+h3 { font-size: 16px; }
+#resume h1 { font-size: 22px; }
+.latent-phead h1 { font-size: 22px; }
