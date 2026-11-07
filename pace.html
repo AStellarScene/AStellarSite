@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Pace, by Adam Laloge: a planner for self-paced degree programs. Enter your courses and a target finish date; get a week-by-week plan with an ahead-or-behind readout.">
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="theme-color" content="#070b16">
-<link rel="stylesheet" href="styles.css?v=73">
+<link rel="stylesheet" href="styles.css?v=74">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -25,16 +25,20 @@
   <div class="wrap header-inner">
     <a class="brand" href="index.html">Adam Laloge</a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
-    <nav id="site-nav">
-      <span class="nav-group"><a href="work.html" class="active" aria-current="page">Projects</a>
+    <nav id="site-nav" aria-label="Site">
+      <a href="work.html" class="active" aria-current="page">Projects</a>
       <a href="resume.html">Resume</a>
       <a href="about.html">About</a>
-      <a href="latent-sitemap.html">Atlas</a></span>
-      <span class="nav-sep" aria-hidden="true"></span>
-      <span class="nav-group"><span class="nav-group-label">Personal</span><a href="photography.html">Photography</a>
-      <a href="bookshelf.html">Bookshelf</a>
-      <a href="blog.html">Blog</a>
-      <a href="dreams.html">Dreamscape</a></span>
+      <a href="latent-sitemap.html">Atlas</a>
+      <div class="nav-item">
+        <button class="nav-drop-btn" type="button" aria-expanded="false" aria-haspopup="true">Personal <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+        <div class="nav-dropdown">
+          <a href="photography.html">Photography</a>
+          <a href="bookshelf.html">Bookshelf</a>
+          <a href="blog.html">Blog</a>
+          <a href="dreams.html">Dreamscape</a>
+        </div>
+      </div>
     </nav>
   </div>
 </header>
@@ -67,10 +71,31 @@
   var btn = document.querySelector('.nav-toggle');
   var nav = document.getElementById('site-nav');
   if (!btn || !nav) return;
+  var dropBtn = nav.querySelector('.nav-drop-btn');
+  var dropItem = dropBtn ? dropBtn.parentNode : null;
+  function closeDrop() {
+    if (!dropItem) return;
+    dropItem.classList.remove('open');
+    dropBtn.setAttribute('aria-expanded', 'false');
+  }
   btn.addEventListener('click', function () {
     var open = nav.classList.toggle('open');
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (!open) closeDrop();
   });
+  if (dropBtn) {
+    dropBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = dropItem.classList.toggle('open');
+      dropBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (dropItem && !dropItem.contains(e.target)) closeDrop();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeDrop();
+    });
+  }
 })();
 </script>
 

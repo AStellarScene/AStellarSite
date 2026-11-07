@@ -43,38 +43,49 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=73">
+{schema}<link rel="stylesheet" href="styles.css?v=74">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
 """
 
-NAV_ITEMS = [
-    ("index.html", "Home"),
+NAV_MAIN = [
     ("work.html", "Projects"),
     ("resume.html", "Resume"),
     ("about.html", "About"),
+    ("latent-sitemap.html", "Atlas"),
+]
+
+NAV_PERSONAL = [
     ("photography.html", "Photography"),
     ("bookshelf.html", "Bookshelf"),
     ("blog.html", "Blog"),
     ("dreams.html", "Dreamscape"),
-    ("latent-sitemap.html", "Atlas"),
 ]
 
 def header(active):
-    links = "\n      ".join(
-        '<a href="%s"%s>%s</a>' % (href, ' class="active" aria-current="page"' if href == active else "", label)
-        for href, label in NAV_ITEMS)
+    def link(href, label):
+        return '<a href="%s"%s>%s</a>' % (
+            href, ' class="active" aria-current="page"' if href == active else "", label)
+    main = "\n      ".join(link(h, l) for h, l in NAV_MAIN)
+    personal = "\n          ".join(link(h, l) for h, l in NAV_PERSONAL)
+    personal_active = any(h == active for h, _ in NAV_PERSONAL)
     return """<header class="site-header">
   <div class="wrap header-inner">
     <a class="brand" href="index.html">Adam Laloge</a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
-    <nav id="site-nav">
+    <nav id="site-nav" aria-label="Site">
       %s
+      <div class="nav-item">
+        <button class="nav-drop-btn%s" type="button" aria-expanded="false" aria-haspopup="true">Personal <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+        <div class="nav-dropdown">
+          %s
+        </div>
+      </div>
     </nav>
   </div>
 </header>
-""" % links
+""" % (main, " active" if personal_active else "", personal)
 
 FOOTER = """
 <footer class="site-footer">
@@ -90,10 +101,31 @@ NAV_JS = """<script>
   var btn = document.querySelector('.nav-toggle');
   var nav = document.getElementById('site-nav');
   if (!btn || !nav) return;
+  var dropBtn = nav.querySelector('.nav-drop-btn');
+  var dropItem = dropBtn ? dropBtn.parentNode : null;
+  function closeDrop() {
+    if (!dropItem) return;
+    dropItem.classList.remove('open');
+    dropBtn.setAttribute('aria-expanded', 'false');
+  }
   btn.addEventListener('click', function () {
     var open = nav.classList.toggle('open');
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (!open) closeDrop();
   });
+  if (dropBtn) {
+    dropBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = dropItem.classList.toggle('open');
+      dropBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (dropItem && !dropItem.contains(e.target)) closeDrop();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeDrop();
+    });
+  }
 })();
 </script>
 """
@@ -1672,11 +1704,16 @@ def resume_body():
     out.append('  <p class="label">Resume</p>')
     out.append('  <h1>%s</h1>' % _md(data["name"]))
     out.append('  <p class="resume-headline">%s</p>' % _md(data["headline"]))
-    meta = [data["location"],
-            '<a href="https://%s">%s</a>' % (data["web"], data["web"]),
-            '<a href="https://%s">%s</a>' % (data["github"], data["github"]),
-            '<a href="mailto:%s">%s</a>' % (data["email"], data["email"])]
-    out.append('  <p class="resume-meta">%s</p>' % "<br>\n  ".join(meta))
+    contact = [("Location", data["location"], None),
+               ("Web", data["web"], "https://" + data["web"]),
+               ("GitHub", data["github"], "https://" + data["github"]),
+               ("Email", data["email"], "mailto:" + data["email"])]
+    out.append('  <div class="resume-contact">')
+    for label, value, href in contact:
+        v = ('<a href="%s">%s</a>' % (href, value)) if href else value
+        out.append('    <div class="contact-item"><span class="contact-label">%s:</span> '
+                   '<span class="contact-value">%s</span></div>' % (label, v))
+    out.append('  </div>')
     out.append('  <p><a class="pill pill-teal" href="resume.pdf" download>Download PDF &#8599;</a></p>')
     out.append('  <h3>Summary</h3>')
     out.append('  <p class="res-summary">%s</p>' % _md(data["summary"]))
