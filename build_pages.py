@@ -43,7 +43,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=74">
+{schema}<link rel="stylesheet" href="styles.css?v=75">
 <link rel="alternate" type="application/rss+xml" title="Adam Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -1709,10 +1709,12 @@ def resume_body():
                ("GitHub", data["github"], "https://" + data["github"]),
                ("Email", data["email"], "mailto:" + data["email"])]
     out.append('  <div class="resume-contact">')
-    for label, value, href in contact:
+    for i, (label, value, href) in enumerate(contact):
         v = ('<a href="%s">%s</a>' % (href, value)) if href else value
         out.append('    <div class="contact-item"><span class="contact-label">%s:</span> '
                    '<span class="contact-value">%s</span></div>' % (label, v))
+        if i == 0:
+            out.append('    <div class="contact-spacer" aria-hidden="true"></div>')
     out.append('  </div>')
     out.append('  <p><a class="pill pill-teal" href="resume.pdf" download>Download PDF &#8599;</a></p>')
     out.append('  <h3>Summary</h3>')
