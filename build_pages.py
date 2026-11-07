@@ -145,7 +145,7 @@ PERSON_LD = """<script type="application/ld+json">
 </script>
 """
 
-WORK_DESC = "Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, and Lucent Launcher \u2014 software built in the open, with an honest status line on each."
+WORK_DESC = "Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, Lucent Launcher, and Atlas \u2014 software built in the open, with an honest status line on each."
 ABOUT_DESC = "About Adam Laloge: an engineering test technician in a medical-device lab who builds test software, is finishing a UX degree, photographs sunsets, and reads dark fantasy."
 PROJ_DESCS = {
     "benchlab.html": "BenchLab, a testing simulator by Adam Laloge: a visual test builder, an in-browser simulated device, and traceability reports generated from the tests themselves.",
@@ -200,6 +200,12 @@ home_body = """  <section class="hero">
         <p class="status">Now: In development</p>
         <p>A native Minecraft launcher in Rust and GTK4. Its vendored core installs Vanilla, Fabric, Quilt, Forge, and NeoForge, builds the launch command, and runs the game.</p>
         <p><a class="card-link" href="lucent.html">View project &#8599;</a></p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Atlas</p>
+        <p class="status">Now: Complete</p>
+        <p>A living map of this site. Every project, photo, book, and post is a point of light placed near the things it belongs with. The idea: a sitemap should show how the work connects, not just list pages. It is generated from the site itself, so it redraws as the site grows.</p>
+        <p><a class="card-link" href="latent-sitemap.html">Explore Atlas &#8599;</a></p>
       </article>
     </div>
   </section>
@@ -268,6 +274,12 @@ work_body = """  <section id="work">
         <p class="status">Now: In development</p>
         <p>A native Minecraft launcher in Rust and GTK4. Its vendored core installs Vanilla, Fabric, Quilt, Forge, and NeoForge, builds the launch command, and runs the game.</p>
         <p><a class="card-link" href="lucent.html">View project &#8599;</a></p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Atlas</p>
+        <p class="status">Now: Complete</p>
+        <p>The site drawn as a galaxy instead of listed as pages. Every project, photo, book, world, and post is a point of light set near the things it belongs with, and points connect when you probe them. The ideology: a list shows pages, a map shows how the work connects. Nothing is placed by hand; the map generates itself from the site's content and redraws as the site grows.</p>
+        <p><a class="card-link" href="latent-sitemap.html">Explore Atlas &#8599;</a></p>
       </article>
     </div>
   </section>"""
