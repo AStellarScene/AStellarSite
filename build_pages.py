@@ -72,7 +72,7 @@ def header(active):
     personal_active = any(h == active for h, _ in NAV_PERSONAL)
     return """<header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="index.html">Adam Laloge</a>
+    <a class="brand" href="index.html">Adam Joseph Laloge</a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">&#9776;</button>
     <nav id="site-nav" aria-label="Site">
       %s
