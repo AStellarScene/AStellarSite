@@ -519,7 +519,7 @@ html, body { overflow-x: clip; }
   border-top: 1px solid var(--hairline);
   border-bottom: 1px solid var(--hairline);
 }
-.contact-item { display: flex; flex-direction: column; gap: 5px; }
+.contact-item { display: flex; flex-direction: row; align-items: baseline; gap: 8px; }
 .contact-label {
   font-family: var(--mono);
   font-size: 10px;
