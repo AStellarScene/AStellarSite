@@ -494,6 +494,24 @@ html, body { overflow-x: clip; }
 
 /* Resume */
 .resume-meta { color: var(--body); }
+.resume-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 30px;
+  padding: 12px 0 14px;
+  margin: 6px 0 16px;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+}
+.contact-item { display: flex; flex-direction: column; gap: 2px; }
+.contact-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.contact-value { color: var(--body); font-size: 15px; }
 #resume h1 { font-size: 28px; margin: 6px 0 12px; }
 .resume-headline {
   color: var(--heading);
@@ -571,7 +589,7 @@ html, body { overflow-x: clip; }
   .site-header, .site-footer { display: none !important; }
   #resume { max-width: none; }
   #resume .pill { display: none !important; }
-  body, p, li, .job-role, .resume-meta { color: #1c1c1c !important; }
+  body, p, li, .job-role, .resume-meta, .contact-value { color: #1c1c1c !important; }
   h1, h2, h3, strong, .job-company strong { color: #000 !important; }
   .label { color: #555 !important; }
   .job-loc, .job-dates { color: #444 !important; }
