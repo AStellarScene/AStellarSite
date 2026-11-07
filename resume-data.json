@@ -26,7 +26,7 @@
     "AI agent workspace design",
     "agent team orchestration",
     "agentic coding with Muse, Copilot, and Claude",
-    "retrieval-augmented generation (RAG) and MCP tool integration",
+    "retrieval-augmented generation (RAG) and MCP tool integration, including CAD driven through MCP",
     "AI output evaluation and validation",
     "natural language workflow automation"
    ]
@@ -39,7 +39,8 @@
     "WordPress (degree coursework)",
     "SQL and database design",
     "embedded microcontrollers and sensor integration",
-    "Git/GitHub, Docker, Linux, and WebSockets"
+    "Git/GitHub, Docker, Linux, and WebSockets",
+    "parametric CAD modeling"
    ]
   },
   {
