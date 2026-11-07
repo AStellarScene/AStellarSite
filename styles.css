@@ -280,7 +280,7 @@ html, body { overflow-x: clip; }
 .pill-violet { background: rgba(255, 255, 255, 0.04); }
 
 /* Work cards */
-.section-note { color: var(--dim); max-width: 640px; }
+.section-note { color: var(--dim); }
 .cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
