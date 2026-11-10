@@ -43,7 +43,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=81">
+{schema}<link rel="stylesheet" href="styles.css?v=82">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -161,8 +161,8 @@ home_body = """  <section class="hero">
     <h1>Hi there</h1>
     <p class="intro">I like planning, building, and testing software. I'm finishing a UX degree. I photograph sunsets and read dark fantasy. Most of my work is internal and can't be shown, so I build in the open here: chasing digital experiences, taking new technologies to the maximum, creating science fiction in real life. That's my goal, anyway.</p>
     <div class="hero-links">
-      <a class="pill pill-teal" href="resume.html">Resume &#8599;</a>
-      <a class="pill pill-violet" href="latent-sitemap.html">Atlas &#8599;</a>
+      <a class="pill pill-primary" href="resume.html">Resume &#8599;</a>
+      <a class="pill pill-bright" href="latent-sitemap.html">Atlas &#8599;</a>
     </div>
   </section>
 
@@ -302,7 +302,7 @@ def project(fname, name, status, paras, bullets=None):
 
 project("benchlab.html", "BenchLab", "In planning",
     ["A testing simulator that runs in the browser. It's the public twin of the test-platform work I do at my job, rebuilt from scratch with nothing proprietary: the workflow is real, the device under test is simulated.",
-     "I'm building it alongside my WGU prototyping courses. The first usability test is running now, and what it turns up decides what the next version changes."],
+     "I'm building it alongside my WGU prototyping courses. It isn't in testing yet: the first usability test comes once there's a prototype to put in front of people, and what it turns up will decide what the next version changes."],
     ["Build a test in a visual editor, step by step",
      "Run it against a simulated device and watch it execute",
      "Get a traceability report tying each step to its requirement",
@@ -1728,7 +1728,7 @@ def resume_body():
         if i == 0:
             out.append('    <div class="contact-spacer" aria-hidden="true"></div>')
     out.append('  </div>')
-    out.append('  <p><a class="pill pill-teal" href="resume.pdf" download>Download PDF &#8599;</a></p>')
+    out.append('  <p><a class="pill pill-primary" href="resume.pdf" download>Download PDF &#8599;</a></p>')
     out.append('  <h3>Summary</h3>')
     out.append('  <p class="res-summary">%s</p>' % _md(data["summary"]))
     out.append('  <h3>Skills</h3>')
@@ -1773,7 +1773,7 @@ def resume_body():
             text = ln["text"]
             if text.startswith("Project page: "):
                 url = text.split(": ", 1)[1]
-                out.append('      <p><a class="pill pill-teal" href="https://%s">Project page &#8599;</a></p>' % url)
+                out.append('      <p><a class="pill pill-primary" href="https://%s">Project page &#8599;</a></p>' % url)
             else:
                 out.append('      <p>%s</p>' % _md(text))
         out.append('    </div>')
