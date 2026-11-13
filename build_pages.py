@@ -146,7 +146,7 @@ PERSON_LD = """<script type="application/ld+json">
 """
 
 WORK_DESC = "Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, Lucent Launcher, and Atlas \u2014 software built in the open, with an honest status line on each."
-ABOUT_DESC = "About Adam Laloge: an engineering test technician in a medical-device lab who builds test software, is finishing a UX degree, photographs sunsets, and reads dark fantasy."
+ABOUT_DESC = "About Adam Laloge: an engineering test technician in a medical-device lab who builds test software, is finishing a UX degree, and reads dark fantasy."
 PROJ_DESCS = {
     "benchlab.html": "BenchLab, a testing simulator by Adam Laloge: a visual test builder, an in-browser simulated device, and traceability reports generated from the tests themselves.",
     "pace.html": "Pace, by Adam Laloge: a planner for self-paced degree programs. Enter your courses and a target finish date; get a week-by-week plan with an ahead-or-behind readout.",
@@ -343,9 +343,9 @@ about_body = """  <section id="about">
     <p class="label">About</p>
     <h2>About</h2>
     <p>I'm Adam Laloge, 23. I work as an engineering test technician at a medical-device lab in Batesville, Indiana. Most of my time goes to building test software: the programs that run the tests, the interfaces technicians use, and the agent workflows that help build both.</p>
-    <p>I call myself a design engineer. I research the people a system serves, design the interface, and write the code behind it. I started in software development, moved to a UX degree because the design questions were the interesting ones, and found the two were never separate jobs for me. I wrote the longer version of that <a href="blog-the-title-is-splitting.html">here</a>.</p>
-    <p>I'm finishing a B.S. in UX Design at WGU, on an accelerated schedule I'm holding myself to, done by the end of January. Several projects here started as coursework. I would rather ship the working version than leave it sitting in a course document.</p>
-    <p>Outside work and school, I photograph sunsets, mostly from my balcony, and landscapes when I get out. I read dark fantasy and historical horror. I do strength training and cardio, and I build side projects. One of them is a Minecraft launcher written in Rust, on GitHub.</p>
+    <p>I call myself a design engineer. I research the people a system serves, design the interface, and write the code behind it. I started in software development and moved to a UX degree because the design questions were the interesting ones. The longer version of that is <a href="blog-the-title-is-splitting.html">here</a>.</p>
+    <p>I'm finishing a B.S. in UX Design at WGU, done by the end of January. Some projects here started as coursework. I would rather ship the working version than leave it sitting in a course document.</p>
+    <p>Outside work and school, I photograph landscapes when I get out. I read dark fantasy and historical horror. I train, and I build side projects, one of them a Minecraft launcher written in Rust, on GitHub.</p>
     <p>One habit the lab burned in: I don't trust a claim I can't measure, including my own. That's why everything on this site is labeled with where it actually stands.</p>
     <p>Most of the building here is done by AI agents under my direction. I decide what gets built and whether it's good enough, and I verify it against the real thing. The agents do the implementation.</p>
   </section>
