@@ -58,8 +58,8 @@ body {
   padding: 0 28px;
 }
 
-/* Header: fixed and transparent at rest; on scroll it condenses into
-   a floating frosted-glass pill (see .condensed below). */
+/* Header: fixed; the bar is a floating glass pill at rest and deepens
+   (darker, stronger blur and shadow) when condensed on scroll. */
 .site-header {
   position: fixed;
   top: 0;
@@ -75,9 +75,17 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 16px;
-  padding-bottom: 16px;
-  border: 1px solid transparent;
+  /* The pill is the resting geometry too, not just the condensed one:
+     the bar's glass and cursor glow are contained in the pill shape
+     at all times, never a full-width rectangle. */
+  margin-top: 12px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(13, 13, 13, 0.38);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.35);
   transition: margin-top 0.38s ease, padding 0.38s ease,
     background-color 0.38s ease, border-color 0.38s ease,
     box-shadow 0.38s ease, border-radius 0.38s ease;
@@ -108,7 +116,7 @@ body {
 }
 @media (max-width: 760px) {
   /* On phones the pill floats inside the screen edges, never flush. */
-  .site-header.condensed .header-inner { margin-left: 12px; margin-right: 12px; }
+  .site-header .header-inner { margin-left: 12px; margin-right: 12px; }
 }
 /* Nav links become pills inside the condensed bar. */
 .site-header.condensed nav a,
