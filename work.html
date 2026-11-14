@@ -4,20 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Projects — Adam Joseph Laloge</title>
-<meta name="description" content="Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, Lucent Launcher, and Atlas — software built in the open, with an honest status line on each.">
+<meta name="description" content="Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, Lucent Launcher, and Atlas. Software built in the open, with an honest status line on each.">
 <link rel="canonical" href="https://adamlaloge.com/work.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Adam Joseph Laloge">
 <meta property="og:title" content="Projects — Adam Joseph Laloge">
-<meta property="og:description" content="Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, Lucent Launcher, and Atlas — software built in the open, with an honest status line on each.">
+<meta property="og:description" content="Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, Lucent Launcher, and Atlas. Software built in the open, with an honest status line on each.">
 <meta property="og:url" content="https://adamlaloge.com/work.html">
 <meta property="og:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Projects — Adam Joseph Laloge">
-<meta name="twitter:description" content="Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, Lucent Launcher, and Atlas — software built in the open, with an honest status line on each.">
+<meta name="twitter:description" content="Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, Lucent Launcher, and Atlas. Software built in the open, with an honest status line on each.">
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
-<meta name="theme-color" content="#070b16">
-<link rel="stylesheet" href="styles.css?v=82">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="stylesheet" href="styles.css?v=83">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -82,7 +82,7 @@
       <article class="card">
         <p class="label card-label">Atlas</p>
         <p class="status">Now: Complete</p>
-        <p>The site drawn as a galaxy instead of listed as pages. Every project, photo, book, world, and post is a point of light set near the things it belongs with, and points connect when you probe them. The ideology: a list shows pages, a map shows how the work connects. Nothing is placed by hand; the map generates itself from the site's content and redraws as the site grows.</p>
+        <p>The site drawn as a galaxy instead of listed as pages. Every project, photo, book, world, and post is a point of light set near the things it belongs with, and points connect when you probe them. A list shows pages. A map shows how the work connects. Nothing is placed by hand; the map generates itself from the site's content and redraws as the site grows.</p>
         <p><a class="card-link" href="latent-sitemap.html">Explore Atlas &#8599;</a></p>
       </article>
     </div>
@@ -125,6 +125,72 @@
       if (e.key === 'Escape') closeDrop();
     });
   }
+})();
+</script>
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* Scroll reveal: sections rise in once as they enter the viewport. */
+  root.classList.add('rv-on');
+  var sections = document.querySelectorAll('main section');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  } else {
+    sections.forEach(function (s) { s.classList.add('in'); });
+  }
+
+  /* Header condense: past a short scroll the bar becomes a floating
+     glass pill. Skipped on Atlas and Dreamscape, whose headers stay
+     in flow over their live canvases. */
+  var header = document.querySelector('.site-header');
+  var inner = document.querySelector('.header-inner');
+  var ticking = false;
+  function onScroll() {
+    ticking = false;
+    if (!header) return;
+    var live = root.classList.contains('latent-live') ||
+               document.body.classList.contains('sitemap-body');
+    header.classList.toggle('condensed', !live && window.scrollY > 32);
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(onScroll);
+    }
+  }, { passive: true });
+  onScroll();
+
+  /* Pill cursor glow: a soft light follows the pointer inside the bar. */
+  if (inner) {
+    inner.addEventListener('pointermove', function (e) {
+      var r = inner.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      inner.style.setProperty('--gx', ((e.clientX - r.left) / r.width * 100).toFixed(2) + '%');
+      inner.style.setProperty('--gy', ((e.clientY - r.top) / r.height * 100).toFixed(2) + '%');
+    }, { passive: true });
+  }
+
+  /* Card sheen: a light that tracks the pointer across each card. */
+  document.querySelectorAll('.card').forEach(function (card) {
+    card.addEventListener('pointermove', function (e) {
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left).toFixed(1) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top).toFixed(1) + 'px');
+      card.classList.add('sheen-on');
+    }, { passive: true });
+    card.addEventListener('pointerleave', function () {
+      card.classList.remove('sheen-on');
+    });
+  });
 })();
 </script>
 

@@ -20,7 +20,6 @@ def section(html, sid):
     return m.group(0)
 
 # Verbatim blocks live on their own pages since the multi-page split.
-sky_js = first_script(read_page("index.html"))
 gallery_js = first_script(read_page("photography.html"))
 photo_section = section(read_page("photography.html"), "photography")
 
@@ -42,8 +41,8 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:title" content="{title}">
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
-<meta name="theme-color" content="#070b16">
-{schema}<link rel="stylesheet" href="styles.css?v=82">
+<meta name="theme-color" content="#0A0A0A">
+{schema}<link rel="stylesheet" href="styles.css?v=83">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -128,6 +127,72 @@ NAV_JS = """<script>
   }
 })();
 </script>
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* Scroll reveal: sections rise in once as they enter the viewport. */
+  root.classList.add('rv-on');
+  var sections = document.querySelectorAll('main section');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  } else {
+    sections.forEach(function (s) { s.classList.add('in'); });
+  }
+
+  /* Header condense: past a short scroll the bar becomes a floating
+     glass pill. Skipped on Atlas and Dreamscape, whose headers stay
+     in flow over their live canvases. */
+  var header = document.querySelector('.site-header');
+  var inner = document.querySelector('.header-inner');
+  var ticking = false;
+  function onScroll() {
+    ticking = false;
+    if (!header) return;
+    var live = root.classList.contains('latent-live') ||
+               document.body.classList.contains('sitemap-body');
+    header.classList.toggle('condensed', !live && window.scrollY > 32);
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(onScroll);
+    }
+  }, { passive: true });
+  onScroll();
+
+  /* Pill cursor glow: a soft light follows the pointer inside the bar. */
+  if (inner) {
+    inner.addEventListener('pointermove', function (e) {
+      var r = inner.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      inner.style.setProperty('--gx', ((e.clientX - r.left) / r.width * 100).toFixed(2) + '%');
+      inner.style.setProperty('--gy', ((e.clientY - r.top) / r.height * 100).toFixed(2) + '%');
+    }, { passive: true });
+  }
+
+  /* Card sheen: a light that tracks the pointer across each card. */
+  document.querySelectorAll('.card').forEach(function (card) {
+    card.addEventListener('pointermove', function (e) {
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left).toFixed(1) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top).toFixed(1) + 'px');
+      card.classList.add('sheen-on');
+    }, { passive: true });
+    card.addEventListener('pointerleave', function () {
+      card.classList.remove('sheen-on');
+    });
+  });
+})();
+</script>
 """
 
 def page(fname, title, desc, active, body, extra_js="", schema="", og_image="https://adamlaloge.com/art/hero-card.jpg"):
@@ -138,15 +203,15 @@ def page(fname, title, desc, active, body, extra_js="", schema="", og_image="htt
     open(os.path.join(SITE, fname), "w").write(html)
     print("wrote", fname, len(html))
 
-DESC = "Personal site of Adam Laloge: software projects, photography, and what I'm building lately."
+DESC = "The personal site of Adam Laloge, design engineer: projects built in the open, photography, and notes."
 
 PERSON_LD = """<script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "Person", "name": "Adam Laloge", "url": "https://adamlaloge.com/", "image": "https://adamlaloge.com/art/hero-card.jpg", "email": "mailto:hello@adamlaloge.com", "jobTitle": "Engineering Test Technician", "worksFor": {"@type": "Organization", "name": "Baxter International"}, "sameAs": ["https://github.com/AStellarScene"]}
 </script>
 """
 
-WORK_DESC = "Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, Lucent Launcher, and Atlas \u2014 software built in the open, with an honest status line on each."
-ABOUT_DESC = "About Adam Laloge: an engineering test technician in a medical-device lab who builds test software, is finishing a UX degree, and reads dark fantasy."
+WORK_DESC = "Projects by Adam Laloge: BenchLab, Pace, Rotation, Slip, Lucent Launcher, and Atlas. Software built in the open, with an honest status line on each."
+ABOUT_DESC = "About Adam Laloge: a design engineer in a medical-device test lab, finishing a UX degree at WGU. Builds test software and AI systems; reads dark fantasy."
 PROJ_DESCS = {
     "benchlab.html": "BenchLab, a testing simulator by Adam Laloge: a visual test builder, an in-browser simulated device, and traceability reports generated from the tests themselves.",
     "pace.html": "Pace, by Adam Laloge: a planner for self-paced degree programs. Enter your courses and a target finish date; get a week-by-week plan with an ahead-or-behind readout.",
@@ -155,14 +220,301 @@ PROJ_DESCS = {
     "lucent.html": "Lucent Launcher, by Adam Laloge: a native Minecraft launcher in Rust and GTK4, with a vendored core that installs Vanilla, Fabric, Quilt, Forge, and NeoForge.",
 }
 
+# ---------- Liquid hero (homepage) ----------
+# Original WebGL1 engine, written for this site: a dark volume of
+# luminous liquid light. Triple domain-warped fbm currents in deep
+# blue through cyan to violet; a two-sine tide swells flow and
+# brightness; invisible drifters divert the current smoothly (the
+# deflection is built from the raw offset vector, zero at the centre,
+# so there is no directional singularity anywhere, ripples included);
+# the pointer stirs, a lagged wake ghost trails it, a resting hand
+# gathers a pool through the warp, and taps drop ripples that drift
+# downstream. All smoothing is exponential; no linear spatial easing.
+LIQUID_JS = """<script>
+(function () {
+  var canvas = document.getElementById('liquid');
+  if (!canvas) return;
+  var root = document.documentElement;
+  var hero = canvas.parentNode;
+  function fail() { root.classList.add('liquid-off'); }
+  var gl = null;
+  try {
+    gl = canvas.getContext('webgl', { antialias: false, alpha: false, depth: false, stencil: false, powerPreference: 'low-power' }) ||
+         canvas.getContext('experimental-webgl', { antialias: false, alpha: false, depth: false, stencil: false });
+  } catch (e) { gl = null; }
+  if (!gl) { fail(); return; }
+
+  var VS = [
+    'attribute vec2 a_pos;',
+    'void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }'
+  ].join('\\n');
+
+  var FS = [
+    'precision highp float;',
+    'uniform vec2 u_res;',
+    'uniform float u_time;',
+    'uniform float u_tide;',
+    'uniform vec2 u_mouse;',
+    'uniform vec2 u_wake;',
+    'uniform float u_wakeAmt;',
+    'uniform float u_pool;',
+    'uniform vec4 u_rip[6];',
+    '',
+    'float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }',
+    'float noise(vec2 p) {',
+    '  vec2 i = floor(p);',
+    '  vec2 f = fract(p);',
+    '  f = f * f * (3.0 - 2.0 * f);',
+    '  float a = hash(i);',
+    '  float b = hash(i + vec2(1.0, 0.0));',
+    '  float c = hash(i + vec2(0.0, 1.0));',
+    '  float d = hash(i + vec2(1.0, 1.0));',
+    '  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);',
+    '}',
+    'float fbm(vec2 p) {',
+    '  float s = 0.0;',
+    '  float a = 0.5;',
+    '  for (int i = 0; i < 3; i++) {',
+    '    s += a * noise(p);',
+    '    p = p * 2.03 + vec2(19.7, 7.3);',
+    '    a *= 0.5;',
+    '  }',
+    '  return s;',
+    '}',
+    // Smooth diversion around an invisible obstacle: displacement is
+    // built from the raw offset, zero at the centre, peaking on a soft
+    // ring. No normalized direction, no singularity.
+    'vec2 divert(vec2 q, vec2 c, float sig, float push, float swirl) {',
+    '  vec2 d = q - c;',
+    '  float g = exp(-dot(d, d) / (sig * sig));',
+    '  return (d * push + vec2(-d.y, d.x) * swirl) * g;',
+    '}',
+    'void main() {',
+    '  vec2 uv = gl_FragCoord.xy / u_res;',
+    '  float aspect = u_res.x / max(u_res.y, 1.0);',
+    '  vec2 p = (uv - 0.5) * vec2(aspect, 1.0) * 2.4;',
+    '  vec2 pm = (u_mouse - 0.5) * vec2(aspect, 1.0) * 2.4;',
+    '  vec2 pw = (u_wake - 0.5) * vec2(aspect, 1.0) * 2.4;',
+    '  float t = u_time;',
+    '',
+    '  vec2 o1 = vec2(-0.85 + 0.16 * sin(t * 0.11), 0.28 + 0.13 * cos(t * 0.09));',
+    '  vec2 o2 = vec2(0.80 + 0.14 * cos(t * 0.08), -0.32 + 0.15 * sin(t * 0.10));',
+    '  vec2 o3 = vec2(0.10 + 0.18 * sin(t * 0.07 + 2.1), 0.55 + 0.10 * sin(t * 0.12 + 0.7));',
+    '  vec2 q = p;',
+    '  q += divert(q, o1, 0.55, 0.85, 0.60);',
+    '  q += divert(q, o2, 0.46, 0.80, -0.55);',
+    '  q += divert(q, o3, 0.40, 0.75, 0.45);',
+    '',
+    // The lagged wake ghost keeps displacing the liquid after the hand
+    // has moved on, then is absorbed.
+    '  q += divert(q, pw, 0.34, 0.55, 0.85) * u_wakeAmt;',
+    '',
+    '  float glow = 0.0;',
+    '  for (int i = 0; i < 6; i++) {',
+    '    vec4 rp = u_rip[i];',
+    '    if (rp.w < 0.003) continue;',
+    '    float age = t - rp.z;',
+    '    if (age < 0.0 || age > 6.0) continue;',
+    '    vec2 rc = (rp.xy - 0.5) * vec2(aspect, 1.0) * 2.4;',
+    '    vec2 d = q - rc;',
+    '    float dist = length(d);',
+    '    float radius = 0.12 + age * 0.30;',
+    '    float ring = exp(-pow((dist - radius) * 5.0, 2.0)) * exp(-age * 0.55) * rp.w;',
+    '    q += d * ring * 0.10 + vec2(0.03, 0.012) * age * ring;',
+    '    glow += ring * 0.35;',
+    '  }',
+    '',
+    // Triple domain warp: currents that stream, fold, pool, and drain.
+    '  vec2 f1 = vec2(',
+    '    fbm(q * 1.15 + vec2(t * 0.021, t * 0.013)),',
+    '    fbm(q * 1.15 + vec2(5.2, 1.3) - vec2(t * 0.017, t * 0.011)));',
+    '  vec2 f2 = vec2(',
+    '    fbm(q * 1.15 + 2.2 * f1 + vec2(1.7, 9.2) + vec2(t * 0.026, -t * 0.015)),',
+    '    fbm(q * 1.15 + 2.2 * f1 + vec2(8.3, 2.8) - vec2(t * 0.019, -t * 0.012)));',
+    '  float f = fbm(q * 1.15 + 2.6 * f2 + vec2(-t * 0.014, t * 0.009));',
+    '  float conv = length(f2);',
+    '',
+    '  float v = clamp(f * 0.85 + conv * 0.30 - 0.08, 0.0, 1.0);',
+    '  vec3 col = mix(vec3(0.012, 0.030, 0.130), vec3(0.078, 0.251, 0.784), smoothstep(0.10, 0.52, v));',
+    '  col = mix(col, vec3(0.482, 0.380, 1.000), smoothstep(0.48, 0.78, v));',
+    '  col = mix(col, vec3(0.180, 0.827, 0.950), pow(smoothstep(0.60, 0.95, v), 2.0) * 0.75);',
+    '  float crest = pow(smoothstep(0.80, 1.0, v), 3.0);',
+    '  col = mix(col, vec3(1.0), crest * 0.85);',
+    '',
+    // A resting hand gathers a pool, read through the warp pattern
+    // itself, never a flat radial blob.
+    '  float pd = length(p - pm);',
+    '  float poolMask = exp(-pd * pd / 0.16) * u_pool;',
+    '  col += vec3(0.30, 0.55, 1.00) * poolMask * (0.25 + 0.75 * f) * 0.55;',
+    '  col += vec3(0.45, 0.65, 1.00) * glow * (0.3 + 0.7 * f);',
+    '',
+    '  col *= u_tide;',
+    '  float melt = smoothstep(2.05, 0.65, length(p * vec2(0.72, 1.0)));',
+    '  col *= 0.25 + 0.75 * melt;',
+    '  gl_FragColor = vec4(col, 1.0);',
+    '}'
+  ].join('\\n');
+
+  function makeShader(type, src) {
+    var s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      gl.deleteShader(s);
+      return null;
+    }
+    return s;
+  }
+  var vs = makeShader(gl.VERTEX_SHADER, VS);
+  var fs = makeShader(gl.FRAGMENT_SHADER, FS);
+  if (!vs || !fs) { fail(); return; }
+  var prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { fail(); return; }
+  gl.useProgram(prog);
+
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  var posLoc = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(posLoc);
+  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+  var U = {};
+  ['u_res', 'u_time', 'u_tide', 'u_mouse', 'u_wake', 'u_wakeAmt', 'u_pool', 'u_rip']
+    .forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+
+  root.classList.add('liquid-on');
+
+  var RM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SPEED = RM ? 0.3 : 1.0;
+
+  var phase = 0;
+  var last = -1;
+  var running = true;
+  var visible = true;
+
+  // Pointer state in uv space, y up. The wake ghost lags the hand on a
+  // slow exponential and keeps stirring after the hand moves on.
+  var tx = 0.5, ty = 0.5, mx = 0.5, my = 0.5, pmx = 0.5, pmy = 0.5;
+  var wx = 0.5, wy = 0.5;
+  var wakeAmt = 0, pool = 0, inside = false;
+  var rips = new Float32Array(24);
+  var ripNext = 0;
+
+  function toUV(e) {
+    var r = canvas.getBoundingClientRect();
+    if (!r.width || !r.height) return null;
+    return {
+      x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
+      y: Math.min(1, Math.max(0, 1 - (e.clientY - r.top) / r.height))
+    };
+  }
+  hero.addEventListener('pointermove', function (e) {
+    var uv = toUV(e);
+    if (!uv) return;
+    tx = uv.x; ty = uv.y; inside = true;
+  }, { passive: true });
+  hero.addEventListener('pointerdown', function (e) {
+    var uv = toUV(e);
+    if (!uv) return;
+    tx = uv.x; ty = uv.y; inside = true;
+    rips[ripNext * 4 + 0] = uv.x;
+    rips[ripNext * 4 + 1] = uv.y;
+    rips[ripNext * 4 + 2] = phase;
+    rips[ripNext * 4 + 3] = 1.0;
+    ripNext = (ripNext + 1) % 6;
+  }, { passive: true });
+  hero.addEventListener('pointerleave', function () { inside = false; });
+
+  function resize() {
+    var scale = Math.min(window.devicePixelRatio || 1, 1.5) * 0.72;
+    var w = Math.max(1, Math.round(canvas.clientWidth * scale));
+    var h = Math.max(1, Math.round(canvas.clientHeight * scale));
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+  }
+  window.addEventListener('resize', resize, { passive: true });
+  resize();
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      visible = entries[0].isIntersecting;
+    }, { threshold: 0.02 }).observe(hero);
+  }
+  document.addEventListener('visibilitychange', function () {
+    running = !document.hidden;
+    last = -1;
+  });
+
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (!running || !visible) { last = -1; return; }
+    if (last < 0) last = now;
+    var dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (dt <= 0) return;
+
+    // The tide: two detuned sines, periods near 13s and 19s, swelling
+    // brightness; the flow phase advances on the same swell.
+    var tideClock = now / 1000 * SPEED;
+    var tide = 0.86
+      + 0.20 * Math.sin(tideClock * (Math.PI * 2 / 13.0))
+      + 0.14 * Math.sin(tideClock * (Math.PI * 2 / 19.0) + 1.7);
+    phase += dt * SPEED * (0.65 + 0.55 * (tide - 0.72));
+
+    var kFast = 1 - Math.exp(-dt * 7.0);
+    pmx = mx; pmy = my;
+    mx += (tx - mx) * kFast;
+    my += (ty - my) * kFast;
+    var speed = Math.hypot(mx - pmx, my - pmy) / Math.max(dt, 0.0001);
+
+    var kWake = 1 - Math.exp(-dt * 1.25);
+    wx += (mx - wx) * kWake;
+    wy += (my - wy) * kWake;
+    var wakeTarget = inside ? Math.min(1, speed * 1.6) : 0;
+    var wRate = wakeTarget > wakeAmt ? 6.0 : 0.7;
+    wakeAmt += (wakeTarget - wakeAmt) * (1 - Math.exp(-dt * wRate));
+
+    var poolTarget = (inside && speed < 0.05) ? 1 : 0;
+    var pRate = poolTarget > pool ? 0.55 : 2.2;
+    pool += (poolTarget - pool) * (1 - Math.exp(-dt * pRate));
+
+    resize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform2f(U.u_res, canvas.width, canvas.height);
+    gl.uniform1f(U.u_time, phase);
+    gl.uniform1f(U.u_tide, tide);
+    gl.uniform2f(U.u_mouse, mx, my);
+    gl.uniform2f(U.u_wake, wx, wy);
+    gl.uniform1f(U.u_wakeAmt, wakeAmt * 0.42);
+    gl.uniform1f(U.u_pool, pool);
+    gl.uniform4fv(U.u_rip, rips);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+"""
+
 # ---------- Home ----------
 home_body = """  <section class="hero">
-    <canvas id="sky" aria-hidden="true"></canvas>
-    <h1>Hi there</h1>
-    <p class="intro">I like planning, building, and testing software. I'm finishing a UX degree. I photograph sunsets and read dark fantasy. Most of my work is internal and can't be shown, so I build in the open here: chasing digital experiences, taking new technologies to the maximum, creating science fiction in real life. That's my goal, anyway.</p>
+    <canvas id="liquid" aria-hidden="true"></canvas>
+    <div class="scroll-cue" aria-hidden="true"><span></span></div>
+  </section>
+
+  <section id="intro">
+    <p class="label">Adam Laloge</p>
+    <h1>Design engineer</h1>
+    <p class="intro">I build the software that tests medical devices, and I design how it feels to use. I'm finishing a B.S. in UX Design at WGU. Most of my work is internal and can't be shown, so I build in the open here, with an honest status line on everything.</p>
     <div class="hero-links">
       <a class="pill pill-primary" href="resume.html">Resume &#8599;</a>
-      <a class="pill pill-bright" href="latent-sitemap.html">Atlas &#8599;</a>
+      <a class="pill pill-bright" href="work.html">Projects &#8599;</a>
+      <a class="pill" href="latent-sitemap.html">Atlas &#8599;</a>
     </div>
   </section>
 
@@ -204,7 +556,7 @@ home_body = """  <section class="hero">
       <article class="card">
         <p class="label card-label">Atlas</p>
         <p class="status">Now: Complete</p>
-        <p>A living map of this site. Every project, photo, book, and post is a point of light placed near the things it belongs with. The idea: a sitemap should show how the work connects, not just list pages. It is generated from the site itself, so it redraws as the site grows.</p>
+        <p>A living map of this site. Every project, photo, book, and post is a point of light placed near the things it belongs with. A list shows pages. A map shows how the work connects. It is generated from the site itself, so it redraws as the site grows.</p>
         <p><a class="card-link" href="latent-sitemap.html">Explore Atlas &#8599;</a></p>
       </article>
     </div>
@@ -237,7 +589,7 @@ home_body = """  <section class="hero">
     <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
   </section>"""
 page("index.html", "Adam Joseph Laloge", DESC, "index.html",
-     home_body, "<script>" + sky_js + "</script>\n", schema=PERSON_LD, og_image="https://adamlaloge.com/art/hero-card.jpg")
+     home_body, LIQUID_JS, schema=PERSON_LD, og_image="https://adamlaloge.com/art/hero-card.jpg")
 
 # ---------- Work index ----------
 work_body = """  <section id="work">
@@ -278,7 +630,7 @@ work_body = """  <section id="work">
       <article class="card">
         <p class="label card-label">Atlas</p>
         <p class="status">Now: Complete</p>
-        <p>The site drawn as a galaxy instead of listed as pages. Every project, photo, book, world, and post is a point of light set near the things it belongs with, and points connect when you probe them. The ideology: a list shows pages, a map shows how the work connects. Nothing is placed by hand; the map generates itself from the site's content and redraws as the site grows.</p>
+        <p>The site drawn as a galaxy instead of listed as pages. Every project, photo, book, world, and post is a point of light set near the things it belongs with, and points connect when you probe them. A list shows pages. A map shows how the work connects. Nothing is placed by hand; the map generates itself from the site's content and redraws as the site grows.</p>
         <p><a class="card-link" href="latent-sitemap.html">Explore Atlas &#8599;</a></p>
       </article>
     </div>
@@ -1867,7 +2219,7 @@ from html import escape as _esc
 import markdown as _md
 
 POSTS_DIR = os.path.join(SITE, "posts")
-BLOG_DESC = "Blog by Adam Laloge: notes and essays on building software, testing, design, and whatever else is on the workbench."
+BLOG_DESC = "Blog by Adam Laloge: notes and essays on building software, testing, and design."
 
 
 def _fm_value(fm, key, default=""):
@@ -1937,7 +2289,7 @@ def blog_index_body():
     listing = "\n".join(rows) if rows else "    <p>Nothing here yet.</p>"
     return """  <section class="blog-head">
     <h1>Blog</h1>
-    <p class="intro">Notes and essays, newest first. Short field notes and longer pieces run on the same rails here.</p>
+    <p class="intro">Notes and essays, newest first.</p>
   </section>
   <section class="post-list">
 %s

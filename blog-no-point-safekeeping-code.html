@@ -16,8 +16,8 @@
 <meta name="twitter:title" content="There's No Point Safekeeping Code — Adam Joseph Laloge">
 <meta name="twitter:description" content="Safekeeping code made sense when rebuilding it cost a million dollars. Compaq paid that in 1982. Cloudflare paid $1,100 for the same kind of job in 2026. What the lock protects now is not what it used to.">
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
-<meta name="theme-color" content="#070b16">
-<link rel="stylesheet" href="styles.css?v=82">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="stylesheet" href="styles.css?v=83">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -108,6 +108,72 @@
       if (e.key === 'Escape') closeDrop();
     });
   }
+})();
+</script>
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* Scroll reveal: sections rise in once as they enter the viewport. */
+  root.classList.add('rv-on');
+  var sections = document.querySelectorAll('main section');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  } else {
+    sections.forEach(function (s) { s.classList.add('in'); });
+  }
+
+  /* Header condense: past a short scroll the bar becomes a floating
+     glass pill. Skipped on Atlas and Dreamscape, whose headers stay
+     in flow over their live canvases. */
+  var header = document.querySelector('.site-header');
+  var inner = document.querySelector('.header-inner');
+  var ticking = false;
+  function onScroll() {
+    ticking = false;
+    if (!header) return;
+    var live = root.classList.contains('latent-live') ||
+               document.body.classList.contains('sitemap-body');
+    header.classList.toggle('condensed', !live && window.scrollY > 32);
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(onScroll);
+    }
+  }, { passive: true });
+  onScroll();
+
+  /* Pill cursor glow: a soft light follows the pointer inside the bar. */
+  if (inner) {
+    inner.addEventListener('pointermove', function (e) {
+      var r = inner.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      inner.style.setProperty('--gx', ((e.clientX - r.left) / r.width * 100).toFixed(2) + '%');
+      inner.style.setProperty('--gy', ((e.clientY - r.top) / r.height * 100).toFixed(2) + '%');
+    }, { passive: true });
+  }
+
+  /* Card sheen: a light that tracks the pointer across each card. */
+  document.querySelectorAll('.card').forEach(function (card) {
+    card.addEventListener('pointermove', function (e) {
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left).toFixed(1) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top).toFixed(1) + 'px');
+      card.classList.add('sheen-on');
+    }, { passive: true });
+    card.addEventListener('pointerleave', function () {
+      card.classList.remove('sheen-on');
+    });
+  });
 })();
 </script>
 
