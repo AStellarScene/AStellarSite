@@ -230,280 +230,382 @@ PROJ_DESCS = {
 # the pointer stirs, a lagged wake ghost trails it, a resting hand
 # gathers a pool through the warp, and taps drop ripples that drift
 # downstream. All smoothing is exponential; no linear spatial easing.
-LIQUID_JS = """<script>
+LIQUID_JS = r"""<script>
 (function () {
-  var canvas = document.getElementById('liquid');
-  if (!canvas) return;
-  var root = document.documentElement;
-  var hero = canvas.parentNode;
-  function fail() { root.classList.add('liquid-off'); }
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* =====================================================
+     THE LIQUID FIELD: an original engine, built straight
+     ahead (motion-design skill: fluid / generative /
+     ambient work is never keyframed — it is simulated
+     continuously, so no loop ever visibly repeats).
+
+     A dark volume of luminous liquid light. Three layers,
+     staged: PRIMARY — one main current, a domain-warped
+     fbm flow (warp of a warp of a warp) streaming blue
+     into violet across the whole hero; SECONDARY — a
+     brightness shimmer riding the current at ~40%
+     amplitude, phase-offset, on its own slower rate;
+     AMBIENT — deeper, dimmer warp strata moving slower
+     still. Layer rates use irrational ratios (1 / 0.83 /
+     0.61 / 0.37) with 50-150ms-class phase offsets, so
+     the layers never sync and never repeat together.
+
+     There is no core, no center object, no radial front.
+     The old pulse survives only as a TIDE: two detuned
+     sines swell the flow speed and brightness globally,
+     like weather, never a shape. Currents split around
+     three invisible obstacles that drift on their own
+     detuned cycles. Brightness concentrates where the
+     warp converges; white appears only at the tightest
+     convergence crests.
+
+     Timing for weight (Premium archetype, 0%
+     exaggeration, no squash/stretch): everything is
+     heavy. Pointer position, velocity, wake, pool, and
+     scroll fade are all exponential smoothers — sine-
+     class ease-in-out, never linear. The hand STIRS:
+     moving drags a wake (follow-through: a lagged ghost
+     of the hand keeps displacing the liquid after the
+     hand has moved on, overshoots a breath, and is
+     absorbed over ~1.5s); holding still lets a pool of
+     light gather slowly through the current's own
+     pattern; a tap drops energy in — a ripple that
+     expands ease-out, distorts the flow, and is carried
+     downstream as it dies. Entrances ease out, exits
+     ease in. On scroll the whole volume dims and slows
+     as you leave it behind.
+  ===================================================== */
+  var canvas = document.getElementById("liquid");
+  var heroEl = document.querySelector(".hero");
   var gl = null;
   try {
-    gl = canvas.getContext('webgl', { antialias: false, alpha: false, depth: false, stencil: false, powerPreference: 'low-power' }) ||
-         canvas.getContext('experimental-webgl', { antialias: false, alpha: false, depth: false, stencil: false });
+    gl = canvas.getContext("webgl", { antialias: false, alpha: false, depth: false, stencil: false })
+      || canvas.getContext("experimental-webgl", { antialias: false, alpha: false, depth: false, stencil: false });
   } catch (e) { gl = null; }
-  if (!gl) { fail(); return; }
 
-  var VS = [
-    'attribute vec2 a_pos;',
-    'void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }'
-  ].join('\\n');
+  if (!gl) {
+    heroEl.classList.add("no-webgl");
+  } else {
+    var VERT = [
+      "attribute vec2 a_pos;",
+      "void main(){ gl_Position = vec4(a_pos, 0.0, 1.0); }"
+    ].join("\n");
 
-  var FS = [
-    'precision highp float;',
-    'uniform vec2 u_res;',
-    'uniform float u_time;',
-    'uniform float u_tide;',
-    'uniform vec2 u_mouse;',
-    'uniform vec2 u_wake;',
-    'uniform float u_wakeAmt;',
-    'uniform float u_pool;',
-    'uniform vec4 u_rip[6];',
-    '',
-    'float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }',
-    'float noise(vec2 p) {',
-    '  vec2 i = floor(p);',
-    '  vec2 f = fract(p);',
-    '  f = f * f * (3.0 - 2.0 * f);',
-    '  float a = hash(i);',
-    '  float b = hash(i + vec2(1.0, 0.0));',
-    '  float c = hash(i + vec2(0.0, 1.0));',
-    '  float d = hash(i + vec2(1.0, 1.0));',
-    '  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);',
-    '}',
-    'float fbm(vec2 p) {',
-    '  float s = 0.0;',
-    '  float a = 0.5;',
-    '  for (int i = 0; i < 3; i++) {',
-    '    s += a * noise(p);',
-    '    p = p * 2.03 + vec2(19.7, 7.3);',
-    '    a *= 0.5;',
-    '  }',
-    '  return s;',
-    '}',
-    // Smooth diversion around an invisible obstacle: displacement is
-    // built from the raw offset, zero at the centre, peaking on a soft
-    // ring. No normalized direction, no singularity.
-    'vec2 divert(vec2 q, vec2 c, float sig, float push, float swirl) {',
-    '  vec2 d = q - c;',
-    '  float g = exp(-dot(d, d) / (sig * sig));',
-    '  return (d * push + vec2(-d.y, d.x) * swirl) * g;',
-    '}',
-    'void main() {',
-    '  vec2 uv = gl_FragCoord.xy / u_res;',
-    '  float aspect = u_res.x / max(u_res.y, 1.0);',
-    '  vec2 p = (uv - 0.5) * vec2(aspect, 1.0) * 2.4;',
-    '  vec2 pm = (u_mouse - 0.5) * vec2(aspect, 1.0) * 2.4;',
-    '  vec2 pw = (u_wake - 0.5) * vec2(aspect, 1.0) * 2.4;',
-    '  float t = u_time;',
-    '',
-    '  vec2 o1 = vec2(-0.85 + 0.16 * sin(t * 0.11), 0.28 + 0.13 * cos(t * 0.09));',
-    '  vec2 o2 = vec2(0.80 + 0.14 * cos(t * 0.08), -0.32 + 0.15 * sin(t * 0.10));',
-    '  vec2 o3 = vec2(0.10 + 0.18 * sin(t * 0.07 + 2.1), 0.55 + 0.10 * sin(t * 0.12 + 0.7));',
-    '  vec2 q = p;',
-    '  q += divert(q, o1, 0.55, 0.85, 0.60);',
-    '  q += divert(q, o2, 0.46, 0.80, -0.55);',
-    '  q += divert(q, o3, 0.40, 0.75, 0.45);',
-    '',
-    // The lagged wake ghost keeps displacing the liquid after the hand
-    // has moved on, then is absorbed.
-    '  q += divert(q, pw, 0.34, 0.55, 0.85) * u_wakeAmt;',
-    '',
-    '  float glow = 0.0;',
-    '  for (int i = 0; i < 6; i++) {',
-    '    vec4 rp = u_rip[i];',
-    '    if (rp.w < 0.003) continue;',
-    '    float age = t - rp.z;',
-    '    if (age < 0.0 || age > 6.0) continue;',
-    '    vec2 rc = (rp.xy - 0.5) * vec2(aspect, 1.0) * 2.4;',
-    '    vec2 d = q - rc;',
-    '    float dist = length(d);',
-    '    float radius = 0.12 + age * 0.30;',
-    '    float ring = exp(-pow((dist - radius) * 5.0, 2.0)) * exp(-age * 0.55) * rp.w;',
-    '    q += d * ring * 0.10 + vec2(0.03, 0.012) * age * ring;',
-    '    glow += ring * 0.35;',
-    '  }',
-    '',
-    // Triple domain warp: currents that stream, fold, pool, and drain.
-    '  vec2 f1 = vec2(',
-    '    fbm(q * 1.15 + vec2(t * 0.021, t * 0.013)),',
-    '    fbm(q * 1.15 + vec2(5.2, 1.3) - vec2(t * 0.017, t * 0.011)));',
-    '  vec2 f2 = vec2(',
-    '    fbm(q * 1.15 + 2.2 * f1 + vec2(1.7, 9.2) + vec2(t * 0.026, -t * 0.015)),',
-    '    fbm(q * 1.15 + 2.2 * f1 + vec2(8.3, 2.8) - vec2(t * 0.019, -t * 0.012)));',
-    '  float f = fbm(q * 1.15 + 2.6 * f2 + vec2(-t * 0.014, t * 0.009));',
-    '  float conv = length(f2);',
-    '',
-    '  float v = clamp(f * 0.85 + conv * 0.30 - 0.08, 0.0, 1.0);',
-    '  vec3 col = mix(vec3(0.012, 0.030, 0.130), vec3(0.078, 0.251, 0.784), smoothstep(0.10, 0.52, v));',
-    '  col = mix(col, vec3(0.482, 0.380, 1.000), smoothstep(0.48, 0.78, v));',
-    '  col = mix(col, vec3(0.180, 0.827, 0.950), pow(smoothstep(0.60, 0.95, v), 2.0) * 0.75);',
-    '  float crest = pow(smoothstep(0.80, 1.0, v), 3.0);',
-    '  col = mix(col, vec3(1.0), crest * 0.85);',
-    '',
-    // A resting hand gathers a pool, read through the warp pattern
-    // itself, never a flat radial blob.
-    '  float pd = length(p - pm);',
-    '  float poolMask = exp(-pd * pd / 0.16) * u_pool;',
-    '  col += vec3(0.30, 0.55, 1.00) * poolMask * (0.25 + 0.75 * f) * 0.55;',
-    '  col += vec3(0.45, 0.65, 1.00) * glow * (0.3 + 0.7 * f);',
-    '',
-    '  col *= u_tide;',
-    '  float melt = smoothstep(2.05, 0.65, length(p * vec2(0.72, 1.0)));',
-    '  col *= 0.25 + 0.75 * melt;',
-    '  gl_FragColor = vec4(col, 1.0);',
-    '}'
-  ].join('\\n');
+    var FRAG = [
+      "precision highp float;",
+      "uniform vec2 uRes;",
+      "uniform float uFlow;",      // accumulated eased flow phase (never resets, never loops)",
+      "uniform float uTime;",      // simulation seconds, for ripples",
+      "uniform float uTide;",      // global brightness swell 0.8..1.2",
+      "uniform float uFade;",      // scroll recession 0..1",
+      "uniform vec2 uMouse;",      // hand, in flow coords",
+      "uniform vec2 uVel;",        // smoothed hand velocity, flow coords / sec",
+      "uniform float uOn;",        // hand presence, eased",
+      "uniform vec2 uWake;",       // lagged follow-through ghost of the hand",
+      "uniform float uWakeStr;",   // wake strength, absorbed slowly",
+      "uniform float uPool;",      // gathered pool, builds / drains slowly",
+      "uniform vec4 uRipples[6];", // xy: drop point (flow coords), z: birth time, w: live",
+      "",
+      "float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }",
+      "float noise(vec2 p){",
+      "  vec2 i = floor(p); vec2 f = fract(p);",
+      "  vec2 u = f * f * (3.0 - 2.0 * f);", // smoothstep interpolation: sine-class ease, never linear",
+      "  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),",
+      "             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);",
+      "}",
+      "float fbm(vec2 p){",
+      "  float v = 0.0; float a = 0.5;",
+      "  mat2 m = mat2(1.6, 1.2, -1.2, 1.6);",
+      "  for (int i = 0; i < 5; i++){ v += a * noise(p); p = m * p; a *= 0.5; }",
+      "  return v;",
+      "}",
+      "mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c, s, -s, c); }",
+      "",
+      "void main(){",
+      "  vec2 uv = gl_FragCoord.xy / uRes;",
+      "  float aspect = uRes.x / max(uRes.y, 1.0);",
+      "  vec2 p = (uv - 0.5) * vec2(aspect, 1.0) * 2.6;",
+      "  float t = uFlow;",
+      "",
+      "  // The whole domain slowly veers: current direction changes",
+      "  // gradually on two detuned sines, never snapping, never cycling in step.",
+      "  float veer = 0.38 * sin(t * 0.21) + 0.22 * sin(t * 0.083 + 2.0);",
+      "  vec2 sp = rot(veer) * p;",
+      "",
+      "  // Invisible obstacles: three slow drifters the current bends around.",
+      "  // The diversion is built from the raw offset vector, never a normalized",
+      "  // direction: displacement is offset * gaussian, so its magnitude is ZERO",
+      "  // at the center, swells to a soft maximum on a wide ring, and falls off",
+      "  // well outside it. No singularity, no focal point, no radiating folds.",
+      "  // A tangential component (each obstacle with its own handedness and",
+      "  // strength) curves the flow AROUND the drifter instead of pushing it",
+      "  // straight out, so nothing in the bend is radially symmetric.",
+      "  vec2 ob1 = vec2(-0.85 + 0.55 * sin(t * 0.11 + 0.7),  0.30 * sin(t * 0.073 + 1.9));",
+      "  vec2 ob2 = vec2( 0.95 + 0.45 * sin(t * 0.089 + 3.4), -0.35 + 0.30 * cos(t * 0.061));",
+      "  vec2 ob3 = vec2( 0.05 + 0.70 * cos(t * 0.052 + 5.1),  0.62 + 0.22 * sin(t * 0.131 + 0.3));",
+      "  vec2 d1 = sp - ob1; sp += (d1 * 1.15 + vec2(-d1.y, d1.x) * 0.85) * exp(-dot(d1, d1) / 0.55);",
+      "  vec2 d2 = sp - ob2; sp += (d2 * 1.05 + vec2(d2.y, -d2.x) * 0.70) * exp(-dot(d2, d2) / 0.46);",
+      "  vec2 d3 = sp - ob3; sp += (d3 * 0.95 + vec2(-d3.y, d3.x) * 1.05) * exp(-dot(d3, d3) / 0.40);",
+      "",
+      "  // The hand stirs. Drag: the sampling point is pulled against the",
+      "  // hand's velocity near the hand, so the pattern smears along the stroke.",
+      "  float rippleGlow = 0.0;",
+      "  if (uOn > 0.003) {",
+      "    vec2 dm = sp - uMouse;",
+      "    float fall = exp(-dot(dm, dm) / 0.16) * uOn;",
+      "    sp -= uVel * fall * 0.20;",
+      "    sp += vec2(-dm.y, dm.x) * fall * uWakeStr * 0.10;", // curl of the stroke",
+      "    // Follow-through ghost: trails the hand at ~40% amplitude, still",
+      "    // displacing liquid after the hand itself has moved on.",
+      "    vec2 dw = sp - uWake;",
+      "    float fallW = exp(-dot(dw, dw) / 0.22) * uWakeStr;",
+      "    sp -= uVel * fallW * 0.09;",
+      "    sp += vec2(-dw.y, dw.x) * fallW * 0.06;",
+      "    // Pool: the domain is drawn gently toward a still hand, so light",
+      "    // gathers THROUGH the current's own folds, not as a pasted glow.",
+      "    float fallP = exp(-dot(dm, dm) / 0.55) * uOn * uPool;",
+      "    sp -= dm * fallP * 0.16;",
+      "  }",
+      "",
+      "  // Tap ripples: expand ease-out (sine), displace the domain as they",
+      "  // pass, and drift downstream with the current while they die.",
+      "  for (int i = 0; i < 6; i++) {",
+      "    vec4 rp = uRipples[i];",
+      "    if (rp.w > 0.5) {",
+      "      float age = uTime - rp.z;",
+      "      if (age > 0.0 && age < 5.0) {",
+      "        vec2 c = rp.xy + vec2(age * 0.055, age * 0.021);", // carried away by the current",
+      "        vec2 dr = sp - c;",
+      "        float dist = length(dr);",
+      "        float rad = 0.95 * sin(min(age / 2.9, 1.0) * 1.5707963);", // ease-out expansion",
+      "        float q = (dist - rad) / 0.15;",
+      "        float ring = exp(-q * q);",
+      "        float fade = 1.0 - age / 5.0; fade = fade * fade * (3.0 - 2.0 * fade);",
+      "        sp += dr * ring * 0.11 * fade;", // raw offset, not normalized: displacement vanishes at the drop point, no radial pinch",
+      "        rippleGlow += ring * fade;",
+      "      }",
+      "    }",
+      "  }",
+      "",
+      "  // Domain warp, three deep: warp of a warp of a warp. Each level",
+      "  // advects at its own rate — overlapping action, layers never in step.",
+      "  vec2 qq = vec2(",
+      "    fbm(sp + vec2(0.0, 0.0) + vec2(t * 0.100, t * 0.061)),",
+      "    fbm(sp + vec2(5.2, 1.3) + vec2(-t * 0.083, t * 0.097)));",
+      "  vec2 rr = vec2(",
+      "    fbm(sp + 2.8 * qq + vec2(1.7, 9.2) + vec2(t * 0.061 + 0.11, -t * 0.047)),",
+      "    fbm(sp + 2.8 * qq + vec2(8.3, 2.8) + vec2(-t * 0.052, t * 0.068 + 0.14)));",
+      "  float f = fbm(sp + 3.2 * rr + vec2(t * 0.034, -t * 0.023));",
+      "",
+      "  // Secondary action: a faint shimmer riding the current at ~40%",
+      "  // amplitude, phase-offset (+3.1), on a different rate and easing path.",
+      "  float shimmer = fbm(sp * 2.3 - rr * 1.4 + vec2(-t * 0.13 + 3.1, t * 0.089 + 1.2));",
+      "",
+      "  // Convergence: where the warp folds tight, light piles up.",
+      "  float conv = pow(clamp(1.0 - abs(f - 0.50) * 1.7, 0.0, 1.0), 3.0);",
+      "  float crest = pow(clamp(1.0 - abs(f - 0.52) * 4.6, 0.0, 1.0), 8.0);",
+      "",
+      "  // Color ramp: deep blue -> cyan -> violet -> deep purple, by warp depth.",
+      "  vec3 ramp = mix(vec3(0.05, 0.16, 0.80), vec3(0.16, 0.68, 0.94), clamp(f * 1.6 - 0.25, 0.0, 1.0));",
+      "  ramp = mix(ramp, vec3(0.47, 0.36, 1.00), clamp(length(qq) * 0.85 - 0.25, 0.0, 1.0));",
+      "  ramp = mix(ramp, vec3(0.34, 0.13, 0.78), clamp(length(rr) * 0.55 - 0.30, 0.0, 1.0) * 0.7);",
+      "",
+      "  float body = smoothstep(0.16, 0.88, f) * 0.34;",
+      "  float stream = pow(clamp(1.0 - abs(f - 0.58) * 2.1, 0.0, 1.0), 2.0) * 0.85;",
+      "  float inten = body + stream * (0.45 + 0.75 * conv);",
+      "  inten += (shimmer - 0.5) * 0.38 * stream;", // secondary shimmer, subordinate",
+      "  inten += rippleGlow * 0.45 * (0.3 + stream);",
+      "",
+      "  // Pool light: amplifies the local current where the hand rests.",
+      "  float poolGlow = 0.0;",
+      "  if (uOn > 0.003) {",
+      "    vec2 dm2 = p - uMouse;",
+      "    poolGlow = exp(-dot(dm2, dm2) / 0.55) * uOn * uPool;",
+      "    inten *= 1.0 + poolGlow * 1.1;",
+      "  }",
+      "",
+      "  vec3 col = vec3(0.039, 0.039, 0.039);", // site black #0A0A0A",
+      "  col += ramp * inten * 1.25;",
+      "  col += vec3(0.55, 0.62, 1.00) * poolGlow * stream * 0.35;",
+      "  col += vec3(1.0) * crest * conv * 0.85;", // white only at the tightest crests",
+      "",
+      "  // Soft edge falloff so the volume breathes against the black.",
+      "  col *= 1.0 - 0.38 * smoothstep(0.85, 2.0, length(p * vec2(0.72, 1.0)));",
+      "  col = col / (1.0 + col * 0.30);", // gentle filmic roll-off, no blow-out strobing",
+      "  col *= uTide * uFade;",
+      "  col = mix(vec3(0.039, 0.039, 0.039), col, uFade * 0.92 + 0.08);",
+      "  gl_FragColor = vec4(col, 1.0);",
+      "}"
+    ].join("\n");
 
-  function makeShader(type, src) {
-    var s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-      gl.deleteShader(s);
-      return null;
+    function compile(type, src) {
+      var sh = gl.createShader(type);
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+        if (window.console) console.error("Liquid shader:", gl.getShaderInfoLog(sh));
+        gl.deleteShader(sh);
+        return null;
+      }
+      return sh;
     }
-    return s;
-  }
-  var vs = makeShader(gl.VERTEX_SHADER, VS);
-  var fs = makeShader(gl.FRAGMENT_SHADER, FS);
-  if (!vs || !fs) { fail(); return; }
-  var prog = gl.createProgram();
-  gl.attachShader(prog, vs);
-  gl.attachShader(prog, fs);
-  gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { fail(); return; }
-  gl.useProgram(prog);
+    var vs = compile(gl.VERTEX_SHADER, VERT);
+    var fs = compile(gl.FRAGMENT_SHADER, FRAG);
+    var prog = null;
+    if (vs && fs) {
+      prog = gl.createProgram();
+      gl.attachShader(prog, vs);
+      gl.attachShader(prog, fs);
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) prog = null;
+    }
 
-  var buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  var posLoc = gl.getAttribLocation(prog, 'a_pos');
-  gl.enableVertexAttribArray(posLoc);
-  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+    if (!prog) {
+      heroEl.classList.add("no-webgl");
+    } else {
+      gl.useProgram(prog);
+      var buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      var posLoc = gl.getAttribLocation(prog, "a_pos");
+      gl.enableVertexAttribArray(posLoc);
+      gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
-  var U = {};
-  ['u_res', 'u_time', 'u_tide', 'u_mouse', 'u_wake', 'u_wakeAmt', 'u_pool', 'u_rip']
-    .forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+      var U = {};
+      ["uRes", "uFlow", "uTime", "uTide", "uFade", "uMouse", "uVel", "uOn", "uWake", "uWakeStr", "uPool"]
+        .forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+      var rippleLocs = [];
+      for (var ri = 0; ri < 6; ri++) rippleLocs.push(gl.getUniformLocation(prog, "uRipples[" + ri + "]"));
 
-  root.classList.add('liquid-on');
+      var W = 0, H = 0;
+      var SCALE = 2.6;
+      function toFlowX(px) { return (px / (W || 1) - 0.5) * (W / Math.max(H, 1)) * SCALE; }
+      function toFlowY(py) { return (0.5 - py / (H || 1)) * SCALE; }
 
-  var RM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var SPEED = RM ? 0.3 : 1.0;
+      var simT = 0, flowT = 0, lastTs = -1;
+      var heroVisible = true;
+      var ptr = { tx: 0, ty: 0, x: 0, y: 0, seen: false, active: false };
+      var vel = { x: 0, y: 0 };
+      var wake = { x: 0, y: 0, str: 0 };
+      var presence = 0, pool = 0;
+      var scrollFade = 1;
+      var ripples = [];
+      for (var rj = 0; rj < 6; rj++) ripples.push({ x: 0, y: 0, t0: -100, live: 0 });
+      var rippleIdx = 0;
 
-  var phase = 0;
-  var last = -1;
-  var running = true;
-  var visible = true;
+      function resize() {
+        var r = heroEl.getBoundingClientRect();
+        W = Math.max(1, Math.floor(r.width)); H = Math.max(1, Math.floor(r.height));
+        var rs = Math.min(window.devicePixelRatio || 1, 1.25) * 0.72; // soft liquid upscales cleanly; keeps 60fps",
+        canvas.width = Math.max(2, Math.floor(W * rs));
+        canvas.height = Math.max(2, Math.floor(H * rs));
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
 
-  // Pointer state in uv space, y up. The wake ghost lags the hand on a
-  // slow exponential and keeps stirring after the hand moves on.
-  var tx = 0.5, ty = 0.5, mx = 0.5, my = 0.5, pmx = 0.5, pmy = 0.5;
-  var wx = 0.5, wy = 0.5;
-  var wakeAmt = 0, pool = 0, inside = false;
-  var rips = new Float32Array(24);
-  var ripNext = 0;
+      heroEl.addEventListener("pointermove", function (e) {
+        var r = canvas.getBoundingClientRect();
+        ptr.tx = e.clientX - r.left; ptr.ty = e.clientY - r.top;
+        if (!ptr.seen) { ptr.x = ptr.tx; ptr.y = ptr.ty; wake.x = ptr.tx; wake.y = ptr.ty; ptr.seen = true; }
+        ptr.active = true;
+      });
+      heroEl.addEventListener("pointerleave", function () { ptr.active = false; });
+      heroEl.addEventListener("pointerdown", function (e) {
+        var r = canvas.getBoundingClientRect();
+        var x = e.clientX - r.left, y = e.clientY - r.top;
+        ptr.tx = x; ptr.ty = y; ptr.active = true;
+        if (!ptr.seen) { ptr.x = x; ptr.y = y; wake.x = x; wake.y = y; ptr.seen = true; }
+        var rp = ripples[rippleIdx]; rippleIdx = (rippleIdx + 1) % 6;
+        rp.x = toFlowX(x); rp.y = toFlowY(y); rp.t0 = simT; rp.live = 1;
+      });
 
-  function toUV(e) {
-    var r = canvas.getBoundingClientRect();
-    if (!r.width || !r.height) return null;
-    return {
-      x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
-      y: Math.min(1, Math.max(0, 1 - (e.clientY - r.top) / r.height))
-    };
-  }
-  hero.addEventListener('pointermove', function (e) {
-    var uv = toUV(e);
-    if (!uv) return;
-    tx = uv.x; ty = uv.y; inside = true;
-  }, { passive: true });
-  hero.addEventListener('pointerdown', function (e) {
-    var uv = toUV(e);
-    if (!uv) return;
-    tx = uv.x; ty = uv.y; inside = true;
-    rips[ripNext * 4 + 0] = uv.x;
-    rips[ripNext * 4 + 1] = uv.y;
-    rips[ripNext * 4 + 2] = phase;
-    rips[ripNext * 4 + 3] = 1.0;
-    ripNext = (ripNext + 1) % 6;
-  }, { passive: true });
-  hero.addEventListener('pointerleave', function () { inside = false; });
+      new IntersectionObserver(function (en) { heroVisible = en[0].isIntersecting; }, { threshold: 0.02 }).observe(heroEl);
 
-  function resize() {
-    var scale = Math.min(window.devicePixelRatio || 1, 1.5) * 0.72;
-    var w = Math.max(1, Math.round(canvas.clientWidth * scale));
-    var h = Math.max(1, Math.round(canvas.clientHeight * scale));
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
+      function frame(now) {
+        requestAnimationFrame(frame);
+        var dt = lastTs < 0 ? 0.016 : Math.min((now - lastTs) / 1000, 0.05);
+        lastTs = now;
+        if (!heroVisible || dt <= 0) return;
+        var speedScale = reduceMotion ? 0.3 : 1;
+        simT += dt * speedScale;
+
+        /* Tide: two detuned sines — the pulse as weather, not a front. */
+        var tide01 = 0.5 + 0.30 * Math.sin(simT * 0.52) + 0.20 * Math.sin(simT * 0.31 + 1.7);
+        tide01 = tide01 < 0 ? 0 : tide01 > 1 ? 1 : tide01;
+        flowT += dt * speedScale * (0.45 + 0.60 * tide01);
+        var tideGain = 0.84 + 0.34 * tide01;
+
+        /* Hand: heavy exponential smoothing (sine-class ease-in-out).
+           Position settles over ~500ms; velocity is the smoothed
+           derivative; the wake ghost lags further (~800ms class) and
+           its strength absorbs over ~1.5s after the stroke ends. */
+        var kPos = 1 - Math.exp(-dt * 3.4);
+        var prevX = ptr.x, prevY = ptr.y;
+        ptr.x += (ptr.tx - ptr.x) * kPos;
+        ptr.y += (ptr.ty - ptr.y) * kPos;
+        var kVel = 1 - Math.exp(-dt * 2.3);
+        vel.x += ((ptr.x - prevX) / dt - vel.x) * kVel;
+        vel.y += ((ptr.y - prevY) / dt - vel.y) * kVel;
+        var kWake = 1 - Math.exp(-dt * 1.7);
+        wake.x += (ptr.x - wake.x) * kWake;
+        wake.y += (ptr.y - wake.y) * kWake;
+        var speedPx = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+        var wakeTarget = ptr.active ? Math.min(speedPx / 320, 1) : 0;
+        wake.str += (wakeTarget - wake.str) * (1 - Math.exp(-dt * (wakeTarget > wake.str ? 1.9 : 0.75)));
+        presence += ((ptr.active ? 1 : 0) - presence) * (1 - Math.exp(-dt * (ptr.active ? 3.2 : 1.5)));
+
+        /* Pool: gathers only under a near-still hand, over ~2s;
+           drains slowly when the hand moves off or leaves. */
+        if (ptr.active && speedPx < 42) pool += (1 - pool) * (1 - Math.exp(-dt * 0.85));
+        else pool *= Math.exp(-dt * 0.65);
+
+        /* Scroll recession: the volume dims as you descend past it. */
+        var sTarget = 1 - Math.min(Math.max(window.scrollY / (H * 0.95 || 1), 0), 1);
+        scrollFade += (sTarget - scrollFade) * (1 - Math.exp(-dt * 3.0));
+        var fade = 0.16 + 0.84 * scrollFade;
+
+        /* Velocity into flow coords, clamped so a flick can't tear the liquid. */
+        var aspect = W / Math.max(H, 1);
+        var vx = vel.x / Math.max(W, 1) * aspect * SCALE;
+        var vy = -vel.y / Math.max(H, 1) * SCALE;
+        var vLen = Math.sqrt(vx * vx + vy * vy), vMax = 1.6;
+        if (vLen > vMax) { vx *= vMax / vLen; vy *= vMax / vLen; }
+
+        gl.uniform2f(U.uRes, canvas.width, canvas.height);
+        gl.uniform1f(U.uFlow, flowT);
+        gl.uniform1f(U.uTime, simT);
+        gl.uniform1f(U.uTide, tideGain);
+        gl.uniform1f(U.uFade, fade);
+        gl.uniform2f(U.uMouse, toFlowX(ptr.x), toFlowY(ptr.y));
+        gl.uniform2f(U.uVel, vx, vy);
+        gl.uniform1f(U.uOn, presence);
+        gl.uniform2f(U.uWake, toFlowX(wake.x), toFlowY(wake.y));
+        gl.uniform1f(U.uWakeStr, wake.str);
+        gl.uniform1f(U.uPool, pool);
+        for (var k = 0; k < 6; k++) {
+          var r2 = ripples[k];
+          if (r2.live && simT - r2.t0 > 5.2) r2.live = 0;
+          gl.uniform4f(rippleLocs[k], r2.x, r2.y, r2.t0, r2.live);
+        }
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      }
+
+      resize();
+      requestAnimationFrame(frame);
+      var rzTimer3;
+      window.addEventListener("resize", function () {
+        clearTimeout(rzTimer3);
+        rzTimer3 = setTimeout(resize, 180);
+      });
     }
   }
-  window.addEventListener('resize', resize, { passive: true });
-  resize();
 
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver(function (entries) {
-      visible = entries[0].isIntersecting;
-    }, { threshold: 0.02 }).observe(hero);
-  }
-  document.addEventListener('visibilitychange', function () {
-    running = !document.hidden;
-    last = -1;
-  });
-
-  function frame(now) {
-    requestAnimationFrame(frame);
-    if (!running || !visible) { last = -1; return; }
-    if (last < 0) last = now;
-    var dt = Math.min(0.05, (now - last) / 1000);
-    last = now;
-    if (dt <= 0) return;
-
-    // The tide: two detuned sines, periods near 13s and 19s, swelling
-    // brightness; the flow phase advances on the same swell.
-    var tideClock = now / 1000 * SPEED;
-    var tide = 0.86
-      + 0.20 * Math.sin(tideClock * (Math.PI * 2 / 13.0))
-      + 0.14 * Math.sin(tideClock * (Math.PI * 2 / 19.0) + 1.7);
-    phase += dt * SPEED * (0.65 + 0.55 * (tide - 0.72));
-
-    var kFast = 1 - Math.exp(-dt * 7.0);
-    pmx = mx; pmy = my;
-    mx += (tx - mx) * kFast;
-    my += (ty - my) * kFast;
-    var speed = Math.hypot(mx - pmx, my - pmy) / Math.max(dt, 0.0001);
-
-    var kWake = 1 - Math.exp(-dt * 1.25);
-    wx += (mx - wx) * kWake;
-    wy += (my - wy) * kWake;
-    var wakeTarget = inside ? Math.min(1, speed * 1.6) : 0;
-    var wRate = wakeTarget > wakeAmt ? 6.0 : 0.7;
-    wakeAmt += (wakeTarget - wakeAmt) * (1 - Math.exp(-dt * wRate));
-
-    var poolTarget = (inside && speed < 0.05) ? 1 : 0;
-    var pRate = poolTarget > pool ? 0.55 : 2.2;
-    pool += (poolTarget - pool) * (1 - Math.exp(-dt * pRate));
-
-    resize();
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.uniform2f(U.u_res, canvas.width, canvas.height);
-    gl.uniform1f(U.u_time, phase);
-    gl.uniform1f(U.u_tide, tide);
-    gl.uniform2f(U.u_mouse, mx, my);
-    gl.uniform2f(U.u_wake, wx, wy);
-    gl.uniform1f(U.u_wakeAmt, wakeAmt * 0.42);
-    gl.uniform1f(U.u_pool, pool);
-    gl.uniform4fv(U.u_rip, rips);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-  }
-  requestAnimationFrame(frame);
 })();
-</script>
-"""
+</script>"""
 
 # ---------- Home ----------
 home_body = """  <section class="hero">
     <canvas id="liquid" aria-hidden="true"></canvas>
+    <div class="hero-vignette" aria-hidden="true"></div>
     <div class="scroll-cue" aria-hidden="true"><span></span></div>
   </section>
 

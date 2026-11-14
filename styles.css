@@ -41,34 +41,16 @@ body {
   position: relative;
 }
 
-/* Nebula glow layer */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  background:
-    radial-gradient(640px 420px at 12% -4%, rgba(255, 255, 255, 0.055), transparent 62%),
-    radial-gradient(760px 520px at 92% 2%, rgba(255, 255, 255, 0.04), transparent 62%),
-    radial-gradient(820px 620px at 88% 86%, rgba(215, 215, 215, 0.035), transparent 62%),
-    radial-gradient(600px 500px at 4% 70%, rgba(255, 255, 255, 0.03), transparent 60%);
-  pointer-events: none;
-}
-
 /* Liquid canvas (JS): a backdrop for the hero only, not the whole page. */
 #liquid {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
+  display: block;
+  z-index: 1;
   pointer-events: none;
-  /* The liquid melts into the page at the bottom instead of slicing at the hero box */
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 110px), transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 110px), transparent 100%);
 }
-/* When the canvas is live, retire the hero's static fallback layer */
-html.liquid-on .hero::before { display: none; }
 
 .wrap {
   max-width: 1100px;
@@ -299,25 +281,31 @@ html, body { overflow-x: clip; }
   display: block;
   position: relative;
   overflow: hidden;
+  isolation: isolate;
+  background: #0A0A0A;
   /* Full-bleed: the liquid runs edge to edge, breaking out of the content column */
   width: 100vw;
   margin-left: calc(50% - 50vw);
   box-sizing: border-box;
 }
-/* Static fallback (no WebGL), scoped to the hero like the canvas: a
-   dim blue-to-violet domain, retired once the liquid is live. */
-.hero::before {
-  content: "";
+/* Vignette over the liquid: shades the top for the nav, melts the
+   bottom into the page ground. Part of the approved hero stack. */
+.hero-vignette {
   position: absolute;
   inset: 0;
-  z-index: 0;
-  background:
-    radial-gradient(90% 65% at 22% 78%, rgba(20, 64, 200, 0.50), transparent 62%),
-    radial-gradient(75% 60% at 78% 24%, rgba(123, 97, 255, 0.38), transparent 64%),
-    radial-gradient(55% 45% at 58% 62%, rgba(46, 211, 242, 0.16), transparent 66%),
-    linear-gradient(158deg, #050914 0%, #070b24 52%, #0a0618 100%);
-  opacity: 0.5;
+  z-index: 2;
   pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(3, 3, 9, 0.38), transparent 16%, transparent 74%, #0A0A0A 99%);
+}
+/* Static fallback when WebGL is unavailable (the engine adds
+   .no-webgl to the hero): layered blue-to-violet washes. */
+.hero.no-webgl {
+  background:
+    linear-gradient(112deg, transparent 18%, rgba(47, 211, 242, 0.28) 42%, rgba(123, 97, 255, 0.34) 58%, transparent 82%),
+    linear-gradient(203deg, transparent 26%, rgba(88, 60, 220, 0.30) 52%, transparent 78%),
+    linear-gradient(64deg, transparent 55%, rgba(38, 90, 220, 0.22) 78%, transparent 96%),
+    #0A0A0A;
 }
 /* The scroll cue: one hairline of light at the hero's foot. */
 .scroll-cue {
@@ -325,7 +313,7 @@ html, body { overflow-x: clip; }
   left: 50%;
   bottom: 26px;
   transform: translateX(-50%);
-  z-index: 2;
+  z-index: 3;
   pointer-events: none;
 }
 .scroll-cue span {
