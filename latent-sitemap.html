@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="A sitemap drawn as a latent space: every photo, book, artwork, and project on Adam Laloge's site as a point in one flowing map.">
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="theme-color" content="#0A0A0A">
-<link rel="stylesheet" href="styles.css?v=89">
+<link rel="stylesheet" href="styles.css?v=90">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -50,11 +50,6 @@
   <script>document.body.classList.add('sitemap-body');</script>
   <div class="sitemap-flow">
   <section class="latent-intro">
-    <div class="latent-glass latent-phead">
-      <p class="label">Sitemap</p>
-      <h1>Atlas</h1>
-      <p class="phead-note">Drag to explore &middot; tap a point to select it &middot; tap again to open it</p>
-    </div>
     <button class="latent-scrollzone" id="scroll-zone" type="button" aria-label="Scroll down to the list">
       <span class="zone-label">Scroll for the list</span>
       <span class="cue-arrow" aria-hidden="true"><i></i><i></i></span>
@@ -357,6 +352,7 @@
   // into neighbouring hues -- screen overlaps mix the intermediate
   // colours on their own. Homes themselves orbit slowly.
   var fogStamps = {}, allStamps = [], fogTime = -1;
+  var pvxS = 0, pvyS = 0; // probe velocity, smoothed and clamped for the fog
   function buildFogStamps() {
     fogStamps = {}; allStamps = [];
     var r = mulberry32(2027);
@@ -371,9 +367,11 @@
       for (var j = 0; j < arr.length; j++) allStamps.push(arr[j]);
     });
   }
-  function stepFogStamps(dt, tSec) {
+  function stepFogOnce(dt, tSec) {
     if (!allStamps.length) return;
     if (fogTime < 0) fogTime = tSec; else fogTime += dt;
+    pvxS += (clampF(probeVx, -14, 14) - pvxS) * 0.12;
+    pvyS += (clampF(probeVy, -14, 14) - pvyS) * 0.12;
     var minWH = Math.min(W, H), f60 = dt * 60;
     for (var si = 0; si < allStamps.length; si++) {
       var s = allStamps[si], reg = DATA.regions[s.key];
@@ -390,19 +388,45 @@
         s.x += s.vx * f60 + s.wx * f60; s.y += s.vy * f60 + s.wy * f60;
         var wakeDamp = Math.pow(0.955, f60);
         s.wx *= wakeDamp; s.wy *= wakeDamp;
+        if (s.wx > 1.4) s.wx = 1.4; else if (s.wx < -1.4) s.wx = -1.4;
+        if (s.wy > 1.4) s.wy = 1.4; else if (s.wy < -1.4) s.wy = -1.4;
         s.rot += s.rotV * dt;
-        var bTarget = 0;
+        // The probe parts the fog by DISPLACEMENT, not impulse: each
+        // stamp carries an offset that eases toward a repulsion
+        // target while the probe is near and eases back to zero when
+        // it leaves. The offset is applied at draw time, outside the
+        // stamp's own weather, so a cleared stamp can never be flung,
+        // overshoot, or teleport home -- it glides out along a smooth
+        // curve and glides back along the same one. (The old model
+        // injected raw probe velocity into stamp velocity: fast
+        // flicks spiked it, frame-time jitter made it stutter, and
+        // the weak home spring overshot on return.)
+        if (s.ox === undefined) { s.ox = 0; s.oy = 0; }
+        var bTarget = 0, oxT = 0, oyT = 0;
         if (probe.active && probe.x > -500) {
-          var pdx = s.x - probe.x, pdy = s.y - probe.y, pd2 = Math.sqrt(pdx * pdx + pdy * pdy);
-          if (pd2 < 230) {
-            var fall = 1 - pd2 / 230;
-            s.wx += probeVx * 60 * dt * fall * 0.65; s.wy += probeVy * 60 * dt * fall * 0.65;
-            bTarget = fall;
+          var pdx = s.x + s.ox - probe.x, pdy = s.y + s.oy - probe.y;
+          var pd = Math.sqrt(pdx * pdx + pdy * pdy);
+          if (pd < 260) {
+            var fall2 = 1 - pd / 260;
+            var rep = fall2 * fall2 * 95;
+            if (pd > 1) { oxT = (pdx / pd) * rep; oyT = (pdy / pd) * rep; }
+            bTarget = fall2;
+            // A whisper of wake remains, fed by the smoothed,
+            // clamped probe velocity: flicks stir, they don't shove.
+            s.wx += pvxS * dt * fall2 * 0.30; s.wy += pvyS * dt * fall2 * 0.30;
           }
         }
+        var oRate = Math.min(1, dt * ((oxT || oyT) ? 7 : 2.6));
+        s.ox += (oxT - s.ox) * oRate; s.oy += (oyT - s.oy) * oRate;
         s.bright += (bTarget - s.bright) * Math.min(1, dt * (bTarget > s.bright ? 6 : 2));
       }
     }
+  }
+  function stepFogStamps(dt, tSec) {
+    // Substepped, so a hitched or high-refresh frame can never move
+    // a stamp further than one 60Hz step would: no dt spikes.
+    var nSub = dt > 0.021 ? 2 : 1, sdt = dt / nSub;
+    for (var q = 0; q < nSub; q++) stepFogOnce(sdt, tSec);
   }
 
   // Living grain: four noise tiles cycled at 1:1 -- the researched
@@ -544,25 +568,20 @@
   // hard constraint forces it, by the least amount that satisfies
   // the constraint (project out along the axis of least penetration;
   // separation corrections split evenly). Hard constraints: centres
-  // stay in the safe rect, out of the overlay chrome (header, title
-  // card, scroll cue -- measured live from the DOM), with clearance
-  // for the label above each centre; and NO object -- no centre, no
-  // label, and no point of any cluster -- may sit under the title
-  // card, enforced by testing each centre against the card rect
-  // grown by that cluster's own point reach (offsets + point radius
-  // + sway/breathing margin). Everything keys off the centres, so
+  // stay in the safe rect, out of the overlay chrome (header, scroll
+  // cue -- measured live from the DOM), with clearance for the label
+  // above each centre. Everything keys off the centres, so
   // the solve adapts fog, labels and points together, and a new
   // region needs nothing but its anchor.
   function layoutRegions() {
     var mX = Math.max(20, W * 0.07), mY = Math.max(20, H * 0.06);
-    var zones = [], card = null;
-    ['.site-header', '.latent-phead', '.latent-scrollzone'].forEach(function (sel) {
+    var zones = [];
+    ['.site-header', '.latent-scrollzone'].forEach(function (sel) {
       var el = document.querySelector(sel);
       if (!el) return;
       var b = el.getBoundingClientRect(), pad = 44;
       var z = { x0: b.left - pad, y0: b.top - pad, x1: b.right + pad, y1: b.bottom + pad };
       zones.push(z);
-      if (sel === '.latent-phead') card = z;
     });
     var labelLift = H * 0.16 + 10; // region labels sit above their centers
     var reach = {};
@@ -587,11 +606,6 @@
     }
     function pushOut(p, k) {
       zones.forEach(function (z) { project(p, z, labelLift); });
-      if (card) { // the title card, grown by this cluster's reach: no object under it
-        var r = reach[k];
-        project(p, { x0: card.x0 - r.x, y0: card.y0 - r.y, x1: card.x1 + r.x, y1: card.y1 + r.y }, 0);
-        project(p, card, labelLift); // label clearance stands as before
-      }
     }
     var pos = {};
     regionKeys.forEach(function (k) {
@@ -904,7 +918,7 @@
           var spr = improvedSprites[k][s.spr % improvedSprites[k].length];
           ctx.save();
           ctx.globalAlpha = clampF(s.alpha * (1 + 0.18 * breathe) + 0.13 * s.bright, 0, 0.58);
-          ctx.translate(s.x, s.y);
+          ctx.translate(s.x + (s.ox || 0), s.y + (s.oy || 0));
           ctx.rotate(s.rot);
           ctx.scale(1, 0.75 + 0.25 * Math.sin(s.ph));
           ctx.drawImage(spr, -size2 / 2, -size2 / 2, size2, size2);
