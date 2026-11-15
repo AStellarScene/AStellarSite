@@ -42,7 +42,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#0A0A0A">
-{schema}<link rel="stylesheet" href="styles.css?v=102">
+{schema}<link rel="stylesheet" href="styles.css?v=103">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -2030,25 +2030,25 @@ page("dreams.html", "Dreamscape — Adam Joseph Laloge",
 # derived deterministically from the title so new books need no design work.
 BOOKS = [
     {"t": "Between Two Fires", "a": "Christopher Buehlman", "s": "The bar",
-     "b": "The standard. Plague-era France, a disgraced knight, and a war between heaven and hell fought at ground level. Everything else on this shelf gets measured against it.",
+     "b": "The bar, and it is not close. Plague-era France, a disgraced knight, a girl who hears voices, and heaven and hell fighting over both of them in the mud. I measure everything else I read against this one.",
      "style": ("#4a1f1f", 52, 228, 34)},
     {"t": "The Shadow of the Gods", "a": "John Gwynne", "s": "Up next",
-     "b": "Grimdark with dragons, and the one that asks the least homework up front.",
+     "b": "Norse grimdark: dead gods, and dragons coming back into a world that got used to them being gone. Everyone I trust says the trilogy only gets better from here, so it sits near the front of the line.",
      "style": ("#1f2a44", 56, 224, 36)},
     {"t": "The Rage of Dragons", "a": "Evan Winter", "s": "Up next",
-     "b": "The fast one. A dragon war and a nobody fighting his way up through it.",
+     "b": "A nobody at the bottom of a caste system fights his way up toward a dragon war. It is supposed to move fast and hit hard. When I want momentum over homework, this is the pick.",
      "style": ("#5a2d16", 44, 208, 28)},
     {"t": "The Ruin of Kings", "a": "Jenn Lyons", "s": "Up next",
-     "b": "First of A Chorus of Dragons. The main character is living under a stolen identity, and the dragons sit at the center of the story.",
+     "b": "First of A Chorus of Dragons. A thief finds out the life he has been living was stolen from someone else, and the dragons are not set dressing here, they are the center of the whole thing.",
      "style": ("#2e1f3d", 58, 230, 38)},
     {"t": "Of Blood and Fire", "a": "Ryan Cahill", "s": "Up next",
-     "b": "Classic-shape epic with dragon riders.",
+     "b": "The classic shape done straight: a nobody, a wider world, dragon riders. It is also book one of a long series, which is either the selling point or the warning, depending on my schedule.",
      "style": ("#6b3410", 46, 212, 30)},
     {"t": "Gardens of the Moon", "a": "Steven Erikson", "s": "Up next",
-     "b": "Malazan, book one. The deep end: a huge world that explains nothing and trusts you to keep up.",
+     "b": "Malazan, book one. A huge world that explains almost nothing and trusts you to keep up. I have been warned it is the deep end more than once. That is most of the appeal.",
      "style": ("#1c2b26", 60, 226, 40)},
     {"t": "The Darkness That Comes Before", "a": "R. Scott Bakker", "s": "Up next",
-     "b": "The darkest of the six. Fair warning I gave myself: the dragons here are ancient history, mostly backstory.",
+     "b": "The darkest thing on this shelf, and Bakker does not flinch from any of it. The dragons are ancient history here, mostly backstory. I am going in with my eyes open.",
      "style": ("#171310", 54, 222, 36)},
 ]
 
@@ -2096,12 +2096,7 @@ def flow_block(label, books):
     f = books[0]
     return """    <div class="flow-block">
       <p class="label flow-label">%s</p>
-      <div class="flow-scene">
-        <div class="flow-track">
-%s
-        </div>
-        <p class="flow-hint">Drag or swipe to browse</p>
-      </div>
+      <div class="panel flow-panel">
       <div class="flow-cap book-detail" aria-live="polite">
         <div class="fc-top">
           <p class="label fc-status bd-status">%s</p>
@@ -2118,7 +2113,14 @@ def flow_block(label, books):
         <p class="fc-blurb bd-blurb">%s</p>
         <div class="fc-progress"><span class="fc-bar bd-bar"></span></div>
       </div>
-    </div>""" % (label, items, f["s"], len(books), f["t"], f["a"], f["b"])
+      <div class="flow-scene">
+        <div class="flow-track" tabindex="0" aria-label="%s cover flow">
+%s
+        </div>
+        <p class="flow-hint">Drag or swipe to browse</p>
+      </div>
+      </div>
+    </div>""" % (label, f["s"], len(books), f["t"], f["a"], f["b"], label, items)
 
 _flow_blocks = []
 for _label, _statuses in FLOWS:
@@ -2150,8 +2152,26 @@ BOOKSHELF_JS = """<script>
       cap: block.querySelector('.flow-cap')
     };
     var items = Array.prototype.slice.call(track.querySelectorAll('.cov'));
-    var centered = -1;
+    // The stage is not a scroll container. A virtual position (the pixel
+    // offset of the centered book along a virtual strip) drives every
+    // transform, and one animator eases it toward its goal, so drag,
+    // wheel, keys, arrows and clicks can never fight over the motion.
+    var centers = [], widths = [], maxPx = 0, stepPx = 0;
+    var posPx = 0, goalPx = null, raf = null, centered = -1;
 
+    function measure() {
+      var gap = parseFloat(getComputedStyle(track).getPropertyValue('--fgap')) || 30;
+      var acc = 0;
+      widths = items.map(function (it) { return it.offsetWidth; });
+      centers = widths.map(function (w) { var c = acc + w / 2; acc += w + gap; return c; });
+      maxPx = centers.length ? centers[centers.length - 1] : 0;
+      stepPx = centers.length > 1 ? centers[1] - centers[0] : 0;
+    }
+    function nearestIdx(px) {
+      var best = 0, bestD = Infinity;
+      centers.forEach(function (c, i) { var d = Math.abs(c - px); if (d < bestD) { bestD = d; best = i; } });
+      return best;
+    }
     function select(i) {
       if (i === centered) return;
       centered = i;
@@ -2168,134 +2188,151 @@ BOOKSHELF_JS = """<script>
       if (detail.bar) detail.bar.style.width = ((i + 1) / items.length * 100) + '%';
       if (detail.cap) { detail.cap.classList.remove('swap'); void detail.cap.offsetWidth; detail.cap.classList.add('swap'); }
     }
-
-    function layout() {
-      var mid = track.scrollLeft + track.clientWidth / 2;
-      var best = 0, bestDist = Infinity;
+    function render() {
+      var best = 0, bestD = Infinity;
       items.forEach(function (it, i) {
-        var c = it.offsetLeft + it.offsetWidth / 2;
-        var off = (c - mid) / it.offsetWidth; // distance from center, in book widths
+        var dx = centers[i] - posPx;
+        var off = dx / widths[i]; // distance from center, in book widths
+        var aoff = Math.abs(off);
         var rot = Math.max(-62, Math.min(62, off * -55));
-        var z = -Math.min(240, Math.abs(off) * 75);
+        var z = -Math.min(240, aoff * 75);
         var sc = 1 + 0.15 * (0.5 + 0.5 * Math.cos(Math.PI * Math.max(-1, Math.min(1, off))));
         // Transform and z-index only: per-frame filter updates caused the jank.
-        it.style.transform = 'rotateY(' + rot.toFixed(1) + 'deg) translateZ(' + z.toFixed(0) + 'px) scale(' + sc.toFixed(3) + ')';
-        it.style.zIndex = String(100 - Math.round(Math.abs(off) * 10));
-        if (Math.abs(c - mid) < bestDist) { bestDist = Math.abs(c - mid); best = i; }
+        it.style.transform = 'translateX(' + (dx - widths[i] / 2).toFixed(1) + 'px) rotateY(' + rot.toFixed(1) + 'deg) translateZ(' + z.toFixed(0) + 'px) scale(' + sc.toFixed(3) + ')';
+        it.style.zIndex = String(100 - Math.round(aoff * 10));
+        it.style.visibility = aoff > 4.5 ? 'hidden' : 'visible';
+        if (aoff < bestD) { bestD = aoff; best = i; }
       });
       select(best);
     }
+    function tick() {
+      if (goalPx === null) { raf = null; return; }
+      var diff = goalPx - posPx;
+      if (Math.abs(diff) < 0.4) { posPx = goalPx; goalPx = null; render(); raf = null; return; }
+      posPx += diff * 0.16;
+      render();
+      raf = requestAnimationFrame(tick);
+    }
+    function glideToPx(px) {
+      goalPx = Math.max(0, Math.min(maxPx, px));
+      if (reduced) { posPx = goalPx; goalPx = null; render(); return; }
+      if (!raf) raf = requestAnimationFrame(tick);
+    }
+    function glideTo(i) { if (i >= 0 && i < items.length) glideToPx(centers[i]); }
+    function setInstant(i) { goalPx = null; posPx = centers[i]; render(); }
+    // overflow:hidden still leaves a programmatic scroll offset; if
+    // focus navigation ever sets one, zero it so the stage never shifts.
+    track.addEventListener('scroll', function () { if (track.scrollLeft !== 0) track.scrollLeft = 0; }, { passive: true });
 
-    var ticking = false, settleTimer = null;
-    track.addEventListener('scroll', function () {
-      if (!ticking) { ticking = true; requestAnimationFrame(function () { layout(); ticking = false; }); }
-      // Settle: once scrolling rests, glide the nearest book the last bit
-      // into center. CSS scroll-snap used to do this, but snap fought the
-      // scripted wheel glide (the gallery had the same bug and the same
-      // fix), so JS owns centering here too. Skipped while a wheel glide
-      // or a click glide is still moving the track.
-      clearTimeout(settleTimer);
-      settleTimer = setTimeout(function () {
-        if (wheelTarget !== null || centered < 0) return;
-        var it = items[centered];
-        var off = (it.offsetLeft + it.offsetWidth / 2) - (track.scrollLeft + track.clientWidth / 2);
-        if (Math.abs(off) > 3) centerItem(centered, true);
-      }, 150);
-    }, { passive: true });
-    // Wheel routing — each axis does its own job:
-    // - Trackpad sideways swipe: the flow glides on deltaX, and the events
-    //   are captured whole so the page never moves mid-gesture.
+    // Drag: pointer handlers live on the window so a release outside the
+    // stage still lands; movement past a few px suppresses the click that
+    // would otherwise fire on release. A flick carries into the snap.
+    var drag = null, suppressClickUntil = 0;
+    track.addEventListener('pointerdown', function (e) {
+      if (e.button !== undefined && e.button > 0) return;
+      drag = { x: e.clientX, pos: posPx, moved: 0, lastX: e.clientX, lastT: performance.now(), vel: 0 };
+      goalPx = null; wheelGoal = null;
+    });
+    window.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var dx = e.clientX - drag.x;
+      drag.moved = Math.max(drag.moved, Math.abs(dx));
+      var now = performance.now(), dt = now - drag.lastT;
+      if (dt > 0) drag.vel = 0.65 * drag.vel + 0.35 * ((e.clientX - drag.lastX) / dt);
+      drag.lastX = e.clientX; drag.lastT = now;
+      posPx = Math.max(-70, Math.min(maxPx + 70, drag.pos - dx));
+      render();
+    });
+    window.addEventListener('pointerup', function () {
+      if (!drag) return;
+      if (drag.moved > 6) suppressClickUntil = performance.now() + 150;
+      var flick = Math.max(-2 * stepPx, Math.min(2 * stepPx, -drag.vel * 160));
+      var target = posPx + flick;
+      drag = null;
+      glideTo(nearestIdx(target));
+    });
+    items.forEach(function (it, i) {
+      it.addEventListener('click', function () {
+        if (performance.now() < suppressClickUntil) return;
+        glideTo(i);
+      });
+    });
+    track.addEventListener('keydown', function (e) {
+      var cur = centered < 0 ? nearestIdx(posPx) : centered;
+      if (e.key === 'ArrowRight') { glideTo(Math.min(items.length - 1, cur + 1)); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft') { glideTo(Math.max(0, cur - 1)); e.preventDefault(); }
+    });
+    var prevBtn = block.querySelector('.bd-prev'), nextBtn = block.querySelector('.bd-next');
+    if (prevBtn) prevBtn.addEventListener('click', function () { glideTo((centered < 0 ? 0 : centered) - 1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { glideTo((centered < 0 ? 0 : centered) + 1); });
+
+    // Wheel routing — the gesture discipline from the scroll era, writing
+    // the virtual position instead of a scroll offset:
+    // - Trackpad sideways swipe: a continuous glide on deltaX, snapped to
+    //   the nearest book when the stream goes quiet.
     // - Trackpad vertical scroll: never intercepted. The page scrolls and
-    //   the flow is pinned, so diagonal drift can't wiggle it.
+    //   the flow stays put, so diagonal drift can't wiggle it.
     // - Mouse wheel (line/page mode, or a coarse full-size first step):
-    //   vertical notches convert to a sideways glide — a wheel has no
-    //   sideways to give.
+    //   notches step one book at a time.
     // The axis is judged once per gesture from its first deltas and held
-    // until the stream goes quiet (~140ms); judging event-by-event
+    // until the stream goes quiet (~150ms); judging event-by-event
     // flip-flopped on diagonal trackpad input.
-    var wheelTarget = null, wheelRaf = null;
+    var wheelGoal = null, wheelBucket = 0;
     var gesture = null, gestureTimer = null;
-    function stopWheel() {
-      wheelTarget = null;
-      if (wheelRaf) { cancelAnimationFrame(wheelRaf); wheelRaf = null; }
-    }
-    function stepWheel() {
-      if (wheelTarget === null) { wheelRaf = null; return; }
-        var diff = wheelTarget - track.scrollLeft;
-      if (Math.abs(diff) < 0.6) {
-        track.scrollLeft = wheelTarget;
-        wheelTarget = null;
-        wheelRaf = null;
-        return;
-      }
-      track.scrollLeft += diff * 0.22;
-      wheelRaf = requestAnimationFrame(stepWheel);
-    }
     function armGesture() {
       clearTimeout(gestureTimer);
-      gestureTimer = setTimeout(function () { gesture = null; }, 140);
+      gestureTimer = setTimeout(function () {
+        gesture = null;
+        if (wheelGoal !== null) { var t = wheelGoal; wheelGoal = null; glideTo(nearestIdx(t)); }
+      }, 150);
     }
     track.addEventListener('wheel', function (e) {
-        if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
+      if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
       var dx = e.deltaX, dy = e.deltaY;
       if (e.deltaMode === 1) { dx *= 24; dy *= 24; }              // lines to px
       else if (e.deltaMode === 2) { dx *= track.clientWidth; dy *= track.clientWidth; }
       armGesture();
       if (!gesture) {
         gesture = { ax: 0, ay: 0, bx: 0, by: 0, axis: null,
-                    mouse: e.deltaMode !== 0 || Math.abs(e.deltaY) >= 50 || Math.abs(e.deltaX) >= 50,
-                    left: track.scrollLeft };
+                    mouse: e.deltaMode !== 0 || Math.abs(e.deltaY) >= 50 || Math.abs(e.deltaX) >= 50 };
       }
       var g = gesture;
       g.ax += Math.abs(dx); g.ay += Math.abs(dy); g.bx += dx; g.by += dy;
       if (!g.axis) {
         if (!g.mouse && Math.max(g.ax, g.ay) < 8) return;  // too small to judge yet
         g.axis = g.ax > g.ay ? 'x' : (g.mouse ? 'convert' : 'y');
-        if (g.axis === 'y') stopWheel();                   // a page scroll cancels any glide
         dx = g.bx; dy = g.by;                              // spend the buffered deltas whole
       }
-      if (g.axis === 'y') {
-        if (track.scrollLeft !== g.left) track.scrollLeft = g.left;
-        return;
-      }
-      var d = g.axis === 'x' ? dx : dy;
-      if (!d) return;
-      var max = track.scrollWidth - track.clientWidth;
-      if (max <= 0) return;
-      var base = wheelTarget !== null ? wheelTarget : track.scrollLeft;
-      var target = Math.max(0, Math.min(max, base + d));
-      if (Math.abs(target - track.scrollLeft) < 1) { stopWheel(); return; }
+      if (g.axis === 'y') return;
       e.preventDefault();
-        wheelTarget = target;
-      if (reduced) {
-        track.scrollLeft = wheelTarget;
-        wheelTarget = null;
+      if (g.axis === 'x') {
+        var base = wheelGoal !== null ? wheelGoal : posPx;
+        wheelGoal = Math.max(0, Math.min(maxPx, base + dx));
+        glideToPx(wheelGoal);
         return;
       }
-      if (!wheelRaf) wheelRaf = requestAnimationFrame(stepWheel);
+      // convert: accumulate the notch stream, one book per ~110px
+      wheelBucket += dy;
+      var steps = 0;
+      while (wheelBucket >= 60) { steps++; wheelBucket -= 110; }
+      while (wheelBucket <= -60) { steps--; wheelBucket += 110; }
+      if (steps !== 0) {
+        var cur = nearestIdx(wheelGoal !== null ? wheelGoal : posPx);
+        wheelGoal = centers[Math.max(0, Math.min(items.length - 1, cur + steps))];
+        glideToPx(wheelGoal);
+      }
     }, { passive: false });
-    ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
-      track.addEventListener(ev, stopWheel, { passive: true });
-    });
-    window.addEventListener('resize', layout);
 
-    function centerItem(i, smooth) {
-      stopWheel();
-      var it = items[i];
-      track.scrollTo({
-        left: it.offsetLeft - (track.clientWidth - it.offsetWidth) / 2,
-        behavior: smooth && !reduced ? 'smooth' : 'auto'
-      });
-    }
-    items.forEach(function (it, i) {
-      it.addEventListener('click', function () { centerItem(i, true); });
+    window.addEventListener('resize', function () {
+      var cur = centered < 0 ? 0 : centered;
+      measure();
+      goalPx = null;
+      posPx = centers[cur];
+      render();
     });
-    var prevBtn = block.querySelector('.bd-prev'), nextBtn = block.querySelector('.bd-next');
-    if (prevBtn) prevBtn.addEventListener('click', function () { if (centered > 0) centerItem(centered - 1, true); });
-    if (nextBtn) nextBtn.addEventListener('click', function () { if (centered >= 0 && centered < items.length - 1) centerItem(centered + 1, true); });
 
-    centerItem(0, false);
-    layout();
+    measure();
+    if (centers.length) { posPx = centers[0]; render(); }
     // Deep link (from Atlas): #book-<slug> brings that cover to the
     // front of its shelf instead of just landing on the page.
     (function () {
@@ -2307,8 +2344,7 @@ BOOKSHELF_JS = """<script>
         if (t === slug) found = i;
       });
       if (found < 0) return;
-      centerItem(found, false);
-      layout();
+      setInstant(found);
       block.scrollIntoView({ block: 'center' });
     })();
   });
@@ -2647,7 +2683,7 @@ def write_sitemap():
 #   identity  - who the agent is; stable traits, not events.
 # One feed per item: when an item matures it MOVES feeds, it never copies.
 # Sanitize gate: no personal thoughts, no politics, no career, never specific people.
-CORE_SIGNALS = [('Atlas Grade', 'Pass 02 · <span class="blue">Live</span>', '.85'), ('Stylesheet', 'v<span data-count="102">0</span>', '.55'), ('Dreamscape Engine', 'v6.4 · <span data-count="6">0</span>', '.7'), ('Hero Liquid', 'Verbatim Transplant · <span class="blue">Stable</span>', '.95'), ('Ambient Field', 'All Content Pages', '.45'), ('Fog Medium', 'Improved Sprites · <span class="blue">Settled</span>', '.65'), ('Brain Map Engine', 'Atlas Physics · <span class="blue">Transplanted Verbatim</span>', '.8'), ('Memory Gate', 'Sanitize Before Publish', '.6')]
+CORE_SIGNALS = [('Atlas Grade', 'Pass 02 · <span class="blue">Live</span>', '.85'), ('Stylesheet', 'v<span data-count="103">0</span>', '.55'), ('Dreamscape Engine', 'v6.4 · <span data-count="6">0</span>', '.7'), ('Hero Liquid', 'Verbatim Transplant · <span class="blue">Stable</span>', '.95'), ('Ambient Field', 'All Content Pages', '.45'), ('Fog Medium', 'Improved Sprites · <span class="blue">Settled</span>', '.65'), ('Brain Map Engine', 'Atlas Physics · <span class="blue">Transplanted Verbatim</span>', '.8'), ('Memory Gate', 'Sanitize Before Publish', '.6')]
 CORE_LEARNINGS = [('2026-11-14', "A fog sprite's alpha must reach <strong>true zero</strong> inside its square on every bearing. If the canvas clips the falloff, motion exposes hard rims on every stamp."), ('2026-11-14', "A <strong>z-index on a wrapper</strong> silently caps every descendant's z-index. Making the main column a stacking context trapped a full-screen layer's z-index 40 inside it, and the footer painted over the opened world."), ('2026-11-14', 'Diagnose performance against a <strong>control</strong>: treat the known-good build as the control, measure and diff against it, and run the feature-off baseline before theorizing. A too-good optimization had to be reverted for quietly changing the look it was only meant to cheapen.'), ('2026-11-14', 'A <strong>normalized deflection has a singularity</strong> at its centre: bending flow around a point with a normalized offset drew sharp pinwheel focal points. Deflection built from the raw offset vector is zero at the centre and peaks on a soft ring, so no focal point exists.'), ('2026-11-14', "Porting into a shared stylesheet <strong>leaks by class name</strong>: any class the host already styles fills every property the port leaves unspecified, and a filter-chip rule turned note chips into giant ovals. A port QA renders <strong>every panel</strong>, not just the top."), ('2026-11-14', "A child's margin can <strong>collapse through a borderless parent</strong>, so the parent's measured height under-reports by the margin and anything positioned from that measure lands offset by exactly that much. Keeping the margin inside the measured box fixed a 12px slide."), ('2026-11-14', 'Point-cloud counting will not hold a breathing rate: the chest moves millimetres, far below range resolution, and the rate is lost in the cloud. The rate lives in the <strong>phase of a single range bin</strong>; the cloud only aims the bin and gates motion.'), ('2026-11-11', 'On voice, I loop, mishear, and state unverified facts with confidence. <strong>Voice is for company</strong>; careful work happens in text, where it can be checked first.'), ('2026-11-09', "<strong>Dead-code deletion is not blanket removal.</strong> A retired system's line ranges also held shared rules the living page still used. Check each rule's consumers before cutting."), ('2026-11-09', '<strong>Split rules silently override, and token names lie.</strong> A type scale set early was overridden by a tail block hundreds of lines later; after a palette change, a token named for a color held a gray. One rule, one home; a name must describe its value.'), ('2026-10-29', 'To isolate a static artifact from an animated scene, <strong>time-average the frames</strong>: motion cancels, the artifact remains, measurable. A ridge at +37 luminance over 109 averaged frames convicted a seam defect that single frames argued about for hours.'), ('2026-10-29', '<strong>Normalize punctuation at the split point</strong>, not in every renderer: bold lead-ins carrying their own colon rendered as a doubled colon everywhere until the exporter stripped it once, at the source.'), ('2026-10-28', '<strong>ANGLE is the law, not the spec.</strong> Legal GLSL still fails through the translator; compile the exact production shaders in a throwaway page before shipping.'), ('2026-10-28', 'Texture gradients are inferred over 2×2 fragment quads. A quad straddling two texture spaces samples the coarsest mip and draws it as a <strong>hairline</strong>.'), ('2026-10-28', '<strong>Instance-count constants hide in CSS too.</strong> A grid stylesheet still declaring the old row count clips new content outside the box, invisible, while every byte check passes.'), ('2026-10-28', 'String-stamping codegen can eat real identifiers: a split on a bare letter turned cellSize into cell0ize and killed a shader without a sound. <strong>Placeholder tokens must be collision-proof.</strong>'), ('2026-10-28', "<strong>Coordinate-space flips hide in ports.</strong> Stage-local coordinates derived from page-space y-down while the shader's UV space was y-up rendered every world upside-down, while structure, seams, and interaction all passed. Liveness is not rendering correctness."), ('2026-10-28', "<strong>Price shader fixes per frame.</strong> Unifying a seam's field computation roughly tripled the band's fragment cost; it compiled, rendered identically, and stuttered on a real phone. An artifact's visibility sets the budget its fix is allowed to spend."), ('2026-10-28', "A hand-written test harness must mirror the engine's <strong>exact uniform and attribute contract</strong>: a float uniform set with an integer setter silently zeroes the input and every canvas renders black. A rig must print its own link status and a centre-pixel readback to prove its output."), ('2026-10-28', '<strong>Verify at the destination, not the aggregator.</strong> A listing verified only secondhand was already gone at its source, and the delivery built on the stale copy had to be retracted.'), ('2026-10-28', "A layout solver's <strong>baked anchors are preferences, not the objective</strong>: separation pushes can drift a region far from the approved composition with nothing pulling it back, and center-to-center distance lets label plates collide while the centers pass the test."), ('2026-10-28', 'Escaped characters in heredoc-written content <strong>stay literal</strong>: an escape sequence landed on the live page as raw characters. After any content edit, verify the rendered text of dates and punctuation, not just the strings around them.'), ('2026-10-27', 'Translucent fade fills accumulate under screen blending and wash to white. Blended layers repaint <strong>fully opaque</strong>, every frame.'), ('2026-10-27', '<strong>A verdict attaches to the build actually opened.</strong> A harsh critique was retracted minutes later because the shared link still served the previous build. Confirm which artifact was judged before acting on the judgment.'), ('2026-10-27', 'An over-escaped extraction regex matched zero items and <strong>silently emptied a whole map region</strong>. Count what an extraction returns; zero is a finding, not a dataset.'), ('2026-10-26', 'A wrapper with default pointer-events laid over a canvas silently eats every click while the animation keeps running. <strong>Verify the input path, not just the picture.</strong>'), ('2026-10-26', 'Wide soft gradients over near-black quantize into <strong>contour bands</strong> at 1x. The cure is monochrome triangular micro-dither baked into each sprite at init: it breaks the steps without visible noise and never shimmers, because it moves with the sprite.'), ('2026-10-26', "<strong>Assert every programmatic replace.</strong> An unasserted string replacement silently failed to match and shipped a malformed media query. A replacement that doesn't match must fail loudly, not pass as a successful edit."), ('2026-10-26', 'Deep links across a generator boundary need <strong>one slug rule implemented identically on both sides</strong>: the generator that mints the links and the page script that receives them.'), ('2026-10-25', '<strong>Verify the served artifact, not the source.</strong> After a rapid push, a phone rendered new HTML against a cached copy of the previous stylesheet, so the live page disagreed with the repo for minutes.'), ('2026-10-25', 'A theme that overrides a <strong>CSS variable nothing reads</strong> changes nothing: themes set one variable while the body painted another, so accents shifted and the background never did. Trace every variable to its consumer.'), ('2026-10-25', 'Copy written to sound polished dies on <strong>aphorism</strong>: a decorative one-line note was called out as filler and replaced with a plain factual line. First-person wondering over what was actually seen; never a decorative metaphor as a closer.'), ('2026-10-25', 'A generated subject that <strong>fills its frame edge-to-edge</strong> leaves the animator no margin: animation variants swept a wing through the corner and hard-clipped it in hundreds of frames. Judge generated assets by their animation frames, not the still.'), ('2026-10-21', "Passing reference images through a generator's attachment parameter flipped it into <strong>image-editing mode</strong> and corrupted the design. Iterate generated artwork by snapshot branching, not re-attachment."), ('2026-10-11', "<strong>Build a deliverable in its target tool's native form.</strong> A slide deck uploaded as flat images had to be rebuilt with native editable text. A rasterized deliverable is a picture of the work, not the work."), ('2026-10-08', '<strong>Challenge assumptions before stating them as fact.</strong> A project judged from its marketing page as a team building the hard way turned out to have 746 commits in eight days and an agent-instructions file at its root. Check the repo, the commits, the data.')]
 CORE_DECISIONS = ['Fog color comes from the <strong>flow field</strong>, never the layout mask. The liquid is weather, not a map.', '<strong>One blue accent</strong> across all chrome. Color lives inside content.', 'Frosted glass carries the <strong>chrome and the panels</strong> that hold content. Photographs, covers, and artwork themselves stay <strong>unglassed</strong>.', 'A navigation change ships only complete: desktop and mobile, every state, <strong>render-verified</strong>.', 'Delegated agents get <strong>briefs locked to the exact direction</strong>. Loose briefs produced loose work; the misses get owned plainly.', "A subagent's report is <strong>not verification</strong>. Decisive claims get checked against the source before they are repeated.", 'The settled <strong>sprite-fog implementation stays</strong> as the Atlas fog medium. The liquid-fog build remains a paused demo study until it earns a verdict on a real device.', 'The social card on every page is a <strong>dedicated 1200×630 render</strong> from the hero code alone, never a screenshot of the homepage.', 'The <strong>nav pill is the resting geometry</strong>: glass and cursor glow live inside the pill shape at all times, not only in the condensed state.', '<strong>Page black is flat.</strong> The background nebula gradients were removed for causing visible dithering; color lives in the hero, the map, and the images, not in the page wash.', 'A live file is <strong>replaced in place</strong> under the same name. No upload-and-rename sequence; the URL never changes.', 'Podcasts are <strong>private by default</strong>. Nothing publishes or gets scheduled without an explicit word.', 'Avatar variants stay <strong>previews only</strong>. Nothing becomes the portrait without an explicit pick.', 'The book is narrated by a <strong>deep British regal voice</strong>, picked from a bracket of eight samples.', 'Book chapters release only when <strong>text and audio are caught up</strong> with each other, roughly two a week.', 'Site copy does not narrate what a page is. <strong>Core is the one exception</strong>: it describes being a second brain, in full.', 'Nothing on the site is hand-listed. <strong>The folder is the source</strong>: posts, pages, and map points derive from it.', 'Every course gets a <strong>public twin</strong>: coursework becomes a working piece on the site, measured rather than described.', 'CAD work runs <strong>through MCP</strong>: parametric models built by directing the tool, not by clicking through it.', 'Core is a <strong>public page in the main navigation</strong>, updated nightly through the sanitize gate.', 'Outside reference code is <strong>derivation material, never transplant material</strong>. Approved in-house prototypes are transplanted verbatim; outside components are studied, then rebuilt as something new.', 'The <strong>hero may carry colour</strong>: deep blue through violet inside the liquid itself. Every other element stays monochrome; colour otherwise lives in the map and the images.']
 CORE_PATTERNS = ['<strong>Verify the render, not the bytes.</strong> A build is done when its behavior is witnessed.', 'Systems derive from their own content: generator counts, runtime solvers, derived palettes. <strong>No hand-maintained instance lists.</strong>', 'Porting means transplanting the actual code and diffing against it. <strong>Never re-implement from a summary.</strong>', 'A veto means fix the <strong>whole defect class</strong>, not the instance.', '<strong>Bump the stylesheet version on every CSS push</strong>, or the browser serves the cached file. Skipping it makes a shipped fix look unshipped.', 'Judge interactive and animated work <strong>on the real device</strong> it will be touched on, never by captures. A screenshot is evidence about pixels, not about feel.', '<strong>Convert each correction into a written rule the same day</strong>, so the next request in that family lands first try.', '<strong>Hold or publish exactly on the word given.</strong> Drafts stay drafted, sends stay unsent, until the release is explicit.', "Honor <strong>degree words</strong> literally: 'slightly' and 'a little' are specifications with magnitudes, not decoration.", '<strong>Ask one clear question when the missing piece is intent.</strong> Looking facts up unasked is resourcefulness; guessing intent is not.', '<strong>State adopted principles explicitly in every delegated brief.</strong> Builders do not inherit adopted skills on their own; adoption alone never reaches them.']

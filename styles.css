@@ -579,20 +579,23 @@ section.hero {
   background: radial-gradient(58% 92% at 50% 100%, rgba(165, 198, 255, 0.075), transparent 70%);
 }
 .pflow-track {
-  display: flex;
-  gap: 30px;
-  overflow-x: auto;
-  padding: 34px calc(50% - 260px) 266px;
-  perspective: 1400px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-}
-.pflow-track::-webkit-scrollbar { display: none; }
-.pflow-track:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--r-md); }
-.pcov {
   position: relative;
-  flex: 0 0 auto;
+  height: 820px;
+  overflow: hidden;
+  perspective: 1400px;
+  --fgap: 30px;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+.pflow-track:active { cursor: grabbing; }
+.pflow-track:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.pcov {
+  position: absolute;
+  left: 50%;
+  top: 34px;
   height: 520px;
   aspect-ratio: var(--ar);
   padding: 0;
@@ -658,9 +661,21 @@ section.hero {
   .fc-bar { transition: none; }
 }
 @media (max-width: 760px) {
-  .pcov { height: 300px; }
-  .pflow-track { gap: 20px; padding: 24px calc(50% - 150px) 160px; }
+  .pcov { height: 300px; top: 24px; }
+  .pflow-track { height: 484px; --fgap: 20px; }
   .fc-title { font-size: 24px; }
+}
+
+/* The flows live on the site's standard glass panel: caption first,
+   stage below, the stage bleeding to the panel's side edges. */
+.flow-panel { padding: 22px 22px 8px; margin: 14px 0 22px; }
+.flow-panel .flow-cap { margin-top: 0; }
+.flow-panel .flow-scene, .flow-panel .pflow-scene { margin-left: -22px; margin-right: -22px; }
+.flow-panel .flow-hint { padding: 0 22px; }
+@media (max-width: 760px) {
+  .flow-panel { padding: 16px 16px 6px; }
+  .flow-panel .flow-scene, .flow-panel .pflow-scene { margin-left: -16px; margin-right: -16px; }
+  .flow-panel .flow-hint { padding: 0 16px; }
 }
 
 /* Full viewing pane: the tapped photo flies out of the flow, tap again to return */
@@ -745,19 +760,23 @@ section.hero {
 .flow-block .flow-scene { margin: 8px 0 6px; }
 .flow-label { margin: 0 0 2px; }
 .flow-track {
-  display: flex;
-  gap: 30px;
-  overflow-x: auto;
-  padding: 36px calc(50% - 124px) 198px;
-  perspective: 1400px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-}
-.flow-track::-webkit-scrollbar { display: none; }
-.cov {
   position: relative;
-  flex: 0 0 auto;
+  height: 606px;
+  overflow: hidden;
+  perspective: 1400px;
+  --fgap: 30px;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+.flow-track:active { cursor: grabbing; }
+.flow-track:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.cov {
+  position: absolute;
+  left: 50%;
+  top: 36px;
   width: 248px;
   height: 372px;
   padding: 0;
@@ -908,7 +927,8 @@ section.hero {
   .cov { width: 188px; height: 282px; }
   .cov-title { font-size: 19px; }
   .cov-front { padding: 18px 15px 18px 38px; }
-  .flow-track { padding: 26px calc(50% - 94px) 150px; gap: 22px; }
+  .flow-track { height: 458px; --fgap: 22px; }
+  .cov { top: 26px; }
 }
 
 /* Resume */
