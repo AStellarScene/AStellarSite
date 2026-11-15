@@ -42,7 +42,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#0A0A0A">
-{schema}<link rel="stylesheet" href="styles.css?v=88">
+{schema}<link rel="stylesheet" href="styles.css?v=89">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -2647,7 +2647,7 @@ def latent_map_data():
         h = zlib.crc32(name.encode())
         ang = math.radians(h % 360)
         items.append({"kind": "project", "title": name, "sub": status,
-                      "rgb": _lighten([94, 234, 212], 0.1 + (h % 40) / 100.0), "size": 22,
+                      "rgb": _lighten([77, 163, 255], 0.1 + (h % 40) / 100.0), "size": 22,
                       "dx": round(math.cos(ang) * 0.07, 4), "dy": round(math.sin(ang) * 0.05, 4),
                       "region": "projects", "href": slug + ".html"})
     for i, p in enumerate(POSTS):
@@ -2716,7 +2716,7 @@ def _map_group(heading, page_href, region):
 
 sitemap_body = """  <canvas id="latent-map" aria-hidden="true"></canvas>
   <div id="latent-hit"></div>
-  <div class="latent-glass-layer" aria-hidden="true" style="background: radial-gradient(60% 50% at 30% 44%, rgba(34, 190, 205, 0.27), rgba(34, 190, 205, 0) 70%), radial-gradient(55% 45% at 76% 40%, rgba(216, 96, 158, 0.25), rgba(216, 96, 158, 0) 70%), radial-gradient(60% 50% at 24% 80%, rgba(228, 96, 52, 0.27), rgba(228, 96, 52, 0) 70%), radial-gradient(55% 45% at 74% 79%, rgba(226, 182, 92, 0.23), rgba(226, 182, 92, 0) 70%), rgba(6, 8, 16, 0.47);"></div>
+  <div class="latent-glass-layer" aria-hidden="true"></div>
   <script>document.body.classList.add('sitemap-body');</script>
   <div class="sitemap-flow">
   <section class="latent-intro">
@@ -2768,18 +2768,18 @@ LATENT_MAP_JS = r"""<script>
 
   function boost(rgb) {
     var avg = (rgb[0] + rgb[1] + rgb[2]) / 3;
-    var out = rgb.map(function (c) { return Math.max(0, Math.min(255, Math.round(avg + (c - avg) * 2.55))); });
+    var out = rgb.map(function (c) { return Math.max(0, Math.min(255, Math.round(avg + (c - avg) * 2.85))); });
     var mx = Math.max(out[0], out[1], out[2]);
-    if (mx > 1) { var f = Math.min(2.0, 225 / mx); out = out.map(function (c) { return Math.min(255, Math.round(c * f)); }); }
+    if (mx > 1) { var f = Math.min(2.0, 235 / mx); out = out.map(function (c) { return Math.min(255, Math.round(c * f)); }); }
     return out;
   }
   function makeGlow(rgb) {
     var c = document.createElement('canvas'); c.width = c.height = 64;
     var g = c.getContext('2d');
     var grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    grad.addColorStop(0, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0.9)');
-    grad.addColorStop(0.22, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0.42)');
-    grad.addColorStop(0.58, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0.09)');
+    grad.addColorStop(0, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0.95)');
+    grad.addColorStop(0.22, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0.47)');
+    grad.addColorStop(0.58, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0.11)');
     grad.addColorStop(1, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0)');
     g.fillStyle = grad; g.fillRect(0, 0, 64, 64);
     return c;
@@ -2799,8 +2799,8 @@ LATENT_MAP_JS = r"""<script>
     g.fill();
     return c;
   }
-  var probeSprite = makeGlow([45, 212, 191]);
-  var cometSprite = makeSpark([45, 212, 191]);
+  var probeSprite = makeGlow([77, 163, 255]);
+  var cometSprite = makeSpark([77, 163, 255]);
 
   // The dynamic nebula: the demo's Improved implementation, lifted
   // whole. Shared periodic fbm + ridge fields are sampled as ALPHA
@@ -2817,11 +2817,11 @@ LATENT_MAP_JS = r"""<script>
     return [lerpF(c1[0], c2[0], u), lerpF(c1[1], c2[1], u), lerpF(c1[2], c2[2], u)];
   }
   var PALS = {
-    photography: [[36, 84, 186], [34, 190, 205], [178, 246, 240]],
-    bookshelf: [[146, 62, 198], [216, 96, 158], [255, 198, 226]],
-    worlds: [[166, 34, 46], [228, 96, 52], [255, 216, 148]],
-    projects: [[216, 118, 36], [226, 182, 92], [255, 242, 198]],
-    writing: [[72, 52, 168], [150, 130, 255], [226, 218, 255]]
+    photography: [[30, 70, 158], [34, 190, 205], [178, 246, 240]],
+    bookshelf: [[128, 52, 178], [216, 96, 158], [255, 198, 226]],
+    worlds: [[146, 28, 40], [228, 96, 52], [255, 216, 148]],
+    projects: [[188, 100, 28], [226, 182, 92], [255, 242, 198]],
+    writing: [[60, 42, 148], [150, 130, 255], [226, 218, 255]]
   };
   var fbmField = null, ridgeField = null, distArr = null, angBinArr = null;
   var improvedSprites = {}, filamentSprites = {}, dustFieldSprite = null, improvedReady = false;
@@ -2932,7 +2932,7 @@ LATENT_MAP_JS = r"""<script>
   // derive a 3-stop ramp from the region's own colour so a new
   // region can never take the map down or arrive unstyled.
   function derivePal(rgb) {
-    var deep = rgb.map(function (c) { return Math.round(c * 0.42); });
+    var deep = rgb.map(function (c) { return Math.round(c * 0.36); });
     var pale = rgb.map(function (c) { return Math.round(c + (255 - c) * 0.72); });
     return [deep, rgb.slice(), pale];
   }
@@ -2964,10 +2964,10 @@ LATENT_MAP_JS = r"""<script>
     var r = mulberry32(2027);
     Object.keys(DATA.regions).forEach(function (k) {
       var arr = [];
-      arr.push({ key: k, wash: true, bx: (r() * 2 - 1) * 0.08, by: (r() * 2 - 1) * 0.08, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 2.9, alpha: 0.065, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * 0.0009, ph: r() * 6.283, sp: 0.4 + r() * 0.5, spr: 1, bright: 0, orbit: 14 });
+      arr.push({ key: k, wash: true, bx: (r() * 2 - 1) * 0.08, by: (r() * 2 - 1) * 0.08, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 2.9, alpha: 0.078, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * 0.0009, ph: r() * 6.283, sp: 0.4 + r() * 0.5, spr: 1, bright: 0, orbit: 14 });
       for (var k2 = 0; k2 < 9; k2++) {
         var ang = r() * 6.283, rad = Math.pow(r(), 0.65);
-        arr.push({ key: k, wash: false, bx: Math.cos(ang) * rad * 0.36, by: Math.sin(ang) * rad * 0.32, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 1.25 + r() * 0.75, alpha: 0.16 + r() * 0.10, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * (0.0006 + r() * 0.0012), ph: r() * 6.283, sp: 0.5 + r() * 0.7, spr: k2 % 4, bright: 0, orbit: 30 + r() * 110 });
+        arr.push({ key: k, wash: false, bx: Math.cos(ang) * rad * 0.36, by: Math.sin(ang) * rad * 0.32, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 1.25 + r() * 0.75, alpha: 0.19 + r() * 0.11, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * (0.0006 + r() * 0.0012), ph: r() * 6.283, sp: 0.5 + r() * 0.7, spr: k2 % 4, bright: 0, orbit: 30 + r() * 110 });
       }
       fogStamps[k] = arr;
       for (var j = 0; j < arr.length; j++) allStamps.push(arr[j]);
@@ -2996,9 +2996,9 @@ LATENT_MAP_JS = r"""<script>
         var bTarget = 0;
         if (probe.active && probe.x > -500) {
           var pdx = s.x - probe.x, pdy = s.y - probe.y, pd2 = Math.sqrt(pdx * pdx + pdy * pdy);
-          if (pd2 < 200) {
-            var fall = 1 - pd2 / 200;
-            s.wx += probeVx * 60 * dt * fall * 0.5; s.wy += probeVy * 60 * dt * fall * 0.5;
+          if (pd2 < 230) {
+            var fall = 1 - pd2 / 230;
+            s.wx += probeVx * 60 * dt * fall * 0.65; s.wy += probeVy * 60 * dt * fall * 0.65;
             bTarget = fall;
           }
         }
@@ -3364,9 +3364,23 @@ LATENT_MAP_JS = r"""<script>
       var bu = bursts[b];
       var bdx = p.x - bu.x, bdy = p.y - bu.y, bd = Math.sqrt(bdx * bdx + bdy * bdy) || 1;
       var band = Math.abs(bd - bu.r);
-      if (band < 46 && bd > 4) {
-        var push = (1 - band / 46) * 0.6 * bu.a;
+      if (band < 52 && bd > 4) {
+        var push = (1 - band / 52) * 0.78 * bu.a;
         p.vx += (bdx / bd) * push; p.vy += (bdy / bd) * push;
+      }
+    }
+    // The magnetic well: inside ~190px the probe's field bends a
+    // point's path toward it, with a tangential swirl so points lean
+    // in and orbit slightly instead of collapsing onto the cursor.
+    // The home spring still wins at range, so the map's composition
+    // holds -- the field is felt, not obeyed.
+    if (probe.active && glassCur < 0.5) {
+      var mdx = probe.x - p.x, mdy = probe.y - p.y;
+      var md = Math.sqrt(mdx * mdx + mdy * mdy);
+      if (md < 190 && md > 12) {
+        var mf = (1 - md / 190) * 0.045;
+        p.vx += (mdx / md) * mf + (-mdy / md) * mf * 0.55;
+        p.vy += (mdy / md) * mf + (mdx / md) * mf * 0.55;
       }
     }
     if (fixate) {
@@ -3377,11 +3391,11 @@ LATENT_MAP_JS = r"""<script>
         p.vx += (fdx / fd) * pull; p.vy += (fdy / fd) * pull;
       }
     }
-    p.vx *= 0.93; p.vy *= 0.93;
+    p.vx *= 0.925; p.vy *= 0.925;
     p.x += p.vx; p.y += p.vy;
     var dx = p.x - probe.x, dy = p.y - probe.y, d2 = dx * dx + dy * dy;
     var target = d2 < 19600 ? 1 - Math.sqrt(d2) / 140 : 0;
-    p.lit += (target - p.lit) * (target > p.lit ? 0.28 : 0.08);
+    p.lit += (target - p.lit) * (target > p.lit ? 0.34 : 0.06);
     p.flash *= 0.94;
   }
 
@@ -3414,8 +3428,8 @@ LATENT_MAP_JS = r"""<script>
 
     regionKeys.forEach(function (k) {
       var r = DATA.regions[k];
-      r.cx = r.x + Math.sin(t * 0.11 + r.seed) * 26;
-      r.cy = r.y + Math.cos(t * 0.09 + r.seed * 1.3) * 20;
+      r.cx = r.x + Math.sin(t * 0.13 + r.seed) * 32;
+      r.cy = r.y + Math.cos(t * 0.105 + r.seed * 1.3) * 24;
     });
 
     var attract = !probe.active || now - probe.last > 3500;
@@ -3433,18 +3447,18 @@ LATENT_MAP_JS = r"""<script>
     if (!attract && glassCur < 0.5 && nearItem) {
       var ndx = nearItem.x - probe.tx, ndy = nearItem.y - probe.ty;
       var nd = Math.sqrt(ndx * ndx + ndy * ndy);
-      if (nd < 170 && nd > 1) {
-        var pull = (1 - nd / 170) * 0.16;
+      if (nd < 185 && nd > 1) {
+        var pull = (1 - nd / 185) * 0.22;
         pTx = probe.tx + ndx * pull; pTy = probe.ty + ndy * pull;
       }
     }
-    var sprK = attract ? 0.05 : 0.22, sprD = attract ? 0.80 : 0.62;
+    var sprK = attract ? 0.05 : 0.17, sprD = attract ? 0.80 : 0.70;
     probeVx = (probeVx + (pTx - probe.x) * sprK) * sprD;
     probeVy = (probeVy + (pTy - probe.y) * sprK) * sprD;
     probe.x += probeVx;
     probe.y += probeVy;
     trail.unshift({ x: probe.x, y: probe.y });
-    if (trail.length > 26) trail.pop();
+    if (trail.length > 34) trail.pop();
 
     if (!fixate && now > nextFixate && glassCur < 0.5) {
       fixate = { item: items[Math.floor(Math.random() * items.length)], until: now + 3400, strength: 0 };
@@ -3491,7 +3505,7 @@ LATENT_MAP_JS = r"""<script>
           var size2 = R * s.sizeMul * (1 + 0.06 * breathe);
           var spr = improvedSprites[k][s.spr % improvedSprites[k].length];
           ctx.save();
-          ctx.globalAlpha = clampF(s.alpha * (1 + 0.18 * breathe) + 0.11 * s.bright, 0, 0.52);
+          ctx.globalAlpha = clampF(s.alpha * (1 + 0.18 * breathe) + 0.13 * s.bright, 0, 0.58);
           ctx.translate(s.x, s.y);
           ctx.rotate(s.rot);
           ctx.scale(1, 0.75 + 0.25 * Math.sin(s.ph));
@@ -3501,7 +3515,7 @@ LATENT_MAP_JS = r"""<script>
         for (var f = 0; f < 2; f++) {
           var fs = filamentSprites[k][f];
           var fsize = regionSize * (1.05 + f * 0.2) * (1 + 0.04 * Math.sin(tt * 0.0004 + f * 2 + ridx));
-          ctx.save(); ctx.globalAlpha = 0.13 + 0.03 * Math.sin(tt * 0.0005 + f + ridx * 2);
+          ctx.save(); ctx.globalAlpha = 0.16 + 0.03 * Math.sin(tt * 0.0005 + f + ridx * 2);
           ctx.translate(cx + Math.sin(tt * 0.0001 + f * 3 + ridx) * 16, cy + Math.cos(tt * 0.00009 + f * 2) * 12);
           ctx.rotate(f * 1.7 + ridx + tt * 0.000015); ctx.scale(1, 0.42);
           ctx.drawImage(fs, -fsize / 2, -fsize / 2, fsize, fsize); ctx.restore();
@@ -3509,7 +3523,7 @@ LATENT_MAP_JS = r"""<script>
         ctx.globalCompositeOperation = 'lighter';
         var core = improvedSprites[k][0];
         var cs = regionSize * 0.42 * (1 + 0.05 * Math.sin(tt * 0.0006 + ridx * 2));
-        ctx.save(); ctx.globalAlpha = 0.42;
+        ctx.save(); ctx.globalAlpha = 0.5;
         ctx.translate(cx, cy); ctx.drawImage(core, -cs / 2, -cs / 2, cs, cs); ctx.restore();
         ctx.globalCompositeOperation = 'screen';
       });
@@ -3583,8 +3597,8 @@ LATENT_MAP_JS = r"""<script>
         if (p.lit > 0.25 && links.length < 14) links.push(p);
         var isFix = fixate && fixate.item === p;
         var tw2 = 0.82 + 0.18 * Math.sin(t * 2.1 + p.ph);
-        var sz = p.size * tw2 * (1 + p.lit * 1.25 + p.flash * 0.7 + (isFix ? 0.55 : 0));
-        ctx.globalAlpha = Math.min(1, 0.64 + p.lit * 0.3 + p.flash * 0.35) * cf;
+        var sz = p.size * tw2 * (1 + p.lit * 1.45 + p.flash * 0.7 + (isFix ? 0.55 : 0));
+        ctx.globalAlpha = Math.min(1, 0.72 + p.lit * 0.3 + p.flash * 0.35) * cf;
         ctx.drawImage(p.sprite, p.x - sz * 0.72, p.y - sz * 0.72, sz * 1.44, sz * 1.44);
         ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = Math.min(1, 0.72 + p.lit * 0.35 + p.flash * 0.4) * cf;
@@ -3630,7 +3644,7 @@ LATENT_MAP_JS = r"""<script>
 
       for (var s2 = trail.length - 1; s2 > 0; s2--) {
         var a2 = trail[s2], b2 = trail[s2 - 1];
-        ctx.strokeStyle = 'hsla(' + Math.round((t * 46 + s2 * 7) % 360) + ', 95%, 72%, ' + (0.34 * (1 - s2 / trail.length) * cf).toFixed(3) + ')';
+        ctx.strokeStyle = 'hsla(' + (213 + Math.round(Math.sin(t * 0.7 + s2 * 0.35) * 12)) + ', 95%, 71%, ' + (0.34 * (1 - s2 / trail.length) * cf).toFixed(3) + ')';
         ctx.lineWidth = 2.2 - s2 * 0.07;
         ctx.beginPath(); ctx.moveTo(a2.x, a2.y); ctx.lineTo(b2.x, b2.y); ctx.stroke();
       }
@@ -3647,9 +3661,9 @@ LATENT_MAP_JS = r"""<script>
         });
         var rc = DATA.regions[nr].rgb;
         ctx.lineWidth = 1.6;
-        ctx.strokeStyle = 'rgba(94, 234, 212,' + (rb.a * 0.5 * cf).toFixed(3) + ')';
+        ctx.strokeStyle = 'rgba(147, 197, 253,' + (rb.a * 0.5 * cf).toFixed(3) + ')';
         ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r, 0, Math.PI * 2); ctx.stroke();
-        ctx.strokeStyle = 'rgba(232, 121, 249,' + (rb.a * 0.3 * cf).toFixed(3) + ')';
+        ctx.strokeStyle = 'rgba(77, 163, 255,' + (rb.a * 0.3 * cf).toFixed(3) + ')';
         ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r * 0.72, 0, Math.PI * 2); ctx.stroke();
         ctx.strokeStyle = 'rgba(' + rc[0] + ',' + rc[1] + ',' + rc[2] + ',' + (rb.a * 0.4 * cf).toFixed(3) + ')';
         ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r * 0.45, 0, Math.PI * 2); ctx.stroke();
@@ -3666,7 +3680,7 @@ LATENT_MAP_JS = r"""<script>
         if (cm.life < 0.05 || cm.x > W + 60 || cm.y > H + 60) { comets.splice(c2, 1); continue; }
         ctx.globalAlpha = cm.life * 0.9 * cf;
         ctx.drawImage(cometSprite, cm.x - 13, cm.y - 13, 26, 26);
-        ctx.strokeStyle = 'rgba(45,212,191,' + (cm.life * 0.4 * cf).toFixed(3) + ')';
+        ctx.strokeStyle = 'rgba(77,163,255,' + (cm.life * 0.4 * cf).toFixed(3) + ')';
         ctx.lineWidth = 1.4;
         ctx.beginPath(); ctx.moveTo(cm.x, cm.y); ctx.lineTo(cm.x - cm.vx * 5, cm.y - cm.vy * 5); ctx.stroke();
       }
@@ -3674,32 +3688,59 @@ LATENT_MAP_JS = r"""<script>
 
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = cf;
-      ctx.font = '10px ui-monospace, Menlo, Consolas, monospace';
-      ctx.textAlign = 'center';
+      // Region names ride in glass chips in the site's label style:
+      // JetBrains Mono, letterspaced, the region's own colour carried
+      // only by a dot -- the same discipline as the page chrome.
+      ctx.font = '600 10px "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
+      try { ctx.letterSpacing = '2px'; } catch (e) {}
+      ctx.textAlign = 'left';
       regionKeys.forEach(function (k) {
         var r = DATA.regions[k];
         var wtxt = ctx.measureText(r.label).width;
-        ctx.fillStyle = 'rgba(3,2,9,0.6)';
-        ctx.fillRect(r.cx - wtxt / 2 - 7, r.cy - H * 0.16 - 6, wtxt + 14, 15);
-        ctx.fillStyle = 'rgba(226,240,255,0.66)';
-        ctx.fillText(r.label, r.cx, r.cy - H * 0.16 + 5);
+        var chipW = wtxt + 30, chipH = 19, chipX = r.cx - chipW / 2, chipY = r.cy - H * 0.16 - 8;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(chipX, chipY, chipW, chipH, 9.5); else ctx.rect(chipX, chipY, chipW, chipH);
+        ctx.fillStyle = 'rgba(10, 12, 18, 0.55)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = 'rgb(' + r.rgb[0] + ',' + r.rgb[1] + ',' + r.rgb[2] + ')';
+        ctx.beginPath(); ctx.arc(chipX + 11, chipY + chipH / 2, 2.4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(237, 242, 248, 0.92)';
+        ctx.fillText(r.label, chipX + 19, chipY + 13.5);
       });
+      try { ctx.letterSpacing = '0px'; } catch (e) {}
+      ctx.textAlign = 'center';
 
       // Selection persists: a point you stopped on stays identified
       // until you choose another or tap empty space.
       var showItem = selected || ((fixate && now < fixate.until) ? fixate.item : (nearItem && nearItemD < 140 * 140 ? nearItem : null));
       if (showItem) {
-        var label2 = showItem.title + '  ·  ' + showItem.sub;
-        ctx.font = '11px ui-monospace, Menlo, Consolas, monospace';
-        var w2 = ctx.measureText(label2).width;
-        var lx = Math.max(10, Math.min(W - w2 - 24, showItem.x - w2 / 2));
-        var ly = showItem.y - showItem.size - 30;
-        if (ly < 16) ly = showItem.y + showItem.size + 26;
-        ctx.fillStyle = 'rgba(3,2,9,0.85)';
-        ctx.fillRect(lx - 4, ly - 12, w2 + 16, 19);
-        ctx.fillStyle = '#f4f7fb';
+        ctx.font = '600 12px "Titillium Web", sans-serif';
+        var wT = ctx.measureText(showItem.title).width;
+        ctx.font = '10px "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
+        var wS = ctx.measureText('  ·  ' + showItem.sub).width;
+        var w2 = wT + wS + 22;
+        var lx = Math.max(10, Math.min(W - w2 - 20, showItem.x - w2 / 2));
+        var ly = showItem.y - showItem.size - 34;
+        if (ly < 22) ly = showItem.y + showItem.size + 30;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(lx - 6, ly - 13, w2 + 12, 21, 10.5); else ctx.rect(lx - 6, ly - 13, w2 + 12, 21);
+        ctx.fillStyle = 'rgba(8, 10, 16, 0.82)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = 'rgb(' + showItem.rgb[0] + ',' + showItem.rgb[1] + ',' + showItem.rgb[2] + ')';
+        ctx.beginPath(); ctx.arc(lx + 3, ly - 2.5, 2.4, 0, Math.PI * 2); ctx.fill();
         ctx.textAlign = 'left';
-        ctx.fillText(label2, lx + 4, ly + 2);
+        ctx.font = '600 12px "Titillium Web", sans-serif';
+        ctx.fillStyle = '#F4F7FB';
+        ctx.fillText(showItem.title, lx + 10, ly + 2);
+        ctx.font = '10px "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
+        ctx.fillStyle = 'rgba(159, 180, 200, 0.95)';
+        ctx.fillText('  ·  ' + showItem.sub, lx + 10 + wT, ly + 2);
         ctx.textAlign = 'center';
       }
       ctx.globalAlpha = 1;
@@ -3711,10 +3752,10 @@ LATENT_MAP_JS = r"""<script>
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = cf;
-      ctx.strokeStyle = 'rgba(45,212,191,0.9)';
+      ctx.strokeStyle = 'rgba(77,163,255,0.9)';
       ctx.lineWidth = 1.2;
       ctx.beginPath(); ctx.arc(probe.x, probe.y, 14 + Math.sin(t * 2.4) * 1.6, 0, Math.PI * 2); ctx.stroke();
-      ctx.fillStyle = '#2dd4bf';
+      ctx.fillStyle = '#4DA3FF';
       ctx.beginPath(); ctx.arc(probe.x, probe.y, 2.4, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
       var wantCursor = (nearItem && nearItemD < 54 * 54) ? 'pointer' : '';
