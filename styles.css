@@ -566,19 +566,24 @@ section.hero {
 }
 .chip:hover { color: var(--heading); border-color: var(--accent); }
 .chip.active { color: var(--base); background: rgba(255, 255, 255, 0.85); border-color: var(--accent); font-weight: 700; }
-.pflow-scene {
-  background: radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%), var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: var(--r-lg);
-  padding: 10px 0 16px;
-  margin: 6px 0 18px;
+/* Photography — Cover Flow: cinematic scale, no box. The stage stands
+   on the page's ambient beams over a reflection floor, and the detail
+   card is replaced by the shared caption hierarchy (.flow-cap). */
+.pflow-scene { position: relative; margin: 6px 0 10px; }
+.pflow-scene::before {
+  content: "";
+  position: absolute;
+  left: 2%; right: 2%; bottom: 4%;
+  height: 52%;
+  pointer-events: none;
+  background: radial-gradient(58% 92% at 50% 100%, rgba(165, 198, 255, 0.075), transparent 70%);
 }
 .pflow-track {
   display: flex;
-  gap: 26px;
+  gap: 30px;
   overflow-x: auto;
-  padding: 26px calc(50% - 240px) 22px;
-  perspective: 1300px;
+  padding: 34px calc(50% - 260px) 266px;
+  perspective: 1400px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
@@ -586,34 +591,47 @@ section.hero {
 .pflow-track::-webkit-scrollbar { display: none; }
 .pflow-track:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--r-md); }
 .pcov {
+  position: relative;
   flex: 0 0 auto;
-  height: 440px;
+  height: 520px;
   aspect-ratio: var(--ar);
   padding: 0;
   border: 1px solid var(--panel-border);
   border-radius: var(--r-md);
-  overflow: hidden;
   background: #0a0a0a;
   cursor: pointer;
   transform-style: preserve-3d;
   box-shadow: 0 22px 30px rgba(0, 0, 0, 0.5);
   -webkit-tap-highlight-color: transparent;
 }
-.pcov img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.pcov img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; border-radius: calc(var(--r-md) - 1px); }
+.pcov .refl {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: 50% 100%;
+  transform: scaleY(-1);
+  border-radius: 0 0 var(--r-md) var(--r-md);
+  opacity: 0.42;
+  filter: brightness(0.8) saturate(0.85);
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.32) 26%, transparent 50%);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.32) 26%, transparent 50%);
+}
 .pcov.selected { border-color: var(--status); box-shadow: 0 0 0 1px var(--status), 0 22px 30px rgba(0, 0, 0, 0.5); }
 .pcov:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-.photo-detail {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: var(--r-lg);
-  padding: 18px 20px;
-}
-.pd-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-.photo-detail h3 { margin: 6px 0 0; font-size: 21px; }
-.pd-side { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex: 0 0 auto; }
-#pd-count { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; color: var(--status); }
-.pd-nav { display: flex; gap: 8px; }
-.pd-arrow {
+
+/* Shared flow caption: the hierarchy under each Cover Flow stage.
+   Status/group label and counter up top, a large title, a mono meta
+   line, one dim blurb, and a hairline progress bar. No box. */
+.flow-cap { margin-top: 12px; }
+.fc-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.fc-side { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex: 0 0 auto; }
+.fc-count { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; color: var(--dim); }
+.fc-nav { display: flex; gap: 8px; }
+.pd-arrow, .fc-arrow {
   -webkit-appearance: none;
   appearance: none;
   width: 38px;
@@ -627,11 +645,22 @@ section.hero {
   padding: 0;
   cursor: pointer;
 }
-.pd-arrow:hover { border-color: var(--accent); color: var(--accent); }
-.pd-desc { color: var(--dim); margin: 10px 0 0; }
+.pd-arrow:hover, .fc-arrow:hover { border-color: var(--accent); color: var(--accent); }
+.fc-title { margin: 8px 0 0; font-size: 30px; font-weight: 600; line-height: 1.15; color: var(--heading); }
+.fc-meta { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); margin: 9px 0 0; }
+.fc-blurb { color: var(--dim); margin: 10px 0 0; max-width: 660px; }
+.fc-progress { height: 2px; background: rgba(255, 255, 255, 0.10); border-radius: 2px; margin-top: 18px; overflow: hidden; }
+.fc-bar { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.5s cubic-bezier(0.22, 0.8, 0.3, 1); }
+.flow-cap.swap .fc-title, .flow-cap.swap .fc-meta, .flow-cap.swap .fc-blurb { animation: capRise 0.5s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
+@keyframes capRise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .flow-cap.swap .fc-title, .flow-cap.swap .fc-meta, .flow-cap.swap .fc-blurb { animation: none; }
+  .fc-bar { transition: none; }
+}
 @media (max-width: 760px) {
-  .pcov { height: 232px; }
-  .pflow-track { gap: 18px; padding: 20px calc(50% - 150px) 16px; }
+  .pcov { height: 300px; }
+  .pflow-track { gap: 20px; padding: 24px calc(50% - 150px) 160px; }
+  .fc-title { font-size: 24px; }
 }
 
 /* Full viewing pane: the tapped photo flies out of the flow, tap again to return */
@@ -686,7 +715,7 @@ section.hero {
    tint in the button's own color, a backdrop blur, and a lit top edge.
    Applies to UI chrome only — book covers, photos, and artwork slices
    are content, not buttons, and stay unglassed. */
-.pill, .chip, .nav-toggle, .pd-arrow, .pane-close {
+.pill, .chip, .nav-toggle, .pd-arrow, .fc-arrow, .pane-close {
   backdrop-filter: blur(10px) saturate(1.4);
   -webkit-backdrop-filter: blur(10px) saturate(1.4);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14),
@@ -696,26 +725,31 @@ section.hero {
 .pill-primary { background: rgba(255, 255, 255, 0.055); border-color: rgba(255, 255, 255, 0.45); }
 .pill-bright { background: rgba(215, 215, 215, 0.15); border-color: rgba(215, 215, 215, 0.5); }
 .nav-toggle { background: rgba(255, 255, 255, 0.05); }
-.pd-arrow { background: rgba(255, 255, 255, 0.05); }
+.pd-arrow, .fc-arrow { background: rgba(255, 255, 255, 0.05); }
 .pane-close { background: rgba(12, 12, 12, 0.45); }
 
-/* Bookshelf — Cover Flow */
-.flow-scene {
-  background: radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%), var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: var(--r-lg);
-  padding: 10px 0 18px;
-  margin: 18px 0 22px;
+/* Bookshelf — Cover Flow: cinematic scale, no box. Real 3D books
+   (a spine face with the title set vertically, page blocks fore and
+   top, a back board) standing on a reflection floor over the page's
+   ambient beams, with the shared caption hierarchy (.flow-cap). */
+.flow-scene { position: relative; margin: 10px 0 6px; }
+.flow-scene::before {
+  content: "";
+  position: absolute;
+  left: 2%; right: 2%; bottom: 4%;
+  height: 52%;
+  pointer-events: none;
+  background: radial-gradient(58% 92% at 50% 100%, rgba(165, 198, 255, 0.075), transparent 70%);
 }
-.flow-block { margin-top: 24px; }
-.flow-block .flow-scene { margin: 8px 0 14px; }
+.flow-block { margin-top: 30px; }
+.flow-block .flow-scene { margin: 8px 0 6px; }
 .flow-label { margin: 0 0 2px; }
 .flow-track {
   display: flex;
   gap: 30px;
   overflow-x: auto;
-  padding: 34px calc(50% - 84px) 26px;
-  perspective: 1200px;
+  padding: 36px calc(50% - 124px) 198px;
+  perspective: 1400px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
@@ -724,8 +758,8 @@ section.hero {
 .cov {
   position: relative;
   flex: 0 0 auto;
-  width: 168px;
-  height: 252px;
+  width: 248px;
+  height: 372px;
   padding: 0;
   border: none;
   background: none;
@@ -734,17 +768,25 @@ section.hero {
   -webkit-tap-highlight-color: transparent;
 }
 .cov:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+.cov-back {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(calc(var(--bd) * -0.5));
+  backface-visibility: hidden;
+  border-radius: 8px 3px 3px 8px;
+  background: linear-gradient(105deg, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.4)), var(--cov);
+}
 .cov-front {
   position: absolute;
   inset: 0;
-  transform: translateZ(calc(var(--bd) / 2));
+  transform: translateZ(calc(var(--bd) * 0.5));
   backface-visibility: hidden;
   border-radius: 3px 8px 8px 3px;
-  background: linear-gradient(105deg, rgba(0,0,0,0.5), rgba(255,255,255,0.06) 22%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.45)), var(--cov);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10), inset 7px 0 12px rgba(0, 0, 0, 0.35), 0 18px 22px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(105deg, rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0.06) 22%, rgba(0, 0, 0, 0.15) 60%, rgba(0, 0, 0, 0.45)), var(--cov);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10), inset 9px 0 14px rgba(0, 0, 0, 0.35), 0 18px 22px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
-  padding: 18px 15px 18px 31px;
+  padding: 24px 20px 24px 46px;
   text-align: left;
 }
 .cov-front::before {
@@ -754,30 +796,30 @@ section.hero {
   left: 0;
   top: 0;
   bottom: 0;
-  width: 17px;
-  background: linear-gradient(90deg, rgba(0,0,0,0.6), rgba(0,0,0,0.28) 55%, rgba(255,255,255,0.10) 85%, rgba(0,0,0,0.35));
+  width: 24px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.28) 55%, rgba(255, 255, 255, 0.10) 85%, rgba(0, 0, 0, 0.35));
   border-right: 1px solid rgba(0, 0, 0, 0.45);
   border-radius: 3px 0 0 3px;
 }
 .cov-front::after {
   content: "";
   position: absolute;
-  inset: 9px;
+  inset: 11px;
   border: 1px solid rgba(217, 179, 106, 0.35);
   border-radius: 4px;
   pointer-events: none;
 }
-.cov.selected .cov-front { box-shadow: inset 0 0 0 2px var(--status), inset 7px 0 12px rgba(0, 0, 0, 0.35), 0 18px 22px rgba(0, 0, 0, 0.45); }
+.cov.selected .cov-front { box-shadow: inset 0 0 0 2px var(--status), inset 9px 0 14px rgba(0, 0, 0, 0.35), 0 18px 22px rgba(0, 0, 0, 0.45); }
 .cov-status {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--status);
 }
 .cov-title {
-  margin-top: 14px;
-  font-size: 19px;
+  margin-top: 16px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.28;
   color: #f0ead8;
@@ -785,29 +827,74 @@ section.hero {
 .cov-author {
   margin-top: auto;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--status);
 }
-.cov-edge {
+.cov-spine {
   position: absolute;
   top: 2px;
-  height: calc(100% - 4px);
+  left: 0;
   width: var(--bd);
+  height: calc(100% - 4px);
+  transform: rotateY(-90deg) translateZ(calc(var(--bd) * 0.5));
   backface-visibility: hidden;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.12) 50%, rgba(0, 0, 0, 0.45)), var(--cov);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
-.cov-edge-right {
+.cov-spine-t {
+  writing-mode: vertical-rl;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #f0ead8;
+  white-space: nowrap;
+  max-height: calc(100% - 20px);
+  overflow: hidden;
+}
+.cov-pages {
+  position: absolute;
+  top: 2px;
   right: 0;
-  transform: rotateY(90deg) translateZ(calc(var(--bd) / 2));
+  width: var(--bd);
+  height: calc(100% - 4px);
+  transform: rotateY(90deg) translateZ(calc(var(--bd) * 0.5));
+  backface-visibility: hidden;
   background: repeating-linear-gradient(90deg, #ddd3ba 0 2px, #c9bd9f 2px 4px);
   border-radius: 1px;
 }
-.cov-edge-left {
-  left: 0;
-  transform: rotateY(-90deg) translateZ(calc(var(--bd) / 2));
-  background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.1)), var(--cov);
+.cov-pages-top {
+  position: absolute;
+  top: 0;
+  left: 2px;
+  width: calc(100% - 4px);
+  height: var(--bd);
+  transform: rotateX(90deg) translateZ(calc(var(--bd) * 0.5));
+  backface-visibility: hidden;
+  background: repeating-linear-gradient(180deg, #ddd3ba 0 2px, #c9bd9f 2px 4px);
+  border-radius: 1px;
 }
+.cov-refl {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 100%;
+  transform: scaleY(-1);
+  opacity: 0.4;
+  filter: brightness(0.8) saturate(0.85);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.32) 26%, transparent 50%);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.32) 26%, transparent 50%);
+}
+.cov-refl .cov-front { box-shadow: none; }
 .flow-hint {
   text-align: center;
   color: var(--dim);
@@ -817,12 +904,11 @@ section.hero {
   text-transform: uppercase;
   margin: 2px 0 4px;
 }
-.book-detail { margin-top: 4px; }
-.book-byline { color: var(--dim); }
 @media (max-width: 760px) {
-  .cov { width: 132px; height: 198px; }
-  .cov-title { font-size: 16px; }
-  .flow-track { padding: 26px calc(50% - 66px) 20px; gap: 22px; }
+  .cov { width: 188px; height: 282px; }
+  .cov-title { font-size: 19px; }
+  .cov-front { padding: 18px 15px 18px 38px; }
+  .flow-track { padding: 26px calc(50% - 94px) 150px; gap: 22px; }
 }
 
 /* Resume */
