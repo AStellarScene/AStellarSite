@@ -505,7 +505,13 @@ section.hero {
 .segbar { display: flex; gap: 5px; margin: 22px 0 14px; }
 .segbar span { flex: 1 1 0; height: 8px; border-radius: var(--r-xs); background: rgba(255, 255, 255, 0.10); }
 .segbar span.filled { background: linear-gradient(180deg, #EDEDED, #B4B4B4); }
-.segbar span.current { background: var(--accent); box-shadow: 0 0 14px rgba(77, 163, 255, 0.55); }
+.segbar span.current { background: var(--accent); box-shadow: 0 0 14px rgba(77, 163, 255, 0.55); animation: seg-pulse 2.6s ease-in-out infinite; }
+/* The current segment breathes like a machine light: a slight glow
+   swell and fade on a steady sine rhythm, never fully dark. */
+@keyframes seg-pulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(77, 163, 255, 0.22); filter: brightness(0.85); }
+  50% { box-shadow: 0 0 16px rgba(77, 163, 255, 0.62); filter: brightness(1.12); }
+}
 .degree-meta {
   display: flex;
   justify-content: space-between;
