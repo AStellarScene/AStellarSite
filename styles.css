@@ -2346,7 +2346,7 @@ html.rv-on main:has(> .world-ambient) .panel { opacity: 1; transform: none; }
       /* ---------- SECOND BRAIN: descriptive panel ---------- */
       .core-root .sb-lede {
         font-size: clamp(19px, 2.6vw, 24px); font-weight: 400; color: var(--heading);
-        line-height: 1.4; margin: 2px 0 18px; max-width: 720px;
+        line-height: 1.4; margin: 2px 0 18px;
       }
       .core-root .sb-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
       .core-root .sb-cols p { margin: 0; font-size: 15.5px; font-weight: 300; color: var(--body); line-height: 1.6; }
