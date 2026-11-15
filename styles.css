@@ -2489,3 +2489,55 @@ html.rv-on main:has(> .world-ambient) .panel { opacity: 1; transform: none; }
         .core-root .gauge i { transform: scaleX(1); }
       }
 
+
+/* ---------- CORE READABILITY PASS (v99, 2026-11-15) ----------
+   Rule: the machine character lives in the instruments (scope, gauges,
+   LEDs, barcodes, plates, brain map), never in the text itself.
+   Content is sentence case in the sans; mono + uppercase + tracking is
+   reserved for pure labels (keys, codes, stamps) of a few words. */
+
+/* calmer glass behind text: same sheen, darker underlay (Core-local) */
+.core-root .glass {
+  background:
+    linear-gradient(180deg, rgba(19, 20, 27, 0.62), rgba(11, 12, 17, 0.70)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
+}
+
+/* hierarchy: panel headings become real headings */
+.core-root .panel-head h2 { font-size: 15px; letter-spacing: 0.18em; }
+.core-root .panel-head .pid { font-size: 11px; }
+.core-root .map-index button { font-size: 11px; }
+.core-root .wr-head { font-size: 11px; }
+
+/* body prose: regular weight, a step larger */
+.core-root .sb-cols p { font-size: 16px; font-weight: 400; line-height: 1.65; }
+.core-root .pat-row p { font-size: 16px; font-weight: 400; }
+.core-root .pat-row .anno { font-size: 11px; }
+.core-root .trait p { font-weight: 400; }
+.core-root .plate p { font-size: 15.5px; font-weight: 400; line-height: 1.6; }
+
+/* learnings: prose out of monospace; date stamp + cursor keep the log feel */
+.core-root .tline { padding: 11px 0; }
+.core-root .tline .tx { font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+.core-root .tline .ts { font-size: 12px; }
+
+/* identity: keys stay instrument labels; values become readable sentences */
+.core-root .id-row { padding: 12px 0; font-size: 12px; }
+.core-root .id-row .iv {
+  font-family: var(--sans); text-transform: none; letter-spacing: normal;
+  font-size: 14.5px; font-weight: 400; line-height: 1.55; color: var(--body);
+}
+
+/* label rows: one step up, more air */
+.core-root .mem-row { font-size: 12px; padding: 12px 2px; }
+.core-root .signal-row { padding: 13px 2px; }
+.core-root .signal-row .s-label { font-size: 13px; }
+.core-root .signal-row .s-value { font-size: 13px; }
+.core-root .segbar-wrap .sb-label, .core-root .segbar-wrap .sb-value { font-size: 11px; }
+.core-root .gate-row { font-size: 12px; }
+.core-root .tele-item { font-size: 12px; }
+
+/* notes: ticker retired (moving text can't be read); chips carry the notes */
+.core-root .ticker { display: none; }
+.core-root .chip .cid { font-size: 11px; }
+.core-root .chip p { font-size: 15.5px; font-weight: 400; }
