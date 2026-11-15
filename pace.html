@@ -17,10 +17,11 @@
 <meta name="twitter:description" content="Pace, by Adam Laloge: a planner for self-paced degree programs. Enter your courses and a target finish date; get a week-by-week plan with an ahead-or-behind readout.">
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="theme-color" content="#0A0A0A">
-<link rel="stylesheet" href="styles.css?v=85">
+<link rel="stylesheet" href="styles.css?v=86">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
+<canvas id="ambient" aria-hidden="true"></canvas>
 <header class="site-header">
   <div class="wrap header-inner">
     <a class="brand" href="index.html">Adam Joseph Laloge</a>
@@ -45,6 +46,7 @@
 
 <main class="wrap">
   <section>
+    <div class="panel">
     <p class="label">Projects</p>
     <h2>Pace</h2>
     <p class="status">Now: In development</p>
@@ -57,6 +59,7 @@
       <li>Replans when a course slips, instead of pretending it didn't</li>
     </ul>
     <p><a href="work.html">&#8592; All projects</a></p>
+    </div>
   </section>
 </main>
 
@@ -66,6 +69,69 @@
     <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a> &middot; <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a></span>
   </div>
 </footer>
+<script>
+(function () {
+  var canvas = document.getElementById('ambient');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var DPR = Math.min(window.devicePixelRatio || 1, 1.25);
+  var W = 0, H = 0, specks = [], raf = 0, running = true;
+  function seed() {
+    var n = Math.round(Math.min(90, Math.max(36, W * H / 26000)));
+    specks = [];
+    for (var i = 0; i < n; i++) {
+      specks.push({
+        x: Math.random() * W, y: Math.random() * H,
+        r: Math.random() * 1.4 + 0.4, s: Math.random() * 0.14 + 0.05,
+        p: Math.random() * Math.PI * 2
+      });
+    }
+  }
+  function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    seed();
+  }
+  function frame(t) {
+    ctx.clearRect(0, 0, W, H);
+    /* The beam: one diagonal band of pale blue-white light, breathing
+       on a slow sine and wandering a few percent of the width. */
+    var breath = 0.5 + 0.5 * Math.sin(t * 0.00013);
+    var bx = W * 0.30 + Math.sin(t * 0.00007) * W * 0.05;
+    var grad = ctx.createLinearGradient(bx - W * 0.34, 0, bx + W * 0.34, H * 0.9);
+    var a = 0.045 + breath * 0.05;
+    grad.addColorStop(0, 'rgba(190, 215, 255, 0)');
+    grad.addColorStop(0.5, 'rgba(190, 215, 255, ' + a.toFixed(3) + ')');
+    grad.addColorStop(1, 'rgba(190, 215, 255, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    /* Specks: dust drifting down through the beam, twinkling. */
+    for (var i = 0; i < specks.length; i++) {
+      var s = specks[i];
+      s.y += s.s;
+      s.x += Math.sin(t * 0.0004 + s.p) * 0.05;
+      if (s.y > H + 4) { s.y = -4; s.x = Math.random() * W; }
+      var tw = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(t * 0.001 + s.p));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, 6.2832);
+      ctx.fillStyle = 'rgba(220, 232, 255, ' + (tw * 0.5).toFixed(3) + ')';
+      ctx.fill();
+    }
+    if (!reduce && running) raf = requestAnimationFrame(frame);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  document.addEventListener('visibilitychange', function () {
+    running = !document.hidden;
+    if (running && !reduce) { cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); }
+  });
+  raf = requestAnimationFrame(frame);
+})();
+</script>
 <script>
 (function () {
   var btn = document.querySelector('.nav-toggle');
@@ -162,6 +228,59 @@
       card.classList.remove('sheen-on');
     });
   });
+
+  /* Risers: cards, panels, and post cards rise in staggered as they
+     enter, mirroring the section reveal. The stagger delay is cleared
+     once the rise lands so hover transitions stay instant. */
+  var risers = document.querySelectorAll('.card, .panel, .post-card');
+  if ('IntersectionObserver' in window) {
+    var io2 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        var sibs = Array.prototype.filter.call(el.parentNode.children, function (c) {
+          return c.classList && (c.classList.contains('card') || c.classList.contains('panel') || c.classList.contains('post-card'));
+        });
+        el.style.transitionDelay = Math.min(Math.max(sibs.indexOf(el), 0), 6) * 70 + 'ms';
+        el.classList.add('in');
+        io2.unobserve(el);
+        setTimeout(function () { el.style.transitionDelay = '0ms'; }, 1400);
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+    risers.forEach(function (el) { io2.observe(el); });
+  } else {
+    risers.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  /* Count-up: a big numeral climbs to its value on a sine ramp the
+     first time it enters view. Reduced motion gets the final value. */
+  var counters = document.querySelectorAll('[data-count]');
+  function runCount(el) {
+    var target = parseFloat(el.getAttribute('data-count'), 10);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.textContent = target;
+      return;
+    }
+    var start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / 1500, 1);
+      var eased = 1 - Math.cos(p * Math.PI / 2);
+      el.textContent = Math.round(target * eased);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if ('IntersectionObserver' in window && counters.length) {
+    var io3 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { runCount(e.target); io3.unobserve(e.target); }
+      });
+    }, { threshold: 0.4 });
+    counters.forEach(function (el) { io3.observe(el); });
+  } else {
+    counters.forEach(runCount);
+  }
 })();
 </script>
 

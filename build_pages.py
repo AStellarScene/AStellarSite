@@ -42,7 +42,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#0A0A0A">
-{schema}<link rel="stylesheet" href="styles.css?v=85">
+{schema}<link rel="stylesheet" href="styles.css?v=86">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -191,15 +191,139 @@ NAV_JS = """<script>
       card.classList.remove('sheen-on');
     });
   });
+
+  /* Risers: cards, panels, and post cards rise in staggered as they
+     enter, mirroring the section reveal. The stagger delay is cleared
+     once the rise lands so hover transitions stay instant. */
+  var risers = document.querySelectorAll('.card, .panel, .post-card');
+  if ('IntersectionObserver' in window) {
+    var io2 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        var sibs = Array.prototype.filter.call(el.parentNode.children, function (c) {
+          return c.classList && (c.classList.contains('card') || c.classList.contains('panel') || c.classList.contains('post-card'));
+        });
+        el.style.transitionDelay = Math.min(Math.max(sibs.indexOf(el), 0), 6) * 70 + 'ms';
+        el.classList.add('in');
+        io2.unobserve(el);
+        setTimeout(function () { el.style.transitionDelay = '0ms'; }, 1400);
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+    risers.forEach(function (el) { io2.observe(el); });
+  } else {
+    risers.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  /* Count-up: a big numeral climbs to its value on a sine ramp the
+     first time it enters view. Reduced motion gets the final value. */
+  var counters = document.querySelectorAll('[data-count]');
+  function runCount(el) {
+    var target = parseFloat(el.getAttribute('data-count'), 10);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.textContent = target;
+      return;
+    }
+    var start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / 1500, 1);
+      var eased = 1 - Math.cos(p * Math.PI / 2);
+      el.textContent = Math.round(target * eased);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if ('IntersectionObserver' in window && counters.length) {
+    var io3 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { runCount(e.target); io3.unobserve(e.target); }
+      });
+    }, { threshold: 0.4 });
+    counters.forEach(function (el) { io3.observe(el); });
+  } else {
+    counters.forEach(runCount);
+  }
+})();
+</script>
+"""
+
+AMBIENT_JS = """<script>
+(function () {
+  var canvas = document.getElementById('ambient');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var DPR = Math.min(window.devicePixelRatio || 1, 1.25);
+  var W = 0, H = 0, specks = [], raf = 0, running = true;
+  function seed() {
+    var n = Math.round(Math.min(90, Math.max(36, W * H / 26000)));
+    specks = [];
+    for (var i = 0; i < n; i++) {
+      specks.push({
+        x: Math.random() * W, y: Math.random() * H,
+        r: Math.random() * 1.4 + 0.4, s: Math.random() * 0.14 + 0.05,
+        p: Math.random() * Math.PI * 2
+      });
+    }
+  }
+  function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    seed();
+  }
+  function frame(t) {
+    ctx.clearRect(0, 0, W, H);
+    /* The beam: one diagonal band of pale blue-white light, breathing
+       on a slow sine and wandering a few percent of the width. */
+    var breath = 0.5 + 0.5 * Math.sin(t * 0.00013);
+    var bx = W * 0.30 + Math.sin(t * 0.00007) * W * 0.05;
+    var grad = ctx.createLinearGradient(bx - W * 0.34, 0, bx + W * 0.34, H * 0.9);
+    var a = 0.045 + breath * 0.05;
+    grad.addColorStop(0, 'rgba(190, 215, 255, 0)');
+    grad.addColorStop(0.5, 'rgba(190, 215, 255, ' + a.toFixed(3) + ')');
+    grad.addColorStop(1, 'rgba(190, 215, 255, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    /* Specks: dust drifting down through the beam, twinkling. */
+    for (var i = 0; i < specks.length; i++) {
+      var s = specks[i];
+      s.y += s.s;
+      s.x += Math.sin(t * 0.0004 + s.p) * 0.05;
+      if (s.y > H + 4) { s.y = -4; s.x = Math.random() * W; }
+      var tw = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(t * 0.001 + s.p));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, 6.2832);
+      ctx.fillStyle = 'rgba(220, 232, 255, ' + (tw * 0.5).toFixed(3) + ')';
+      ctx.fill();
+    }
+    if (!reduce && running) raf = requestAnimationFrame(frame);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  document.addEventListener('visibilitychange', function () {
+    running = !document.hidden;
+    if (running && !reduce) { cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); }
+  });
+  raf = requestAnimationFrame(frame);
 })();
 </script>
 """
 
 def page(fname, title, desc, active, body, extra_js="", schema="", og_image="https://adamlaloge.com/art/hero-card.jpg"):
     url = "https://adamlaloge.com/" + ("" if fname == "index.html" else fname)
-    html = (HEAD.format(title=title, desc=desc, url=url, schema=schema, og_image=og_image) + header(active)
+    # Atlas and Dreamscape run their own full-page canvases; every
+    # other page gets the ambient beam-and-specks layer behind its
+    # glass.
+    ambient = fname not in ("latent-sitemap.html", "dreams.html")
+    html = (HEAD.format(title=title, desc=desc, url=url, schema=schema, og_image=og_image)
+            + ('<canvas id="ambient" aria-hidden="true"></canvas>\n' if ambient else "")
+            + header(active)
             + '\n<main class="wrap">\n' + body + '\n</main>\n' + FOOTER
-            + extra_js + NAV_JS + "\n</body>\n</html>\n")
+            + extra_js + (AMBIENT_JS if ambient else "") + NAV_JS + "\n</body>\n</html>\n")
     open(os.path.join(SITE, fname), "w").write(html)
     print("wrote", fname, len(html))
 
@@ -606,17 +730,26 @@ LIQUID_JS = r"""<script>
 home_body = """  <section class="hero">
     <canvas id="liquid" aria-hidden="true"></canvas>
     <div class="hero-vignette" aria-hidden="true"></div>
+    <div class="hero-gloss" aria-hidden="true"></div>
+    <div class="hero-content">
+      <p class="label">Adam Laloge</p>
+      <h1>Design engineer</h1>
+      <p class="intro">I build the software that tests medical devices, and I design how it feels to use. I'm finishing a B.S. in UX Design at WGU. Most of my work is internal and can't be shown, so I build in the open here, with an honest status line on everything.</p>
+      <div class="hero-links">
+        <a class="pill pill-primary" href="resume.html">Resume &#8599;</a>
+        <a class="pill pill-bright" href="work.html">Projects &#8599;</a>
+        <a class="pill" href="latent-sitemap.html">Atlas &#8599;</a>
+      </div>
+    </div>
     <div class="scroll-cue" aria-hidden="true"><span></span></div>
   </section>
 
-  <section id="intro">
-    <p class="label">Adam Laloge</p>
-    <h1>Design engineer</h1>
-    <p class="intro">I build the software that tests medical devices, and I design how it feels to use. I'm finishing a B.S. in UX Design at WGU. Most of my work is internal and can't be shown, so I build in the open here, with an honest status line on everything.</p>
-    <div class="hero-links">
-      <a class="pill pill-primary" href="resume.html">Resume &#8599;</a>
-      <a class="pill pill-bright" href="work.html">Projects &#8599;</a>
-      <a class="pill" href="latent-sitemap.html">Atlas &#8599;</a>
+  <section id="degree">
+    <div class="panel">
+      <p class="label">WGU &middot; B.S. UX Design</p>
+      <p class="degree-line"><span class="degree-num" data-count="55">55</span> <span class="degree-of">of 88 CUs complete</span></p>
+      <div class="segbar" aria-hidden="true"><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="current"></span><span></span><span></span><span></span><span></span><span></span></div>
+      <p class="degree-meta"><span>55 of 88 CUs</span><span>33 remaining &middot; Target Jan 31, 2027</span></p>
     </div>
   </section>
 
@@ -665,30 +798,38 @@ home_body = """  <section class="hero">
   </section>
 
   <section id="about">
-    <p class="label">About</p>
-    <h2>About</h2>
-    <p>I'm 23. I work as an engineering test technician at a medical-device lab in Batesville, Indiana, where most of my time goes to building test software. I'm also finishing a B.S. in UX Design at WGU.</p>
-    <p><a href="about.html">More about me &#8599;</a></p>
+    <div class="panel">
+      <p class="label">About</p>
+      <h2>About</h2>
+      <p>I'm 23. I work as an engineering test technician at a medical-device lab in Batesville, Indiana, where most of my time goes to building test software. I'm also finishing a B.S. in UX Design at WGU.</p>
+      <p><a href="about.html">More about me &#8599;</a></p>
+    </div>
   </section>
 
   <section id="photography">
-    <p class="label">Photography</p>
-    <h2>Off the clock</h2>
-    <p><a href="photography.html"><img class="teaser-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass"></a></p>
-    <p><a href="photography.html">See the photography &#8599;</a></p>
+    <div class="panel">
+      <p class="label">Photography</p>
+      <h2>Off the clock</h2>
+      <p><a href="photography.html"><img class="teaser-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass"></a></p>
+      <p><a href="photography.html">See the photography &#8599;</a></p>
+    </div>
   </section>
 
   <section id="atlas">
-    <p class="label">Atlas</p>
-    <h2>The site, drawn as a galaxy</h2>
-    <p>Every photo, book, world, and project here is a point of light in a living nebula, drifting near the things it belongs with &mdash; a sitemap built like latent space, and generated from the site itself.</p>
-    <p><a href="latent-sitemap.html">Explore Atlas &#8599;</a></p>
+    <div class="panel">
+      <p class="label">Atlas</p>
+      <h2>The site, drawn as a galaxy</h2>
+      <p>Every photo, book, world, and project here is a point of light in a living nebula, drifting near the things it belongs with &mdash; a sitemap built like latent space, and generated from the site itself.</p>
+      <p><a href="latent-sitemap.html">Explore Atlas &#8599;</a></p>
+    </div>
   </section>
 
   <section id="contact">
-    <p class="label">Contact</p>
-    <h2>Get in touch</h2>
-    <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
+    <div class="panel">
+      <p class="label">Contact</p>
+      <h2>Get in touch</h2>
+      <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
+    </div>
   </section>"""
 page("index.html", "Adam Joseph Laloge", DESC, "index.html",
      home_body, LIQUID_JS, schema=PERSON_LD, og_image="https://adamlaloge.com/art/hero-card.jpg")
@@ -746,11 +887,13 @@ def project(fname, name, status, paras, bullets=None):
         bl = "\n    <h3>What it does</h3>\n    <ul>\n" + "\n".join(
             "      <li>%s</li>" % b for b in bullets) + "\n    </ul>"
     body = """  <section>
+    <div class="panel">
     <p class="label">Projects</p>
     <h2>%s</h2>
     <p class="status">Now: %s</p>
 %s%s
     <p><a href="work.html">&#8592; All projects</a></p>
+    </div>
   </section>""" % (name, status, "\n".join("    <p>%s</p>" % p for p in paras), bl)
     page(fname, "%s — Adam Joseph Laloge" % name, PROJ_DESCS.get(fname, DESC), "work.html", body)
 
@@ -794,6 +937,7 @@ project("lucent.html", "Lucent Launcher", "In development",
 
 # ---------- About ----------
 about_body = """  <section id="about">
+    <div class="panel">
     <p class="label">About</p>
     <h2>About</h2>
     <p>I'm Adam Laloge, 23. I work as an engineering test technician at a medical-device lab in Batesville, Indiana. Most of my time goes to building test software: the programs that run the tests, the interfaces technicians use, and the agent workflows that help build both.</p>
@@ -802,12 +946,15 @@ about_body = """  <section id="about">
     <p>Outside work and school, I photograph landscapes when I get out. I read dark fantasy and historical horror. I train, and I build side projects, one of them a Minecraft launcher written in Rust, on GitHub.</p>
     <p>One habit the lab burned in: I don't trust a claim I can't measure, including my own. That's why everything on this site is labeled with where it actually stands.</p>
     <p>Most of the building here is done by AI agents under my direction. I decide what gets built and whether it's good enough, and I verify it against the real thing. The agents do the implementation.</p>
+    </div>
   </section>
 
   <section id="contact">
+    <div class="panel">
     <p class="label">Contact</p>
     <h2>Get in touch</h2>
     <p>Code and public projects live on GitHub: <a href="https://github.com/AStellarScene">github.com/AStellarScene</a>. Email: <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a>.</p>
+    </div>
   </section>"""
 page("about.html", "About — Adam Joseph Laloge", ABOUT_DESC, "about.html", about_body)
 

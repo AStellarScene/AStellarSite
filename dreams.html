@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="AI artwork directed by Adam Laloge. Worlds are quilted into a single grid, with liquid seams between every pair. Open one and it fills the screen while the page takes on its colors.">
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="theme-color" content="#0A0A0A">
-<link rel="stylesheet" href="styles.css?v=85">
+<link rel="stylesheet" href="styles.css?v=86">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -1199,6 +1199,59 @@ initDreamQuilt(document.querySelector('.quilt'), document.querySelector('.quilt 
       card.classList.remove('sheen-on');
     });
   });
+
+  /* Risers: cards, panels, and post cards rise in staggered as they
+     enter, mirroring the section reveal. The stagger delay is cleared
+     once the rise lands so hover transitions stay instant. */
+  var risers = document.querySelectorAll('.card, .panel, .post-card');
+  if ('IntersectionObserver' in window) {
+    var io2 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        var sibs = Array.prototype.filter.call(el.parentNode.children, function (c) {
+          return c.classList && (c.classList.contains('card') || c.classList.contains('panel') || c.classList.contains('post-card'));
+        });
+        el.style.transitionDelay = Math.min(Math.max(sibs.indexOf(el), 0), 6) * 70 + 'ms';
+        el.classList.add('in');
+        io2.unobserve(el);
+        setTimeout(function () { el.style.transitionDelay = '0ms'; }, 1400);
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+    risers.forEach(function (el) { io2.observe(el); });
+  } else {
+    risers.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  /* Count-up: a big numeral climbs to its value on a sine ramp the
+     first time it enters view. Reduced motion gets the final value. */
+  var counters = document.querySelectorAll('[data-count]');
+  function runCount(el) {
+    var target = parseFloat(el.getAttribute('data-count'), 10);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.textContent = target;
+      return;
+    }
+    var start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / 1500, 1);
+      var eased = 1 - Math.cos(p * Math.PI / 2);
+      el.textContent = Math.round(target * eased);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if ('IntersectionObserver' in window && counters.length) {
+    var io3 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { runCount(e.target); io3.unobserve(e.target); }
+      });
+    }, { threshold: 0.4 });
+    counters.forEach(function (el) { io3.observe(el); });
+  } else {
+    counters.forEach(runCount);
+  }
 })();
 </script>
 
