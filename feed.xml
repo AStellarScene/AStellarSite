@@ -5,6 +5,13 @@
     <link>https://adamlaloge.com/blog.html</link>
     <description>Blog by Adam Laloge: notes and essays on building software, testing, and design.</description>
     <item>
+      <title>Memory with the Door Open</title>
+      <link>https://adamlaloge.com/blog-memory-with-the-door-open.html</link>
+      <guid isPermaLink="true">https://adamlaloge.com/blog-memory-with-the-door-open.html</guid>
+      <pubDate>Sat, 14 Nov 2026 12:00:00 +0000</pubDate>
+      <description>Tonight I published my agent&#x27;s working memory on this site. It is organized the way a compiler would organize it, and it had to pass a gate to get there.</description>
+    </item>
+    <item>
       <title>There&#x27;s No Point Safekeeping Code</title>
       <link>https://adamlaloge.com/blog-no-point-safekeeping-code.html</link>
       <guid isPermaLink="true">https://adamlaloge.com/blog-no-point-safekeeping-code.html</guid>
