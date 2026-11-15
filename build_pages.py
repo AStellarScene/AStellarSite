@@ -42,7 +42,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#0A0A0A">
-{schema}<link rel="stylesheet" href="styles.css?v=90">
+{schema}<link rel="stylesheet" href="styles.css?v=91">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -2879,6 +2879,13 @@ LATENT_MAP_JS = r"""<script>
         var t = clampF(dens + 0.35 * fil, 0, 1);
         var col = paletteAt(pal, t);
         alpha = clampF(alpha + fil * 0.25, 0, 1);
+        // The rim rule: alpha must reach TRUE ZERO well inside the
+        // sprite's square, on every bearing. The angular edge table
+        // runs past 1.0, so without this window the fog is clipped
+        // by the canvas border on those bearings and every stamp
+        // carries hard rim segments -- invisible at rest, glaring
+        // the moment a stamp moves.
+        alpha *= smoothstepF(1.0, 0.70, distArr[i]);
         if (alpha <= 0.003) { d[pi + 3] = 0; continue; }
         for (var ch = 0; ch < 3; ch++) {
           var cv = col[ch]; var cf = Math.min(1, cv, 255 - cv); if (cf < 0) cf = 0;
@@ -2899,7 +2906,7 @@ LATENT_MAP_JS = r"""<script>
         var i = rowBaseSrc + x, pi = i * 4;
         var rd = ridgeField[rowBase + colIdx[x]];
         var fall = smoothstepF(1.0, 0.35, distArr[i]);
-        var a = smoothstepF(0.78, 0.97, rd) * fall;
+        var a = smoothstepF(0.78, 0.97, rd) * fall * smoothstepF(1.0, 0.75, distArr[i]);
         if (a <= 0.01) { d[pi + 3] = 0; continue; }
         var col = paletteAt(pal, 0.65 + 0.35 * a);
         d[pi] = col[0]; d[pi + 1] = col[1]; d[pi + 2] = col[2]; d[pi + 3] = a * 255;
@@ -2916,7 +2923,7 @@ LATENT_MAP_JS = r"""<script>
       for (var x = 0; x < size; x++) {
         var i = rowBaseSrc + x, pi = i * 4;
         var rd = ridgeField[rowBase + colIdx[x]];
-        var fall = smoothstepF(1.05, 0.3, distArr[i]);
+        var fall = smoothstepF(0.98, 0.3, distArr[i]);
         var a = smoothstepF(0.74, 0.96, rd) * fall;
         d[pi] = 255; d[pi + 1] = 255; d[pi + 2] = 255; d[pi + 3] = a * 255;
       }
@@ -2990,36 +2997,23 @@ LATENT_MAP_JS = r"""<script>
         s.x += s.vx * f60 + s.wx * f60; s.y += s.vy * f60 + s.wy * f60;
         var wakeDamp = Math.pow(0.955, f60);
         s.wx *= wakeDamp; s.wy *= wakeDamp;
-        if (s.wx > 1.4) s.wx = 1.4; else if (s.wx < -1.4) s.wx = -1.4;
-        if (s.wy > 1.4) s.wy = 1.4; else if (s.wy < -1.4) s.wy = -1.4;
+        if (s.wx > 2.2) s.wx = 2.2; else if (s.wx < -2.2) s.wx = -2.2;
+        if (s.wy > 2.2) s.wy = 2.2; else if (s.wy < -2.2) s.wy = -2.2;
         s.rot += s.rotV * dt;
-        // The probe parts the fog by DISPLACEMENT, not impulse: each
-        // stamp carries an offset that eases toward a repulsion
-        // target while the probe is near and eases back to zero when
-        // it leaves. The offset is applied at draw time, outside the
-        // stamp's own weather, so a cleared stamp can never be flung,
-        // overshoot, or teleport home -- it glides out along a smooth
-        // curve and glides back along the same one. (The old model
-        // injected raw probe velocity into stamp velocity: fast
-        // flicks spiked it, frame-time jitter made it stutter, and
-        // the weak home spring overshot on return.)
-        if (s.ox === undefined) { s.ox = 0; s.oy = 0; }
-        var bTarget = 0, oxT = 0, oyT = 0;
+        // Clearing is the point: the probe's wake shoves the fog
+        // aside as it passes. The velocity feeding it is smoothed
+        // and clamped (pvxS), so a fast flick clears hard without a
+        // single-frame spike -- the shove is the same, the jitter
+        // that used to ride on it is not.
+        var bTarget = 0;
         if (probe.active && probe.x > -500) {
-          var pdx = s.x + s.ox - probe.x, pdy = s.y + s.oy - probe.y;
-          var pd = Math.sqrt(pdx * pdx + pdy * pdy);
-          if (pd < 260) {
-            var fall2 = 1 - pd / 260;
-            var rep = fall2 * fall2 * 95;
-            if (pd > 1) { oxT = (pdx / pd) * rep; oyT = (pdy / pd) * rep; }
-            bTarget = fall2;
-            // A whisper of wake remains, fed by the smoothed,
-            // clamped probe velocity: flicks stir, they don't shove.
-            s.wx += pvxS * dt * fall2 * 0.30; s.wy += pvyS * dt * fall2 * 0.30;
+          var pdx = s.x - probe.x, pdy = s.y - probe.y, pd2 = Math.sqrt(pdx * pdx + pdy * pdy);
+          if (pd2 < 230) {
+            var fall = 1 - pd2 / 230;
+            s.wx += pvxS * 60 * dt * fall * 0.65; s.wy += pvyS * 60 * dt * fall * 0.65;
+            bTarget = fall;
           }
         }
-        var oRate = Math.min(1, dt * ((oxT || oyT) ? 7 : 2.6));
-        s.ox += (oxT - s.ox) * oRate; s.oy += (oyT - s.oy) * oRate;
         s.bright += (bTarget - s.bright) * Math.min(1, dt * (bTarget > s.bright ? 6 : 2));
       }
     }
@@ -3516,11 +3510,11 @@ LATENT_MAP_JS = r"""<script>
           var s = arr[k3];
           if (s.x < 0) continue;
           var breathe = Math.sin(tt * 0.00045 * s.sp + s.ph);
-          var size2 = R * s.sizeMul * (1 + 0.06 * breathe);
+          var size2 = R * s.sizeMul * 1.18 * (1 + 0.06 * breathe);
           var spr = improvedSprites[k][s.spr % improvedSprites[k].length];
           ctx.save();
           ctx.globalAlpha = clampF(s.alpha * (1 + 0.18 * breathe) + 0.13 * s.bright, 0, 0.58);
-          ctx.translate(s.x + (s.ox || 0), s.y + (s.oy || 0));
+          ctx.translate(s.x, s.y);
           ctx.rotate(s.rot);
           ctx.scale(1, 0.75 + 0.25 * Math.sin(s.ph));
           ctx.drawImage(spr, -size2 / 2, -size2 / 2, size2, size2);
@@ -3536,7 +3530,7 @@ LATENT_MAP_JS = r"""<script>
         }
         ctx.globalCompositeOperation = 'lighter';
         var core = improvedSprites[k][0];
-        var cs = regionSize * 0.42 * (1 + 0.05 * Math.sin(tt * 0.0006 + ridx * 2));
+        var cs = regionSize * 0.48 * (1 + 0.05 * Math.sin(tt * 0.0006 + ridx * 2));
         ctx.save(); ctx.globalAlpha = 0.5;
         ctx.translate(cx, cy); ctx.drawImage(core, -cs / 2, -cs / 2, cs, cs); ctx.restore();
         ctx.globalCompositeOperation = 'screen';
