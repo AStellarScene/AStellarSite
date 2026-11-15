@@ -1281,8 +1281,13 @@ ul.plain { list-style: none; padding-left: 0; }
    whatever size the display is, and the image fills it */
 html.world-lock, html.world-lock body { overflow: hidden; }
 
-/* Over an opened world: header and title block float above the image */
-html.latent-live .site-header { position: relative; z-index: 50; }
+/* Over an opened world: header and title block float above the image.
+   flow-root on the header is load-bearing: it keeps the pill's
+   margin-top inside the header box, so the header's offsetHeight --
+   which the page script reads as --bar-h, the opened quilt's top --
+   equals the bar's full visual height. Without it the margin collapses
+   through and the opened world slides that far under the pill. */
+html.latent-live .site-header { position: relative; z-index: 50; display: flow-root; }
 html.latent-live .latent-head { position: relative; z-index: 45; }
 html.latent-live[data-world] .site-header {
   /* Pinned at the top while a world is open. The image itself does NOT
@@ -1325,6 +1330,15 @@ html.latent-live[data-world="vending"] .site-header::before { background-image: 
 html.latent-live[data-world="watch"] .site-header::before { background-image: url("art/the-long-watch.jpg"); }
 html.latent-live[data-world="vending"] .site-header::after { background: rgba(4, 10, 16, 0.42); }
 html.latent-live[data-world="watch"] .site-header::after { background: rgba(17, 17, 17, 0.42); }
+
+/* While a world is open the document collapses to one viewport (the
+   quilt is fixed, the scroll locked), which lands the in-flow footer
+   mid-screen. The glass build put main and the footer on the same
+   z-index: 1 layer (content above the ambient canvas); at equal
+   z-index the later footer paints over main's whole stacking context,
+   quilt included. Drop the footer below main for exactly the time a
+   world is open. */
+html.latent-live[data-world] .site-footer { z-index: 0; }
 
 /* When a world opens, the text above it fades away entirely */
 html.latent-live .latent-head { transition: opacity 0.7s ease; }
