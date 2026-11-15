@@ -462,7 +462,7 @@ section.hero {
 .card {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
+  background: linear-gradient(180deg, rgba(19, 20, 27, 0.62), rgba(11, 12, 17, 0.70)), linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
   backdrop-filter: blur(16px) saturate(1.25);
   -webkit-backdrop-filter: blur(16px) saturate(1.25);
   border: 1px solid var(--panel-border);
@@ -499,7 +499,7 @@ section.hero {
    the container; what lives inside it (text, photos) stays unglassed. */
 .panel {
   position: relative;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
+  background: linear-gradient(180deg, rgba(19, 20, 27, 0.62), rgba(11, 12, 17, 0.70)), linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
   backdrop-filter: blur(16px) saturate(1.25);
   -webkit-backdrop-filter: blur(16px) saturate(1.25);
   border: 1px solid var(--panel-border);
@@ -867,7 +867,7 @@ section.hero {
   /* On screen the resume sits in one glass panel; print keeps the
      plain white document below. */
   #resume {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
+    background: linear-gradient(180deg, rgba(19, 20, 27, 0.62), rgba(11, 12, 17, 0.70)), linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
     backdrop-filter: blur(16px) saturate(1.25);
     -webkit-backdrop-filter: blur(16px) saturate(1.25);
     border: 1px solid var(--panel-border);
@@ -1687,7 +1687,7 @@ body.sitemap-body .latent-scrollzone {
   border: 1px solid var(--panel-border);
   border-radius: var(--r-lg);
   padding: 24px 26px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
+  background: linear-gradient(180deg, rgba(19, 20, 27, 0.62), rgba(11, 12, 17, 0.70)), linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
   backdrop-filter: blur(16px) saturate(1.25);
   -webkit-backdrop-filter: blur(16px) saturate(1.25);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 18px 40px rgba(0, 0, 0, 0.32);
@@ -1848,7 +1848,7 @@ html.rv-on main:has(> .world-ambient) .panel { opacity: 1; transform: none; }
 
       /* ---------- Glass ---------- */
       .core-root .glass {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
+        background: linear-gradient(180deg, rgba(19, 20, 27, 0.62), rgba(11, 12, 17, 0.70)), linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
         -webkit-backdrop-filter: blur(16px) saturate(1.25);
         backdrop-filter: blur(16px) saturate(1.25);
         border: 1px solid var(--panel-border);
@@ -2495,13 +2495,6 @@ html.rv-on main:has(> .world-ambient) .panel { opacity: 1; transform: none; }
    LEDs, barcodes, plates, brain map), never in the text itself.
    Content is sentence case in the sans; mono + uppercase + tracking is
    reserved for pure labels (keys, codes, stamps) of a few words. */
-
-/* calmer glass behind text: same sheen, darker underlay (Core-local) */
-.core-root .glass {
-  background:
-    linear-gradient(180deg, rgba(19, 20, 27, 0.62), rgba(11, 12, 17, 0.70)),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
-}
 
 /* hierarchy: panel headings become real headings */
 .core-root .panel-head h2 { font-size: 15px; letter-spacing: 0.18em; }
