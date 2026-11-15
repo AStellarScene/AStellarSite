@@ -42,7 +42,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#0A0A0A">
-{schema}<link rel="stylesheet" href="styles.css?v=92">
+{schema}<link rel="stylesheet" href="styles.css?v=93">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -2763,9 +2763,9 @@ LATENT_MAP_JS = r"""<script>
 
   function boost(rgb) {
     var avg = (rgb[0] + rgb[1] + rgb[2]) / 3;
-    var out = rgb.map(function (c) { return Math.max(0, Math.min(255, Math.round(avg + (c - avg) * 2.85))); });
+    var out = rgb.map(function (c) { return Math.max(0, Math.min(255, Math.round(avg + (c - avg) * 3.1))); });
     var mx = Math.max(out[0], out[1], out[2]);
-    if (mx > 1) { var f = Math.min(2.0, 235 / mx); out = out.map(function (c) { return Math.min(255, Math.round(c * f)); }); }
+    if (mx > 1) { var f = Math.min(2.0, 242 / mx); out = out.map(function (c) { return Math.min(255, Math.round(c * f)); }); }
     return out;
   }
   function makeGlow(rgb) {
@@ -2801,7 +2801,7 @@ LATENT_MAP_JS = r"""<script>
   // whole. Shared periodic fbm + ridge fields are sampled as ALPHA
   // MASKS and colorized by a three-stop palette per region (deep,
   // anchor, hot). Density throws the field's bottom away
-  // (smoothstep 0.42-0.82) -- that is where the contrast lives:
+  // (smoothstep 0.46-0.84) -- that is where the contrast lives:
   // transparent depths, structured bodies, hot filaments.
   function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
   function clampF(v, a, b) { return v < a ? a : (v > b ? b : v); }
@@ -2812,11 +2812,11 @@ LATENT_MAP_JS = r"""<script>
     return [lerpF(c1[0], c2[0], u), lerpF(c1[1], c2[1], u), lerpF(c1[2], c2[2], u)];
   }
   var PALS = {
-    photography: [[27, 63, 143], [34, 190, 205], [178, 246, 240]],
-    bookshelf: [[115, 47, 160], [216, 96, 158], [255, 198, 226]],
-    worlds: [[132, 25, 36], [228, 96, 52], [255, 216, 148]],
-    projects: [[170, 90, 25], [226, 182, 92], [255, 242, 198]],
-    writing: [[54, 38, 133], [150, 130, 255], [226, 218, 255]]
+    photography: [[24, 56, 128], [34, 190, 205], [178, 246, 240]],
+    bookshelf: [[103, 42, 144], [216, 96, 158], [255, 198, 226]],
+    worlds: [[118, 22, 32], [228, 96, 52], [255, 216, 148]],
+    projects: [[153, 81, 22], [226, 182, 92], [255, 242, 198]],
+    writing: [[48, 34, 119], [150, 130, 255], [226, 218, 255]]
   };
   var fbmField = null, ridgeField = null, distArr = null, angBinArr = null;
   var improvedSprites = {}, filamentSprites = {}, dustFieldSprite = null, improvedReady = false;
@@ -2873,7 +2873,7 @@ LATENT_MAP_JS = r"""<script>
         var rd = ridgeField[rowBase + colIdx2[x]];
         var fall = smoothstepF(edge[angBinArr[i]], edge[angBinArr[i]] - 0.55, distArr[i]);
         if (fall <= 0.001) { d[pi + 3] = 0; continue; }
-        var dens = smoothstepF(0.42, 0.82, v);
+        var dens = smoothstepF(0.46, 0.84, v);
         var alpha = clampF(dens * 1.15 - 0.08, 0, 1) * fall;
         var fil = smoothstepF(0.72, 0.95, rd) * fall;
         var t = clampF(dens + 0.35 * fil, 0, 1);
@@ -2967,10 +2967,10 @@ LATENT_MAP_JS = r"""<script>
     var r = mulberry32(2027);
     Object.keys(DATA.regions).forEach(function (k) {
       var arr = [];
-      arr.push({ key: k, wash: true, bx: (r() * 2 - 1) * 0.08, by: (r() * 2 - 1) * 0.08, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 2.9, alpha: 0.058, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * 0.0009, ph: r() * 6.283, sp: 0.4 + r() * 0.5, spr: 1, bright: 0, orbit: 14 });
+      arr.push({ key: k, wash: true, bx: (r() * 2 - 1) * 0.08, by: (r() * 2 - 1) * 0.08, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 2.9, alpha: 0.048, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * 0.0009, ph: r() * 6.283, sp: 0.4 + r() * 0.5, spr: 1, bright: 0, orbit: 14 });
       for (var k2 = 0; k2 < 9; k2++) {
         var ang = r() * 6.283, rad = Math.pow(r(), 0.65);
-        arr.push({ key: k, wash: false, bx: Math.cos(ang) * rad * 0.36, by: Math.sin(ang) * rad * 0.32, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 1.25 + r() * 0.75, alpha: 0.19 + r() * 0.11, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * (0.0006 + r() * 0.0012), ph: r() * 6.283, sp: 0.5 + r() * 0.7, spr: k2 % 4, bright: 0, orbit: 30 + r() * 110 });
+        arr.push({ key: k, wash: false, bx: Math.cos(ang) * rad * 0.36, by: Math.sin(ang) * rad * 0.32, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 1.25 + r() * 0.75, alpha: 0.21 + r() * 0.12, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * (0.0006 + r() * 0.0012), ph: r() * 6.283, sp: 0.5 + r() * 0.7, spr: k2 % 4, bright: 0, orbit: 30 + r() * 110 });
       }
       fogStamps[k] = arr;
       for (var j = 0; j < arr.length; j++) allStamps.push(arr[j]);
@@ -3513,7 +3513,7 @@ LATENT_MAP_JS = r"""<script>
           var size2 = R * s.sizeMul * 1.18 * (1 + 0.06 * breathe);
           var spr = improvedSprites[k][s.spr % improvedSprites[k].length];
           ctx.save();
-          ctx.globalAlpha = clampF(s.alpha * (1 + 0.18 * breathe) + 0.10 * s.bright, 0, 0.58);
+          ctx.globalAlpha = clampF(s.alpha * (1 + 0.18 * breathe) + 0.10 * s.bright, 0, 0.62);
           ctx.translate(s.x, s.y);
           ctx.rotate(s.rot);
           ctx.scale(1, 0.75 + 0.25 * Math.sin(s.ph));
@@ -3523,7 +3523,7 @@ LATENT_MAP_JS = r"""<script>
         for (var f = 0; f < 2; f++) {
           var fs = filamentSprites[k][f];
           var fsize = regionSize * (1.05 + f * 0.2) * (1 + 0.04 * Math.sin(tt * 0.0004 + f * 2 + ridx));
-          ctx.save(); ctx.globalAlpha = 0.16 + 0.03 * Math.sin(tt * 0.0005 + f + ridx * 2);
+          ctx.save(); ctx.globalAlpha = 0.18 + 0.03 * Math.sin(tt * 0.0005 + f + ridx * 2);
           ctx.translate(cx + Math.sin(tt * 0.0001 + f * 3 + ridx) * 16, cy + Math.cos(tt * 0.00009 + f * 2) * 12);
           ctx.rotate(f * 1.7 + ridx + tt * 0.000015); ctx.scale(1, 0.42);
           ctx.drawImage(fs, -fsize / 2, -fsize / 2, fsize, fsize); ctx.restore();
@@ -3537,11 +3537,11 @@ LATENT_MAP_JS = r"""<script>
       });
       ctx.globalCompositeOperation = 'destination-out';
       var lanes = [
-        { x: 0.50 * W, y: 0.55 * H, s: R * 2.4, rot: 0.7, a: 0.73, ph: 0.0 },
-        { x: DATA.regions.photography.cx, y: DATA.regions.photography.cy, s: R * 1.7, rot: 2.2, a: 0.60, ph: 1.7 },
-        { x: 0.52 * W, y: 0.18 * H, s: R * 1.9, rot: 1.4, a: 0.55, ph: 3.1 },
-        { x: DATA.regions.projects.cx, y: DATA.regions.projects.cy, s: R * 1.5, rot: 0.2, a: 0.53, ph: 4.4 },
-        { x: 0.60 * W, y: 0.62 * H, s: R * 2.0, rot: 1.05, a: 0.57, ph: 5.6 }
+        { x: 0.50 * W, y: 0.55 * H, s: R * 2.4, rot: 0.7, a: 0.77, ph: 0.0 },
+        { x: DATA.regions.photography.cx, y: DATA.regions.photography.cy, s: R * 1.7, rot: 2.2, a: 0.64, ph: 1.7 },
+        { x: 0.52 * W, y: 0.18 * H, s: R * 1.9, rot: 1.4, a: 0.59, ph: 3.1 },
+        { x: DATA.regions.projects.cx, y: DATA.regions.projects.cy, s: R * 1.5, rot: 0.2, a: 0.57, ph: 4.4 },
+        { x: 0.60 * W, y: 0.62 * H, s: R * 2.0, rot: 1.05, a: 0.61, ph: 5.6 }
       ];
       lanes.forEach(function (L) {
         var lx = L.x + Math.sin(tt * 0.00007 + L.ph) * 20;
@@ -3606,7 +3606,7 @@ LATENT_MAP_JS = r"""<script>
         var isFix = fixate && fixate.item === p;
         var tw2 = 0.82 + 0.18 * Math.sin(t * 2.1 + p.ph);
         var sz = p.size * tw2 * (1 + p.lit * 1.45 + p.flash * 0.7 + (isFix ? 0.55 : 0));
-        ctx.globalAlpha = Math.min(1, 0.72 + p.lit * 0.3 + p.flash * 0.35) * cf;
+        ctx.globalAlpha = Math.min(1, 0.76 + p.lit * 0.3 + p.flash * 0.35) * cf;
         ctx.drawImage(p.sprite, p.x - sz * 0.61, p.y - sz * 0.61, sz * 1.22, sz * 1.22);
         ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = Math.min(1, 0.72 + p.lit * 0.35 + p.flash * 0.4) * cf;
