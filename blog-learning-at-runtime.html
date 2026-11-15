@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning at Runtime — Adam Joseph Laloge</title>
+<meta name="description" content="I learned radar signal processing by building a radar device and asking questions at the moment each problem appeared. It is the opposite of studying first, and it is much faster.">
+<link rel="canonical" href="https://adamlaloge.com/blog-learning-at-runtime.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Adam Joseph Laloge">
+<meta property="og:title" content="Learning at Runtime — Adam Joseph Laloge">
+<meta property="og:description" content="I learned radar signal processing by building a radar device and asking questions at the moment each problem appeared. It is the opposite of studying first, and it is much faster.">
+<meta property="og:url" content="https://adamlaloge.com/blog-learning-at-runtime.html">
+<meta property="og:image" content="https://adamlaloge.com/art/hero-card.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Learning at Runtime — Adam Joseph Laloge">
+<meta name="twitter:description" content="I learned radar signal processing by building a radar device and asking questions at the moment each problem appeared. It is the opposite of studying first, and it is much faster.">
+<meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="stylesheet" href="styles.css?v=101">
+<link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
+</head>
+<body>
+<canvas id="ambient" aria-hidden="true"></canvas>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">Adam Joseph Laloge</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu"><span class="nt-icon" aria-hidden="true"></span></button>
+    <nav id="site-nav" aria-label="Site">
+      <a href="resume.html">Resume</a>
+      <a href="work.html">Projects</a>
+      <a href="latent-sitemap.html">Atlas</a>
+      <a href="core.html">Core</a>
+      <a href="about.html">About</a>
+      <div class="nav-item">
+        <button class="nav-drop-btn active" type="button" aria-expanded="false" aria-haspopup="true">Personal <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+        <div class="nav-dropdown">
+          <a href="photography.html">Photography</a>
+          <a href="bookshelf.html">Bookshelf</a>
+          <a href="blog.html" class="active" aria-current="page">Blog</a>
+          <a href="dreams.html">Dreamscape</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="post">
+    <p class="post-meta">November 15, 2026 &middot; 5 min read</p>
+    <h1>Learning at Runtime</h1>
+    <div class="post-body">
+<p class="lede">I started building a radar device knowing almost nothing about radar. The job I gave it was simple to say: tell me whether someone is in the room, where they are, and whether they are breathing. No camera, no wearable, just radio energy and whatever I could pull back out of it. I assumed I would have to study the field first and build second. That is not what happened.</p>
+<h2>Blocked, in order</h2>
+<p>Time of flight came first because it had to. Send energy out, time what comes back, and you get distance. That worked, and then it didn't. The steps were too coarse, and a chest rising a few millimetres as someone breathes fell between them. The device could tell me a person-shaped thing was three metres away. It could not tell me the person was alive.</p>
+<p>So I had to learn phase. The small motion I needed was not in the range at all. It was in the phase of the returning signal, shifting back and forth as the chest moved. Once I could read that, the device could find a breathing person in a still room.</p>
+<p>Direction came last. Distance and breathing gave me a presence on a line, not a position. Phase compared across antennas gave me angle of arrival, and angle plus distance is azimuth. Now the device could place someone instead of just detecting them. Every term I learned arrived as a repair for the last one's failure. It was not a curriculum. It was a list of things broken, in the order they broke.</p>
+<h2>The other way</h2>
+<p>Someone posted a method this week for learning an unfamiliar subject in 48 hours with AI, built on MIT course material. It starts with a corpus, assembled before any questions get asked: six classic textbooks, fifteen research papers, the full set of lecture notes. Then it asks only three things.</p>
+<p>First: what does the field agree on? Not a summary. The settled core, laid out as concepts, principles, and the framework that connects them. A map of the subject.</p>
+<p>Second: what does the field still argue about? The long-standing disputes, with the reasoning behind each side. The point is not the topics. It is learning where the edges of the field are, and why reasonable people hold opposite positions at them.</p>
+<p>Third: an exam. Twenty questions generated from the subject's own exams and homework. Then everything closes. You answer from memory, the AI grades each question, and the grading separates what you memorized from what you actually understood.</p>
+<p>The rule under all of it is that the AI is not there to make the subject easier. It does not summarize things down for you. It raises the difficulty: it makes you compare, judge, recall, produce something, and take the correction. Their closing line is that the AI draws the map, and you walk it yourself.</p>
+<p>It is a good method. I did almost none of it. I never drew the map. I walked, and the map is whatever is left behind.</p>
+<h2>A class of one</h2>
+<p>People have started calling this personal superintelligence, and I think the name fits. I am learning ten times faster than I ever have, and it is not because the answers got better. It is because there is no gap between the learning and the use. In school I studied things weeks before I touched them, and half of it was gone by the time I did. Here the idea shows up inside the problem, I use it within the hour, and the hardware tells me whether I got it right.</p>
+<p>What I notice now is that my way obeyed their one rule by accident. Nothing was summarized for me, and the exam never closed, because the exam was the device. A formula I had only memorized failed exactly the way a wrong one did. The hardware only passes what you actually understand.</p>
+<p>A textbook teaches radar to everyone at once. This taught it to one person, in the order my project demanded, against my constraints. A class of one.</p>
+<p>Radar is not the point, either. The loop does not care what the subject is. Give it a real thing that pushes back and it teaches me whatever that thing requires. That is the part that changed how I think about learning: the constraint was never whether I could learn a field. It was only ever what I chose to build.</p>
+<p>And it worked. The device sits in a room now and does the job I gave it, in the rough way first versions do everything. It finds a person, places them, and reads their breathing out of a signal I could not have parsed a word of when I started.</p>
+<h2>The gaps</h2>
+<p>What I know is shaped exactly like this project. There are whole parts of radar I have never touched because nothing I built ever broke for lack of them. The second question in that post exists to mark the edges of a field on purpose. Mine are unmarked, and I won't pretend otherwise.</p>
+<p>But unmarked is not the same as unreachable. Every gap is just a subject I have not pointed this at yet. If the device needed one of them tomorrow, I would learn it the way I learned the rest: inside the problem, against the hardware, in days instead of a semester. The shallowness is a default, not a limit.</p>
+<p>Their method can tell you precisely what you don't know before you start. Mine tells me as I go. I have made my peace with that trade, because everything mine knows has already been used for something real.</p>
+<p>I wonder what to point it at next.</p>
+    </div>
+    <p class="post-foot"><a href="blog.html">&larr; All posts</a></p>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span><strong>Adam Laloge</strong></span>
+    <span class="footer-links"><a href="https://github.com/AStellarScene">GitHub</a> &middot; <a href="mailto:hello@adamlaloge.com">hello@adamlaloge.com</a></span>
+  </div>
+</footer>
+<script>
+(function () {
+  var canvas = document.getElementById('ambient');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var DPR = Math.min(window.devicePixelRatio || 1, 1.25);
+  var W = 0, H = 0, specks = [], raf = 0, running = true;
+  function seed() {
+    var n = Math.round(Math.min(90, Math.max(36, W * H / 26000)));
+    specks = [];
+    for (var i = 0; i < n; i++) {
+      specks.push({
+        x: Math.random() * W, y: Math.random() * H,
+        r: Math.random() * 1.4 + 0.4, s: Math.random() * 0.14 + 0.05,
+        p: Math.random() * Math.PI * 2
+      });
+    }
+  }
+  function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    seed();
+  }
+  function frame(t) {
+    ctx.clearRect(0, 0, W, H);
+    /* The beam: one diagonal band of pale blue-white light, breathing
+       on a slow sine and wandering a few percent of the width. */
+    var breath = 0.5 + 0.5 * Math.sin(t * 0.00013);
+    var bx = W * 0.30 + Math.sin(t * 0.00007) * W * 0.05;
+    var grad = ctx.createLinearGradient(bx - W * 0.34, 0, bx + W * 0.34, H * 0.9);
+    var a = 0.045 + breath * 0.05;
+    grad.addColorStop(0, 'rgba(190, 215, 255, 0)');
+    grad.addColorStop(0.5, 'rgba(190, 215, 255, ' + a.toFixed(3) + ')');
+    grad.addColorStop(1, 'rgba(190, 215, 255, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    /* Specks: dust drifting down through the beam, twinkling. */
+    for (var i = 0; i < specks.length; i++) {
+      var s = specks[i];
+      s.y += s.s;
+      s.x += Math.sin(t * 0.0004 + s.p) * 0.05;
+      if (s.y > H + 4) { s.y = -4; s.x = Math.random() * W; }
+      var tw = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(t * 0.001 + s.p));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, 6.2832);
+      ctx.fillStyle = 'rgba(220, 232, 255, ' + (tw * 0.5).toFixed(3) + ')';
+      ctx.fill();
+    }
+    if (!reduce && running) raf = requestAnimationFrame(frame);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  document.addEventListener('visibilitychange', function () {
+    running = !document.hidden;
+    if (running && !reduce) { cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); }
+  });
+  raf = requestAnimationFrame(frame);
+})();
+</script>
+<script>
+(function () {
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('site-nav');
+  if (!btn || !nav) return;
+  var dropBtn = nav.querySelector('.nav-drop-btn');
+  var dropItem = dropBtn ? dropBtn.parentNode : null;
+  function closeDrop() {
+    if (!dropItem) return;
+    dropItem.classList.remove('open');
+    dropBtn.setAttribute('aria-expanded', 'false');
+  }
+  btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (!open) closeDrop();
+  });
+  if (dropBtn) {
+    dropBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = dropItem.classList.toggle('open');
+      dropBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (dropItem && !dropItem.contains(e.target)) closeDrop();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeDrop();
+    });
+  }
+})();
+</script>
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* Scroll reveal: sections rise in once as they enter the viewport. */
+  root.classList.add('rv-on');
+  var sections = document.querySelectorAll('main section');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  } else {
+    sections.forEach(function (s) { s.classList.add('in'); });
+  }
+
+  /* Header condense: past a short scroll the bar becomes a floating
+     glass pill. Skipped on Atlas and Dreamscape, whose headers stay
+     in flow over their live canvases. */
+  var header = document.querySelector('.site-header');
+  var inner = document.querySelector('.header-inner');
+  var ticking = false;
+  function onScroll() {
+    ticking = false;
+    if (!header) return;
+    var live = root.classList.contains('latent-live') ||
+               document.body.classList.contains('sitemap-body');
+    header.classList.toggle('condensed', !live && window.scrollY > 32);
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(onScroll);
+    }
+  }, { passive: true });
+  onScroll();
+
+  /* Pill cursor glow: a soft light follows the pointer inside the bar. */
+  if (inner) {
+    inner.addEventListener('pointermove', function (e) {
+      var r = inner.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      inner.style.setProperty('--gx', ((e.clientX - r.left) / r.width * 100).toFixed(2) + '%');
+      inner.style.setProperty('--gy', ((e.clientY - r.top) / r.height * 100).toFixed(2) + '%');
+    }, { passive: true });
+  }
+
+  /* Card sheen: a light that tracks the pointer across each card. */
+  document.querySelectorAll('.card').forEach(function (card) {
+    card.addEventListener('pointermove', function (e) {
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left).toFixed(1) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top).toFixed(1) + 'px');
+      card.classList.add('sheen-on');
+    }, { passive: true });
+    card.addEventListener('pointerleave', function () {
+      card.classList.remove('sheen-on');
+    });
+  });
+
+  /* Risers: cards, panels, and post cards rise in staggered as they
+     enter, mirroring the section reveal. The stagger delay is cleared
+     once the rise lands so hover transitions stay instant. */
+  var risers = document.querySelectorAll('.card, .panel, .post-card');
+  if ('IntersectionObserver' in window) {
+    var io2 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        var sibs = Array.prototype.filter.call(el.parentNode.children, function (c) {
+          return c.classList && (c.classList.contains('card') || c.classList.contains('panel') || c.classList.contains('post-card'));
+        });
+        el.style.transitionDelay = Math.min(Math.max(sibs.indexOf(el), 0), 6) * 70 + 'ms';
+        el.classList.add('in');
+        io2.unobserve(el);
+        setTimeout(function () { el.style.transitionDelay = '0ms'; }, 1400);
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+    risers.forEach(function (el) { io2.observe(el); });
+  } else {
+    risers.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  /* Count-up: a big numeral climbs to its value on a sine ramp the
+     first time it enters view. Reduced motion gets the final value. */
+  var counters = document.querySelectorAll('[data-count]');
+  function runCount(el) {
+    var target = parseFloat(el.getAttribute('data-count'), 10);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.textContent = target;
+      return;
+    }
+    var start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / 1500, 1);
+      var eased = 1 - Math.cos(p * Math.PI / 2);
+      el.textContent = Math.round(target * eased);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if ('IntersectionObserver' in window && counters.length) {
+    var io3 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { runCount(e.target); io3.unobserve(e.target); }
+      });
+    }, { threshold: 0.4 });
+    counters.forEach(function (el) { io3.observe(el); });
+  } else {
+    counters.forEach(runCount);
+  }
+})();
+</script>
+
+</body>
+</html>
