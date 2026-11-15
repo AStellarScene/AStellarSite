@@ -42,7 +42,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#0A0A0A">
-{schema}<link rel="stylesheet" href="styles.css?v=91">
+{schema}<link rel="stylesheet" href="styles.css?v=92">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -2722,7 +2722,7 @@ sitemap_body = """  <canvas id="latent-map" aria-hidden="true"></canvas>
   <section class="latent-intro">
     <button class="latent-scrollzone" id="scroll-zone" type="button" aria-label="Scroll down to the list">
       <span class="zone-label">Scroll for the list</span>
-      <span class="cue-arrow" aria-hidden="true"><i></i><i></i></span>
+      <span class="scroll-cue zone-cue" aria-hidden="true"><span></span></span>
     </button>
   </section>
   <section class="sitemap-list-sec">
@@ -2800,8 +2800,8 @@ LATENT_MAP_JS = r"""<script>
   // The dynamic nebula: the demo's Improved implementation, lifted
   // whole. Shared periodic fbm + ridge fields are sampled as ALPHA
   // MASKS and colorized by a three-stop palette per region (deep,
-  // anchor, hot). Density throws the field's bottom third away
-  // (smoothstep 0.36-0.80) -- that is where the contrast lives:
+  // anchor, hot). Density throws the field's bottom away
+  // (smoothstep 0.42-0.82) -- that is where the contrast lives:
   // transparent depths, structured bodies, hot filaments.
   function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
   function clampF(v, a, b) { return v < a ? a : (v > b ? b : v); }
@@ -2812,11 +2812,11 @@ LATENT_MAP_JS = r"""<script>
     return [lerpF(c1[0], c2[0], u), lerpF(c1[1], c2[1], u), lerpF(c1[2], c2[2], u)];
   }
   var PALS = {
-    photography: [[30, 70, 158], [34, 190, 205], [178, 246, 240]],
-    bookshelf: [[128, 52, 178], [216, 96, 158], [255, 198, 226]],
-    worlds: [[146, 28, 40], [228, 96, 52], [255, 216, 148]],
-    projects: [[188, 100, 28], [226, 182, 92], [255, 242, 198]],
-    writing: [[60, 42, 148], [150, 130, 255], [226, 218, 255]]
+    photography: [[27, 63, 143], [34, 190, 205], [178, 246, 240]],
+    bookshelf: [[115, 47, 160], [216, 96, 158], [255, 198, 226]],
+    worlds: [[132, 25, 36], [228, 96, 52], [255, 216, 148]],
+    projects: [[170, 90, 25], [226, 182, 92], [255, 242, 198]],
+    writing: [[54, 38, 133], [150, 130, 255], [226, 218, 255]]
   };
   var fbmField = null, ridgeField = null, distArr = null, angBinArr = null;
   var improvedSprites = {}, filamentSprites = {}, dustFieldSprite = null, improvedReady = false;
@@ -2873,7 +2873,7 @@ LATENT_MAP_JS = r"""<script>
         var rd = ridgeField[rowBase + colIdx2[x]];
         var fall = smoothstepF(edge[angBinArr[i]], edge[angBinArr[i]] - 0.55, distArr[i]);
         if (fall <= 0.001) { d[pi + 3] = 0; continue; }
-        var dens = smoothstepF(0.36, 0.80, v);
+        var dens = smoothstepF(0.42, 0.82, v);
         var alpha = clampF(dens * 1.15 - 0.08, 0, 1) * fall;
         var fil = smoothstepF(0.72, 0.95, rd) * fall;
         var t = clampF(dens + 0.35 * fil, 0, 1);
@@ -2967,7 +2967,7 @@ LATENT_MAP_JS = r"""<script>
     var r = mulberry32(2027);
     Object.keys(DATA.regions).forEach(function (k) {
       var arr = [];
-      arr.push({ key: k, wash: true, bx: (r() * 2 - 1) * 0.08, by: (r() * 2 - 1) * 0.08, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 2.9, alpha: 0.078, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * 0.0009, ph: r() * 6.283, sp: 0.4 + r() * 0.5, spr: 1, bright: 0, orbit: 14 });
+      arr.push({ key: k, wash: true, bx: (r() * 2 - 1) * 0.08, by: (r() * 2 - 1) * 0.08, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 2.9, alpha: 0.058, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * 0.0009, ph: r() * 6.283, sp: 0.4 + r() * 0.5, spr: 1, bright: 0, orbit: 14 });
       for (var k2 = 0; k2 < 9; k2++) {
         var ang = r() * 6.283, rad = Math.pow(r(), 0.65);
         arr.push({ key: k, wash: false, bx: Math.cos(ang) * rad * 0.36, by: Math.sin(ang) * rad * 0.32, x: -1, y: -1, vx: 0, vy: 0, wx: 0, wy: 0, sizeMul: 1.25 + r() * 0.75, alpha: 0.19 + r() * 0.11, rot: r() * 6.283, rotV: (r() < 0.5 ? -1 : 1) * (0.0006 + r() * 0.0012), ph: r() * 6.283, sp: 0.5 + r() * 0.7, spr: k2 % 4, bright: 0, orbit: 30 + r() * 110 });
@@ -3513,7 +3513,7 @@ LATENT_MAP_JS = r"""<script>
           var size2 = R * s.sizeMul * 1.18 * (1 + 0.06 * breathe);
           var spr = improvedSprites[k][s.spr % improvedSprites[k].length];
           ctx.save();
-          ctx.globalAlpha = clampF(s.alpha * (1 + 0.18 * breathe) + 0.13 * s.bright, 0, 0.58);
+          ctx.globalAlpha = clampF(s.alpha * (1 + 0.18 * breathe) + 0.10 * s.bright, 0, 0.58);
           ctx.translate(s.x, s.y);
           ctx.rotate(s.rot);
           ctx.scale(1, 0.75 + 0.25 * Math.sin(s.ph));
@@ -3530,18 +3530,18 @@ LATENT_MAP_JS = r"""<script>
         }
         ctx.globalCompositeOperation = 'lighter';
         var core = improvedSprites[k][0];
-        var cs = regionSize * 0.48 * (1 + 0.05 * Math.sin(tt * 0.0006 + ridx * 2));
-        ctx.save(); ctx.globalAlpha = 0.5;
+        var cs = regionSize * 0.44 * (1 + 0.05 * Math.sin(tt * 0.0006 + ridx * 2));
+        ctx.save(); ctx.globalAlpha = 0.34;
         ctx.translate(cx, cy); ctx.drawImage(core, -cs / 2, -cs / 2, cs, cs); ctx.restore();
         ctx.globalCompositeOperation = 'screen';
       });
       ctx.globalCompositeOperation = 'destination-out';
       var lanes = [
-        { x: 0.50 * W, y: 0.55 * H, s: R * 2.4, rot: 0.7, a: 0.68, ph: 0.0 },
-        { x: DATA.regions.photography.cx, y: DATA.regions.photography.cy, s: R * 1.7, rot: 2.2, a: 0.55, ph: 1.7 },
-        { x: 0.52 * W, y: 0.18 * H, s: R * 1.9, rot: 1.4, a: 0.5, ph: 3.1 },
-        { x: DATA.regions.projects.cx, y: DATA.regions.projects.cy, s: R * 1.5, rot: 0.2, a: 0.48, ph: 4.4 },
-        { x: 0.60 * W, y: 0.62 * H, s: R * 2.0, rot: 1.05, a: 0.52, ph: 5.6 }
+        { x: 0.50 * W, y: 0.55 * H, s: R * 2.4, rot: 0.7, a: 0.73, ph: 0.0 },
+        { x: DATA.regions.photography.cx, y: DATA.regions.photography.cy, s: R * 1.7, rot: 2.2, a: 0.60, ph: 1.7 },
+        { x: 0.52 * W, y: 0.18 * H, s: R * 1.9, rot: 1.4, a: 0.55, ph: 3.1 },
+        { x: DATA.regions.projects.cx, y: DATA.regions.projects.cy, s: R * 1.5, rot: 0.2, a: 0.53, ph: 4.4 },
+        { x: 0.60 * W, y: 0.62 * H, s: R * 2.0, rot: 1.05, a: 0.57, ph: 5.6 }
       ];
       lanes.forEach(function (L) {
         var lx = L.x + Math.sin(tt * 0.00007 + L.ph) * 20;
@@ -3561,7 +3561,7 @@ LATENT_MAP_JS = r"""<script>
       ctx.globalCompositeOperation = 'lighter';
       for (var wi = trail.length - 1; wi >= 0; wi--) {
         var wpk = trail[wi];
-        var wa = (1 - wi / trail.length) * (probe.active && now - probe.last < 3000 ? 0.15 : 0.05);
+        var wa = (1 - wi / trail.length) * (probe.active && now - probe.last < 3000 ? 0.11 : 0.04);
         if (wa < 0.012) continue;
         var wr = 130 - wi * 3.5;
         ctx.globalAlpha = wa;
@@ -3607,7 +3607,7 @@ LATENT_MAP_JS = r"""<script>
         var tw2 = 0.82 + 0.18 * Math.sin(t * 2.1 + p.ph);
         var sz = p.size * tw2 * (1 + p.lit * 1.45 + p.flash * 0.7 + (isFix ? 0.55 : 0));
         ctx.globalAlpha = Math.min(1, 0.72 + p.lit * 0.3 + p.flash * 0.35) * cf;
-        ctx.drawImage(p.sprite, p.x - sz * 0.72, p.y - sz * 0.72, sz * 1.44, sz * 1.44);
+        ctx.drawImage(p.sprite, p.x - sz * 0.61, p.y - sz * 0.61, sz * 1.22, sz * 1.22);
         ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = Math.min(1, 0.72 + p.lit * 0.35 + p.flash * 0.4) * cf;
         ctx.fillStyle = p.css;
