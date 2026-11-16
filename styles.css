@@ -551,7 +551,7 @@ section.hero {
 }
 
 /* Photography gallery */
-.gal-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 16px; }
+.gal-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 12px; }
 .chip {
   font-family: var(--mono);
   font-size: 11px;
@@ -630,8 +630,8 @@ section.hero {
    Status/group label and counter up top, a large title, a mono meta
    line, one dim blurb, and a hairline progress bar. No box. */
 .flow-cap { margin-top: 12px; }
-.fc-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-.fc-side { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex: 0 0 auto; }
+.fc-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.fc-side { display: flex; flex-direction: row; align-items: center; gap: 14px; flex: 0 0 auto; }
 .fc-count { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; color: var(--dim); }
 .fc-nav { display: flex; gap: 8px; }
 .pd-arrow, .fc-arrow {
@@ -668,14 +668,20 @@ section.hero {
 
 /* The flows live on the site's standard glass panel: caption first,
    stage below, the stage bleeding to the panel's side edges. */
-.flow-panel { padding: 22px 22px 8px; margin: 14px 0 22px; }
+.flow-panel { padding: 22px 22px 8px; margin: 12px 0 22px; }
 .flow-panel .flow-cap { margin-top: 0; }
 .flow-panel .flow-scene, .flow-panel .pflow-scene { margin-left: -22px; margin-right: -22px; }
 .flow-panel .flow-hint { padding: 0 22px; }
+/* Bookshelf shelves: the block's margin-top owns shelf separation, and
+   the scene bleed needs the longer selector to beat .flow-block's own
+   scene margin shorthand. */
+.flow-block .flow-panel { margin: 12px 0 0; }
+.flow-block .flow-panel .flow-scene { margin: 6px -22px 0; }
 @media (max-width: 760px) {
   .flow-panel { padding: 16px 16px 6px; }
   .flow-panel .flow-scene, .flow-panel .pflow-scene { margin-left: -16px; margin-right: -16px; }
   .flow-panel .flow-hint { padding: 0 16px; }
+  .flow-block .flow-panel .flow-scene { margin-left: -16px; margin-right: -16px; }
 }
 
 /* Full viewing pane: the tapped photo flies out of the flow, tap again to return */
@@ -756,7 +762,7 @@ section.hero {
   pointer-events: none;
   background: radial-gradient(58% 92% at 50% 100%, rgba(165, 198, 255, 0.075), transparent 70%);
 }
-.flow-block { margin-top: 30px; }
+.flow-block { margin-top: 36px; }
 .flow-block .flow-scene { margin: 8px 0 6px; }
 .flow-label { margin: 0 0 2px; }
 .flow-track {
@@ -921,7 +927,7 @@ section.hero {
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin: 2px 0 4px;
+  margin: 6px 0 4px;
 }
 @media (max-width: 760px) {
   .cov { width: 188px; height: 282px; }

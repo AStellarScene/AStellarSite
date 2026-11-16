@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Adam Laloge's bookshelf: historical horror, dark fantasy, and sci-fi — what he's reading and what's next.">
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="theme-color" content="#0A0A0A">
-<link rel="stylesheet" href="styles.css?v=103">
+<link rel="stylesheet" href="styles.css?v=104">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -245,7 +245,7 @@
     // transform, and one animator eases it toward its goal, so drag,
     // wheel, keys, arrows and clicks can never fight over the motion.
     var centers = [], widths = [], maxPx = 0, stepPx = 0;
-    var posPx = 0, goalPx = null, raf = null, centered = -1;
+    var posPx = 0, goalPx = null, raf = null, centered = -1, destIdx = -1;
 
     function measure() {
       var gap = parseFloat(getComputedStyle(track).getPropertyValue('--fgap')) || 30;
@@ -306,8 +306,8 @@
       if (reduced) { posPx = goalPx; goalPx = null; render(); return; }
       if (!raf) raf = requestAnimationFrame(tick);
     }
-    function glideTo(i) { if (i >= 0 && i < items.length) glideToPx(centers[i]); }
-    function setInstant(i) { goalPx = null; posPx = centers[i]; render(); }
+    function glideTo(i) { if (i >= 0 && i < items.length) { destIdx = i; glideToPx(centers[i]); } }
+    function setInstant(i) { goalPx = null; destIdx = i; posPx = centers[i]; render(); }
     // overflow:hidden still leaves a programmatic scroll offset; if
     // focus navigation ever sets one, zero it so the stage never shifts.
     track.addEventListener('scroll', function () { if (track.scrollLeft !== 0) track.scrollLeft = 0; }, { passive: true });
@@ -319,7 +319,7 @@
     track.addEventListener('pointerdown', function (e) {
       if (e.button !== undefined && e.button > 0) return;
       drag = { x: e.clientX, pos: posPx, moved: 0, lastX: e.clientX, lastT: performance.now(), vel: 0 };
-      goalPx = null; wheelGoal = null;
+      goalPx = null; wheelGoal = null; destIdx = -1;
     });
     window.addEventListener('pointermove', function (e) {
       if (!drag) return;
@@ -346,13 +346,13 @@
       });
     });
     track.addEventListener('keydown', function (e) {
-      var cur = centered < 0 ? nearestIdx(posPx) : centered;
+      var cur = destIdx >= 0 ? destIdx : (centered < 0 ? nearestIdx(posPx) : centered);
       if (e.key === 'ArrowRight') { glideTo(Math.min(items.length - 1, cur + 1)); e.preventDefault(); }
       else if (e.key === 'ArrowLeft') { glideTo(Math.max(0, cur - 1)); e.preventDefault(); }
     });
     var prevBtn = block.querySelector('.bd-prev'), nextBtn = block.querySelector('.bd-next');
-    if (prevBtn) prevBtn.addEventListener('click', function () { glideTo((centered < 0 ? 0 : centered) - 1); });
-    if (nextBtn) nextBtn.addEventListener('click', function () { glideTo((centered < 0 ? 0 : centered) + 1); });
+    if (prevBtn) prevBtn.addEventListener('click', function () { var b = destIdx >= 0 ? destIdx : (centered < 0 ? 0 : centered); glideTo(b - 1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { var b = destIdx >= 0 ? destIdx : (centered < 0 ? 0 : centered); glideTo(b + 1); });
 
     // Wheel routing — the gesture discipline from the scroll era, writing
     // the virtual position instead of a scroll offset:
@@ -396,6 +396,7 @@
       if (g.axis === 'x') {
         var base = wheelGoal !== null ? wheelGoal : posPx;
         wheelGoal = Math.max(0, Math.min(maxPx, base + dx));
+        destIdx = -1;
         glideToPx(wheelGoal);
         return;
       }
