@@ -580,10 +580,10 @@ section.hero {
 }
 .pflow-track {
   position: relative;
-  height: 820px;
+  height: 698px;
   overflow: hidden;
-  perspective: 1400px;
-  --fgap: 30px;
+  perspective: 1300px;
+  --fgap: 26px;
   cursor: grab;
   touch-action: pan-y;
   user-select: none;
@@ -595,8 +595,8 @@ section.hero {
 .pcov {
   position: absolute;
   left: 50%;
-  top: 34px;
-  height: 520px;
+  top: 26px;
+  height: 440px;
   aspect-ratio: var(--ar);
   padding: 0;
   border: 1px solid var(--panel-border);
@@ -661,8 +661,8 @@ section.hero {
   .fc-bar { transition: none; }
 }
 @media (max-width: 760px) {
-  .pcov { height: 300px; top: 24px; }
-  .pflow-track { height: 484px; --fgap: 20px; }
+  .pcov { height: 232px; top: 20px; }
+  .pflow-track { height: 380px; --fgap: 18px; }
   .fc-title { font-size: 24px; }
 }
 
@@ -767,9 +767,9 @@ section.hero {
 .flow-label { margin: 0 0 2px; }
 .flow-track {
   position: relative;
-  height: 606px;
+  height: 424px;
   overflow: hidden;
-  perspective: 1400px;
+  perspective: 1200px;
   --fgap: 30px;
   cursor: grab;
   touch-action: pan-y;
@@ -782,9 +782,9 @@ section.hero {
 .cov {
   position: absolute;
   left: 50%;
-  top: 36px;
-  width: 248px;
-  height: 372px;
+  top: 34px;
+  width: 168px;
+  height: 252px;
   padding: 0;
   border: none;
   background: none;
@@ -808,10 +808,10 @@ section.hero {
   backface-visibility: hidden;
   border-radius: 3px 8px 8px 3px;
   background: linear-gradient(105deg, rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0.06) 22%, rgba(0, 0, 0, 0.15) 60%, rgba(0, 0, 0, 0.45)), var(--cov);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10), inset 9px 0 14px rgba(0, 0, 0, 0.35), 0 18px 22px rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10), inset 7px 0 12px rgba(0, 0, 0, 0.35), 0 18px 22px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
-  padding: 24px 20px 24px 46px;
+  padding: 18px 15px 18px 31px;
   text-align: left;
 }
 .cov-front::before {
@@ -837,14 +837,14 @@ section.hero {
 .cov.selected .cov-front { box-shadow: inset 0 0 0 2px var(--status), inset 9px 0 14px rgba(0, 0, 0, 0.35), 0 18px 22px rgba(0, 0, 0, 0.45); }
 .cov-status {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--status);
 }
 .cov-title {
-  margin-top: 16px;
-  font-size: 24px;
+  margin-top: 14px;
+  font-size: 19px;
   font-weight: 700;
   line-height: 1.28;
   color: #f0ead8;
@@ -852,7 +852,7 @@ section.hero {
 .cov-author {
   margin-top: auto;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--status);
@@ -930,10 +930,9 @@ section.hero {
   margin: 6px 0 4px;
 }
 @media (max-width: 760px) {
-  .cov { width: 188px; height: 282px; }
-  .cov-title { font-size: 19px; }
-  .cov-front { padding: 18px 15px 18px 38px; }
-  .flow-track { height: 458px; --fgap: 22px; }
+  .cov { width: 132px; height: 198px; }
+  .cov-title { font-size: 16px; }
+  .flow-track { height: 335px; --fgap: 22px; }
   .cov { top: 26px; }
 }
 
