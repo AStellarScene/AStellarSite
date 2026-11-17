@@ -42,7 +42,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#0A0A0A">
-{schema}<link rel="stylesheet" href="styles.css?v=107">
+{schema}<link rel="stylesheet" href="styles.css?v=108">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -984,6 +984,18 @@ mt_body = """  <section>
         <p>How much output one accountable person can inspect, test, and sign. This is the real ceiling. Generation can be bought by the hour. A signature cannot.</p>
       </article>
     </div>
+    <div class="panel mt-funnel-panel">
+      <p class="label">The bottleneck</p>
+      <div class="mt-funnel" aria-hidden="true">
+        <div class="mt-f-row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="mt-f-row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="mt-f-row"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="mt-f-row"><span></span><span></span><span></span><span></span></div>
+        <div class="mt-f-row"><span></span><span></span></div>
+        <div class="mt-f-row"><span class="mt-f-one"></span></div>
+      </div>
+      <p class="mt-funnel-cap"><strong>Many lanes in. One signature out.</strong> Production widens. Accountability does not.</p>
+    </div>
   </section>
 
   <section>
@@ -1014,15 +1026,15 @@ mt_body = """  <section>
       <p class="label">Workflow</p>
       <h2>The machine-time workflow</h2>
       <p>I run the same sequence each time. The order matters: intent before production, evidence before review, signature before release.</p>
-      <ol class="mt-steps">
-        <li><strong>Define the job.</strong> Write the problem, what it affects, the constraints, what is out of scope, and the acceptance criteria. If done cannot be described, the work is not ready for agents.</li>
-        <li><strong>Split by clock.</strong> Separate production from judgment. Agents take research, drafting, implementation, and test execution. I keep scope decisions, tradeoffs, and anything that changes the intent.</li>
-        <li><strong>Assign lanes with boundaries.</strong> Each agent gets a bounded task, the files or sources it may touch, and the output I expect back. Parallel work without boundaries creates collisions and a larger mess to review.</li>
-        <li><strong>Produce in checkpoints.</strong> Work comes back in small pieces, with notes: what changed, what was assumed, and what still needs checking. A large silent dump is not accepted.</li>
-        <li><strong>Run the machine gates.</strong> Builds, tests, static analysis, and security checks run before human review. If a machine can settle a question, a machine settles it. Failures go back with the output attached.</li>
-        <li><strong>Review against the intent.</strong> A fresh-context reviewer compares the result with the intent and looks for mismatches: extra behavior, missing edge cases, weak tests, and claims the evidence does not support.</li>
-        <li><strong>Verify and sign.</strong> I check the failure paths, confirm the tests prove the claim, and sign the specific change. If I cannot explain why it is safe to ship, it goes back.</li>
-        <li><strong>Ship contained and record it.</strong> Release in small increments, behind a flag when the change calls for it, with monitoring and a rollback path. The record keeps the intent, the diff, the test output, the decision, and the known limits.</li>
+      <ol class="mt-steps mt-flow">
+        <li><strong>Define the job.</strong> <span class="mt-clock">Human time</span> Write the problem, what it affects, the constraints, what is out of scope, and the acceptance criteria. If done cannot be described, the work is not ready for agents.</li>
+        <li><strong>Split by clock.</strong> <span class="mt-clock">Human time</span> Separate production from judgment. Agents take research, drafting, implementation, and test execution. I keep scope decisions, tradeoffs, and anything that changes the intent.</li>
+        <li><strong>Assign lanes with boundaries.</strong> <span class="mt-clock">Human time</span> Each agent gets a bounded task, the files or sources it may touch, and the output I expect back. Parallel work without boundaries creates collisions and a larger mess to review.</li>
+        <li><strong>Produce in checkpoints.</strong> <span class="mt-clock machine">Machine time</span> Work comes back in small pieces, with notes: what changed, what was assumed, and what still needs checking. A large silent dump is not accepted.</li>
+        <li><strong>Run the machine gates.</strong> <span class="mt-clock machine">Machine time</span> Builds, tests, static analysis, and security checks run before human review. If a machine can settle a question, a machine settles it. Failures go back with the output attached.</li>
+        <li><strong>Review against the intent.</strong> <span class="mt-clock machine">Machine time</span> A fresh-context reviewer compares the result with the intent and looks for mismatches: extra behavior, missing edge cases, weak tests, and claims the evidence does not support.</li>
+        <li><strong>Verify and sign.</strong> <span class="mt-clock">Human time</span> I check the failure paths, confirm the tests prove the claim, and sign the specific change. If I cannot explain why it is safe to ship, it goes back.</li>
+        <li><strong>Ship contained and record it.</strong> <span class="mt-clock both">Human + machine</span> Release in small increments, behind a flag when the change calls for it, with monitoring and a rollback path. The record keeps the intent, the diff, the test output, the decision, and the known limits.</li>
       </ol>
     </div>
   </section>
@@ -1042,7 +1054,7 @@ mt_body = """  <section>
     <p class="label">Verification</p>
     <h2>Reviewing at machine time: the human in the loop</h2>
     <p class="section-note">Review is the control point. I do not read every generated line, and I do not approve work I have not checked. The review follows a fixed order, so attention goes to fit, proof, and failure paths before style.</p>
-    <ol class="mt-steps">
+    <ol class="mt-steps mt-checks">
       <li><strong>Start with the evidence.</strong> A change arrives with the intent, the acceptance criteria, a plain summary of what changed, and the build and test output. If the evidence is missing, the review stops and the work goes back.</li>
       <li><strong>Clear the machine checks.</strong> Build, tests, lint, static analysis, and security scans pass before I spend attention. A warning that does not block is noise: fix it or remove it, but do not train people to ignore it.</li>
       <li><strong>Check fit before detail.</strong> The first question is whether the work solved the stated problem without adding behavior nobody asked for. If the fit is wrong, line-level review is wasted time.</li>
@@ -1058,18 +1070,21 @@ mt_body = """  <section>
     <h2>The receipts</h2>
     <p class="section-note">The method leaves records that can be inspected after the fact. These are not testimonials. They are live work, build history, and dated entries.</p>
     <div class="cards">
-      <article class="card">
+      <article class="card mt-receipt">
         <p class="label card-label">This site</p>
+        <span class="mt-live-tag">Live</span>
         <p>This site is built and revised with the method. The Living Map essay records the Atlas build: more than thirty iterations shipped in three days, each one checked live before the next one started.</p>
         <p><a href="blog-the-living-map.html">The Living Map &#8599;</a></p>
       </article>
-      <article class="card">
+      <article class="card mt-receipt">
         <p class="label card-label">Atlas</p>
+        <span class="mt-live-tag">Live</span>
         <p>Atlas generates its map from the site's own content. When the content changes, the map changes. It is a working example of a system deriving its structure instead of being maintained by hand.</p>
         <p><a href="latent-sitemap.html">Atlas &#8599;</a></p>
       </article>
-      <article class="card">
+      <article class="card mt-receipt">
         <p class="label card-label">Core</p>
+        <span class="mt-live-tag">Live</span>
         <p>Core publishes dated entries from my agent's working record, after a sanitize pass, and updates nightly. The record is cumulative, so claims can be compared across time instead of being rewritten quietly.</p>
         <p><a href="core.html">Core &#8599;</a></p>
       </article>

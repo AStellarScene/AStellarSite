@@ -554,7 +554,13 @@ section.hero {
    bars, and the line family. Lane blocks borrow the segbar's fill
    language: white for the human lane, the one blue accent for the
    machine lanes. */
-.mt-lanes { margin-top: 26px; }
+.mt-lanes {
+  margin-top: 26px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  padding: 18px 18px 14px;
+}
 .mt-lane-head {
   display: flex;
   justify-content: space-between;
@@ -586,11 +592,22 @@ section.hero {
   gap: 18px;
   margin: 20px 0 6px;
 }
+.mt-stat { border-top: 1px solid var(--hairline); padding-top: 12px; position: relative; }
+.mt-stat::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 34px;
+  height: 1px;
+  background: var(--accent);
+}
 .mt-stat-num {
-  font-size: clamp(30px, 4.2vw, 44px);
-  line-height: 1.05;
+  font-family: var(--sans);
+  font-size: clamp(20px, 2.3vw, 25px);
+  font-weight: 600;
+  line-height: 1.2;
   color: var(--heading);
-  font-variant-numeric: tabular-nums;
   margin: 0;
 }
 .mt-stat p { margin: 6px 0 0; color: var(--dim); }
@@ -616,6 +633,101 @@ section.hero {
 }
 .mt-steps strong { color: var(--heading); font-weight: 600; }
 
+/* The workflow runs as a rail: a vertical line the steps hang from,
+   each step tagged with the clock that owns it. */
+.mt-flow { position: relative; }
+.mt-flow::before {
+  content: "";
+  position: absolute;
+  left: 19px;
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(77, 163, 255, 0.55), rgba(255, 255, 255, 0.10));
+}
+.mt-flow li { border-top: none; padding: 11px 0 11px 58px; }
+.mt-flow li::before { left: 32px; top: 12px; }
+.mt-flow li::after {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 17px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #0A0A0A;
+  border: 2px solid var(--accent);
+}
+.mt-clock {
+  display: inline-block;
+  vertical-align: 2px;
+  margin-left: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  padding: 3px 8px 2px;
+  white-space: nowrap;
+}
+.mt-clock.machine { color: var(--accent); border-color: rgba(77, 163, 255, 0.45); }
+.mt-clock.both { color: var(--heading); border-color: rgba(255, 255, 255, 0.30); }
+
+/* Verification reads as gates instead: boxed step numbers, no rail. */
+.mt-checks li { padding-left: 64px; }
+.mt-checks li::before {
+  color: var(--heading);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: var(--r-sm);
+  padding: 2px 6px;
+  top: 12px;
+}
+
+/* The bottleneck, drawn in the lane colors: machine lanes (blue)
+   narrow to a single human signature (white). */
+.mt-funnel-panel { margin-top: 18px; }
+.mt-funnel { display: grid; justify-items: center; gap: 8px; margin: 18px 0 4px; }
+.mt-f-row { display: flex; gap: 7px; }
+.mt-f-row span { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); opacity: 0.75; }
+.mt-f-row span.mt-f-one {
+  width: 11px;
+  height: 11px;
+  background: #EDEDED;
+  opacity: 1;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
+}
+.mt-funnel-cap { text-align: center; color: var(--dim); margin: 12px 0 0; }
+.mt-funnel-cap strong { color: var(--heading); font-weight: 600; }
+
+/* Receipts carry a live tag, in the accent, with a slow pulse. */
+.mt-receipt { position: relative; }
+.mt-live-tag {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.mt-live-tag::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: mt-pulse 2.4s ease-in-out infinite;
+}
+@keyframes mt-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .mt-live-tag::before { animation: none; } }
+
 .mt-lines { list-style: none; margin: 18px 0 0; padding: 0; }
 .mt-lines li {
   display: flex;
@@ -623,16 +735,19 @@ section.hero {
   align-items: baseline;
   gap: 14px;
   flex-wrap: wrap;
-  padding: 14px 0;
-  border-top: 1px solid var(--hairline);
+  padding: 20px 22px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--panel-border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-md);
 }
-.mt-lines li:first-child { border-top: none; padding-top: 4px; }
+.mt-lines li:first-child { padding-top: 20px; }
 .mt-line {
   font-family: var(--sans);
-  font-size: 23px;
+  font-size: clamp(22px, 2.8vw, 29px);
   font-weight: 600;
   color: var(--heading);
-  line-height: 1.4;
+  line-height: 1.35;
 }
 .mt-line-tag {
   font-family: var(--mono);
