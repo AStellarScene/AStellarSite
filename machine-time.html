@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Machine Time: how Adam Laloge builds with agents. Parallel machine hours for the generation; his hours for intent, verification, and the signature. Work in machine time. Sign in human time.">
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="theme-color" content="#0A0A0A">
-<link rel="stylesheet" href="styles.css?v=106">
+<link rel="stylesheet" href="styles.css?v=107">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -94,21 +94,24 @@
   <section>
     <div class="panel">
       <p class="label">Economics</p>
-      <h2>What the machine hours cost</h2>
+      <h2>The economics flipped</h2>
+      <p>Skilled human hours used to be the input everything else waited on, so they were rationed: fewer attempts, bigger plans, long arguments before anyone wrote a line. Agent hours invert the rationing. Generation is cheap, parallel, and always on. The scarce inputs now sit at the ends of the pipeline: a clear intent, the judgment to tell good from almost good, and a person willing to sign.</p>
       <div class="mt-stats">
         <div class="mt-stat">
-          <p class="mt-stat-num">One month</p>
-          <p>Of agent work: significant code changes, produced in parallel while I did other work, and bought by the hour.</p>
+          <p class="mt-stat-num">One more try</p>
+          <p>The cost of another attempt, another draft, another approach: close to nothing next to the human hour it once took.</p>
         </div>
         <div class="mt-stat">
-          <p class="mt-stat-num">One run</p>
-          <p>The agent research run behind the ultra-wideband radar project, start to finish.</p>
+          <p class="mt-stat-num">Every lane at once</p>
+          <p>Machine hours scale sideways. Buy more lanes and the same day holds more work. The calendar stops being the budget.</p>
         </div>
         <div class="mt-stat">
-          <p class="mt-stat-num">At least a year</p>
-          <p>My estimate of the senior-level engineer time that radar research would have taken by hand, at PhD-level depth in places.</p>
+          <p class="mt-stat-num">One signature</p>
+          <p>The input that never gets cheaper and never parallelizes: one accountable person for every change that ships.</p>
         </div>
       </div>
+      <p>When attempts are cheap, the strategy changes with them. Run several approaches at once and keep the best, instead of betting the quarter on one plan. Prototype before the meeting instead of arguing through it. And killing a wrong direction stops hurting, because it cost machine hours, not weeks of a person's life. Bad work dies early, and dies cheap.</p>
+      <p>The expensive failure changes too. It is no longer slow production. It is fast production of the wrong thing, shipped before anybody checked. That is why the economics and the verification are the same argument: the cheaper generation gets, the more the remaining human hours are worth, and the worse it is to spend them typing instead of deciding.</p>
       <p>Machine time is bought by the hour. Human time is spent on what matters: the intent going in, the verification coming out, and the signature at the end.</p>
     </div>
   </section>
@@ -142,26 +145,28 @@
 
   <section>
     <p class="label">Verification</p>
-    <h2>How the big labs check AI code</h2>
-    <p class="section-note">Nobody serious reads every line any more, and nobody serious trusts the model either. The human moved upstream to intent and downstream to accountability.</p>
+    <h2>Reviewing at machine time: the human in the loop</h2>
+    <p class="section-note">Generation is not the bottleneck any more. Review is. Reading every line does not scale, and rubber-stamping is not review. What scales is a process: the work arrives with evidence, machines decide what machines can decide, and the human spends attention where the risk actually is.</p>
+    <ol class="mt-steps">
+      <li><strong>Demand the receipts first.</strong> No review starts until the change arrives with its evidence: the intent it was built against, the acceptance criteria, a plain summary of what changed and why, and the build and test output. Missing receipts end the review before it starts. Send it back.</li>
+      <li><strong>Let machines take the first pass.</strong> Build, tests, static analysis, and security scans run automatically and block on failure. They are gates, not warnings. A human should never spend attention on a question a machine can settle.</li>
+      <li><strong>Get an independent AI review.</strong> A reviewer with fresh context, one that did not write the code, reads the diff against the intent. Its job is mismatch hunting: behavior nobody asked for, edge cases nobody handled, tests that pass without testing anything.</li>
+      <li><strong>Sort by risk, not by size.</strong> A large generated change can be low risk, and a two-line change can be dangerous. The tier is set by what the change touches, not by how much of it there is and not by who or what wrote it.</li>
+      <li><strong>Review in a fixed order.</strong> Intent first: is this the right thing, built the way the intent described? Then the risky paths, line by line. Then the tests: do they actually prove the claim, and did anything weaken them to get a pass? The generator never edits its own tests. Spot-check the rest, and do not pretend a skim is a read.</li>
+      <li><strong>Sign one change, by name.</strong> An approval covers one specific change and belongs to a person. An agent's approval never counts as a person's. If you would not put your name on the failure, it does not ship.</li>
+      <li><strong>Ship contained, then close the loop.</strong> Flags, staged rollout, monitoring, and a rollback path are the last layer of review, because some defects only show up in production. Every miss that gets through becomes a test, a gate, or a checklist item, so next time the process catches it instead of luck.</li>
+    </ol>
     <div class="cards">
       <article class="card">
-        <p class="label card-label">Google</p>
-        <p>AI-generated code goes through the same machinery as human code: presubmit tests, static analysis, and approval from an engineer in review. The gates were already strong; generation just feeds them faster.</p>
+        <p class="label card-label">Low risk</p>
+        <p>Documentation, tests, isolated styling, internal tools that touch no data. Green gates plus the independent AI review can be enough. The human spot-checks, and the change moves at machine speed.</p>
       </article>
       <article class="card">
-        <p class="label card-label">Meta</p>
-        <p>Generated output is filtered before a human sees it. A generated test survives only if it builds, passes repeatedly without flaking, and increases coverage instead of duplicating what exists.</p>
-      </article>
-      <article class="card">
-        <p class="label card-label">Anthropic</p>
-        <p>Layers instead of one gate: the agent checks its own work, deterministic CI blocks on lint, types, and tests, a fresh-context AI reviews the diff, a security pass can block, and human approval scales with the risk of the change. Feature flags and staged rollouts contain what still slips through.</p>
-      </article>
-      <article class="card">
-        <p class="label card-label">Here</p>
-        <p>The same shape at one-person scale. Agents generate in machine time. Automated checks and AI review take the first pass. I read what matters, and my name goes on the risk.</p>
+        <p class="label card-label">High risk</p>
+        <p>Anything touching data, money, authentication, safety paths, or a public interface. A person reads it line by line, a named owner signs, and it ships behind a flag with the rollback ready.</p>
       </article>
     </div>
+    <p>That is the whole trick to moving at machine time with a human in the loop: scrutiny scales with risk, not with volume. The machine produces the volume. The process decides where the human looks. The signature decides what ships.</p>
   </section>
 </main>
 
