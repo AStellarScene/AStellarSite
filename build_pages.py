@@ -758,7 +758,7 @@ home_body = """  <section class="hero">
     <div class="panel">
       <p class="label">Machine Time</p>
       <h2>Work in machine time. Sign in human time.</h2>
-      <p>Most of the building now happens in parallel agent hours that cost about $580 a month. My hours go to the parts that do not scale: the intent going in, the verification coming out, and the signature on the risk.</p>
+      <p>Most of the building now happens in parallel agent hours. Machine time is cheap; human time is not. My hours go to the parts that do not scale: the intent going in, the verification coming out, and the signature on the risk.</p>
       <p><a href="machine-time.html">The method, with receipts &#8599;</a></p>
     </div>
   </section>
@@ -940,7 +940,7 @@ project("lucent.html", "Lucent Launcher", "In development",
 # Adam's working method, developed 2026-11-16: agents supply parallel
 # machine hours; he supplies intent, verification, and the signature.
 # A custom page, not a project() page: it is a method, not a project.
-MT_DESC = "Machine Time: how Adam Laloge builds with agents. Parallel machine hours for the generation; his hours for intent, verification, and the signature. Set records, leave receipts."
+MT_DESC = "Machine Time: how Adam Laloge builds with agents. Parallel machine hours for the generation; his hours for intent, verification, and the signature. Work in machine time. Sign in human time."
 mt_body = """  <section>
     <div class="panel">
       <p class="label">Machine Time</p>
@@ -977,7 +977,7 @@ mt_body = """  <section>
       </article>
       <article class="card">
         <p class="label card-label">Cost</p>
-        <p>What the machine hours cost. Agents are cheap: about $580 covered a full month of them, with significant code changes to show for it. The bill is not the constraint it used to be.</p>
+        <p>What the machine hours cost. Agents are cheap, and they run in parallel. The bill is not the constraint it used to be.</p>
       </article>
       <article class="card">
         <p class="label card-label">Verification bandwidth</p>
@@ -992,11 +992,11 @@ mt_body = """  <section>
       <h2>What the machine hours cost</h2>
       <div class="mt-stats">
         <div class="mt-stat">
-          <p class="mt-stat-num">$580</p>
-          <p>One month of agent work: significant code changes, produced in parallel while I did other work.</p>
+          <p class="mt-stat-num">One month</p>
+          <p>Of agent work: significant code changes, produced in parallel while I did other work, and bought by the hour.</p>
         </div>
         <div class="mt-stat">
-          <p class="mt-stat-num">About $100</p>
+          <p class="mt-stat-num">One run</p>
           <p>The agent research run behind the ultra-wideband radar project, start to finish.</p>
         </div>
         <div class="mt-stat">
@@ -1028,12 +1028,9 @@ mt_body = """  <section>
     <div class="panel">
       <p class="label">The Lines</p>
       <h2>What replaced move fast and break things</h2>
-      <p>Facebook retired that motto in 2014 and swapped in move fast with stable infrastructure. Correct, and forgettable. These are the lines I actually work by:</p>
+      <p>Facebook retired that motto in 2014 and swapped in move fast with stable infrastructure. Correct, and forgettable. Mine is one line:</p>
       <ul class="mt-lines">
-        <li><span class="mt-line">Set records, leave receipts.</span><span class="mt-line-tag">The lead</span></li>
-        <li><span class="mt-line">Fast, with receipts.</span><span class="mt-line-tag">The standard</span></li>
-        <li><span class="mt-line">Machine time, human receipts.</span><span class="mt-line-tag">The short form</span></li>
-        <li><span class="mt-line">Move fast and verify things.</span><span class="mt-line-tag">The heir</span></li>
+        <li><span class="mt-line">Work in machine time. Sign in human time.</span></li>
       </ul>
     </div>
   </section>
