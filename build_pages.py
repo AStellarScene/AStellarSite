@@ -990,7 +990,7 @@ mt_body = """  <section>
     <div class="panel">
       <p class="label">Economics</p>
       <h2>The economics flipped</h2>
-      <p>Skilled human hours used to be the input everything else waited on, so they were rationed: fewer attempts, bigger plans, long arguments before anyone wrote a line. Agent hours invert the rationing. Generation is cheap, parallel, and always on. The scarce inputs now sit at the ends of the pipeline: a clear intent, the judgment to tell good from almost good, and a person willing to sign.</p>
+      <p>Skilled human hours used to be the input everything else waited on, so they were rationed: fewer attempts, bigger plans, long arguments before anyone wrote a line. Agent hours invert the rationing. Generation is cheap, parallel, and always on, so the strategy flips with it: run several approaches at once, keep the best, and kill wrong directions while they are still cheap.</p>
       <div class="mt-stats">
         <div class="mt-stat">
           <p class="mt-stat-num">One more try</p>
@@ -1005,9 +1005,7 @@ mt_body = """  <section>
           <p>The input that never gets cheaper and never parallelizes: one accountable person for every change that ships.</p>
         </div>
       </div>
-      <p>When attempts are cheap, the strategy changes with them. Run several approaches at once and keep the best, instead of betting the quarter on one plan. Prototype before the meeting instead of arguing through it. And killing a wrong direction stops hurting, because it cost machine hours, not weeks of a person's life. Bad work dies early, and dies cheap.</p>
-      <p>The expensive failure changes too. It is no longer slow production. It is fast production of the wrong thing, shipped before anybody checked. That is why the economics and the verification are the same argument: the cheaper generation gets, the more the remaining human hours are worth, and the worse it is to spend them typing instead of deciding.</p>
-      <p>Machine time is bought by the hour. Human time is spent on what matters: the intent going in, the verification coming out, and the signature at the end.</p>
+      <p>The scarce inputs now sit at the ends of the pipeline: a clear intent, the judgment to tell good from almost good, and a person willing to sign. The expensive failure is no longer slow production; it is fast production of the wrong thing, shipped before anybody checked. Machine time is bought by the hour. Human time is spent on what matters.</p>
     </div>
   </section>
 
