@@ -759,7 +759,7 @@ home_body = """  <section class="hero">
       <p class="label">Machine Time</p>
       <h2>Work in machine time. Sign in human time.</h2>
       <p>Most of the building now happens in parallel agent hours. Machine time is cheap; human time is not. My hours go to the parts that do not scale: the intent going in, the verification coming out, and the signature on the risk.</p>
-      <p><a href="machine-time.html">The method, with receipts &#8599;</a></p>
+      <p><a href="machine-time.html">The workflow, the review process, and the receipts &#8599;</a></p>
     </div>
   </section>
 
@@ -977,7 +977,7 @@ mt_body = """  <section>
       </article>
       <article class="card">
         <p class="label card-label">Cost</p>
-        <p>What the machine hours cost. Agents are cheap, and they run in parallel. The bill is not the constraint it used to be.</p>
+        <p>What the machine hours cost. Agents are cheap, and they run in parallel. The bill is not the constraint it used to be. Cheap is not free, though: you can burn credits solving the wrong problem, and it happens all the time. The spend is small. The wasted direction is not.</p>
       </article>
       <article class="card">
         <p class="label card-label">Verification bandwidth</p>
@@ -1049,6 +1049,30 @@ mt_body = """  <section>
       <li><strong>Ship contained, then close the loop.</strong> Flags, staged rollout, monitoring, and a rollback path are the last layer of review, because some defects only show up in production. Every miss that gets through becomes a test, a gate, or a checklist item, so next time the process catches it instead of luck.</li>
     </ol>
     <p>That is the whole trick to moving at machine time with a human in the loop. The machine produces the volume. The process decides where the human looks. The signature decides what ships.</p>
+  </section>
+
+  <section>
+    <p class="label">Receipts</p>
+    <h2>The receipts</h2>
+    <p class="section-note">A method page can claim anything, so here is the work itself: things built this way that you can open, touch, and check. Each one is still live. None of them is a screenshot of a claim.</p>
+    <div class="cards">
+      <article class="card">
+        <p class="label card-label">This site</p>
+        <p>Every page here was built with agents in machine time and verified by hand before it shipped. The build record is public: the essay on the Atlas documents thirty-plus shipped iterations in three days, every one of them live, on real devices, within hours of the last.</p>
+        <p><a href="blog-the-living-map.html">The Living Map &#8599;</a></p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Atlas</p>
+        <p>A living map of this site that generates itself from the site's content. Nothing on it is placed by hand, and it redraws itself as the site grows. Open it and probe it; the map is the receipt.</p>
+        <p><a href="latent-sitemap.html">Atlas &#8599;</a></p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Core</p>
+        <p>A public second brain: what my agent has learned, decided, and noticed, published after a sanitize pass and updated nightly. The entries are dated and cumulative, so the record can be checked against itself over time.</p>
+        <p><a href="core.html">Core &#8599;</a></p>
+      </article>
+    </div>
+    <p>That is what a receipt looks like here: not a number in a paragraph, but the thing itself, still standing where anyone can inspect it. Work that cannot point at its receipts does not get to cite this method.</p>
   </section>"""
 MT_JS = """<script>
 (function () {
