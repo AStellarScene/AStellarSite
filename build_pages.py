@@ -990,11 +990,11 @@ mt_body = """  <section>
     <div class="panel">
       <p class="label">Economics</p>
       <h2>The economics flipped</h2>
-      <p>Skilled human hours used to be the input everything else waited on, so they were rationed: fewer attempts, bigger plans, long arguments before anyone wrote a line. Agent hours invert the rationing. Generation is cheap, parallel, and always on, so the strategy flips with it: run several approaches at once, keep the best, and kill wrong directions while they are still cheap.</p>
+      <p>Skilled human hours used to be the input everything else waited on, so they were rationed: fewer attempts, bigger plans, long arguments before anyone wrote a line. Agent hours move the rationing instead of removing it. Generation is cheap, parallel, and always on, but each new approach still has to pass through one person's judgment. So the flip is not try everything. It is aim first, generate inside the intent, and cut any direction that cannot be verified and signed.</p>
       <div class="mt-stats">
         <div class="mt-stat">
-          <p class="mt-stat-num">One more try</p>
-          <p>The cost of another attempt, another draft, another approach: close to nothing next to the human hour it once took.</p>
+          <p class="mt-stat-num">Cheap to make</p>
+          <p>Another draft or approach costs little to generate. It still costs judgment to evaluate, which is why volume is not the strategy.</p>
         </div>
         <div class="mt-stat">
           <p class="mt-stat-num">Every lane at once</p>
