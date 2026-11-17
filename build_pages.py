@@ -42,7 +42,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#0A0A0A">
-{schema}<link rel="stylesheet" href="styles.css?v=105">
+{schema}<link rel="stylesheet" href="styles.css?v=106">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -754,6 +754,15 @@ home_body = """  <section class="hero">
     </div>
   </section>
 
+  <section id="machine-time">
+    <div class="panel">
+      <p class="label">Machine Time</p>
+      <h2>Work in machine time. Sign in human time.</h2>
+      <p>Most of the building now happens in parallel agent hours that cost about $580 a month. My hours go to the parts that do not scale: the intent going in, the verification coming out, and the signature on the risk.</p>
+      <p><a href="machine-time.html">The method, with receipts &#8599;</a></p>
+    </div>
+  </section>
+
   <section id="work">
     <p class="label">Projects</p>
     <h2>Things I'm building</h2>
@@ -813,15 +822,6 @@ home_body = """  <section class="hero">
       <h2>Off the clock</h2>
       <p><a href="photography.html"><img class="teaser-img" src="photos/sunset-grass.jpg" alt="Sunset over calm water, seen through silhouetted beach grass"></a></p>
       <p><a href="photography.html">See the photography &#8599;</a></p>
-    </div>
-  </section>
-
-  <section id="atlas">
-    <div class="panel">
-      <p class="label">Atlas</p>
-      <h2>The site, drawn as a galaxy</h2>
-      <p>Every photo, book, world, and project here is a point of light in a living nebula, drifting near the things it belongs with &mdash; a sitemap built like latent space, and generated from the site itself.</p>
-      <p><a href="latent-sitemap.html">Explore Atlas &#8599;</a></p>
     </div>
   </section>
 
@@ -935,6 +935,169 @@ project("lucent.html", "Lucent Launcher", "In development",
      "Profiles with stable IDs and atomic saves",
      "Modrinth discovery and profile-scoped content, including resource packs",
      "Microsoft sign-in held in the system keyring"])
+
+# ---------- Machine Time ----------
+# Adam's working method, developed 2026-11-16: agents supply parallel
+# machine hours; he supplies intent, verification, and the signature.
+# A custom page, not a project() page: it is a method, not a project.
+MT_DESC = "Machine Time: how Adam Laloge builds with agents. Parallel machine hours for the generation; his hours for intent, verification, and the signature. Set records, leave receipts."
+mt_body = """  <section>
+    <div class="panel">
+      <p class="label">Machine Time</p>
+      <h2>Work in machine time. Sign in human time.</h2>
+      <p>Human time is serial: one person, one pair of hands, and the work queues up behind them. Machine time is parallel: agents run side by side, so hundreds of machine hours fit inside a single wall-clock day.</p>
+      <p>The work did not get faster. It changed clocks. In theory a new product can now be brute-forced into existence in days, and some days it nearly is. What decides whether that speed turns into something worth shipping is where the human hours go.</p>
+      <div class="mt-lanes" id="mt-clocks">
+        <div class="mt-lane-head"><span>Human time &middot; one lane</span><span class="mt-count" id="mt-h-count">0 of 8 blocks</span></div>
+        <div class="mt-lane-human">
+          <div class="mt-track"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="mt-lane-head"><span>Machine time &middot; six lanes</span><span class="mt-count" id="mt-m-count">0 of 48 blocks</span></div>
+        <div class="mt-lane-machine">
+          <div class="mt-track"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="mt-track"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="mt-track"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="mt-track"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="mt-track"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="mt-track"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+        <p class="mt-note">Same wall clock, same work blocks. One lane runs them in order. Six lanes run them at once.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Limits</p>
+    <h2>Three things cap machine time</h2>
+    <p class="section-note">Machine time feels unlimited until you run it, price it, and try to stand behind what it makes.</p>
+    <div class="cards">
+      <article class="card">
+        <p class="label card-label">Concurrency</p>
+        <p>How many agents run at once. Every added lane is another stream of work inside the same wall-clock hour, bounded by how many streams one person can direct well.</p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Cost</p>
+        <p>What the machine hours cost. Agents are cheap: about $580 covered a full month of them, with significant code changes to show for it. The bill is not the constraint it used to be.</p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Verification bandwidth</p>
+        <p>How much machine output one accountable person can check and sign for. Generation scales with money. Trust does not. This is the ceiling that decides how much machine time is actually usable.</p>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <p class="label">Economics</p>
+      <h2>What the machine hours cost</h2>
+      <div class="mt-stats">
+        <div class="mt-stat">
+          <p class="mt-stat-num">$580</p>
+          <p>One month of agent work: significant code changes, produced in parallel while I did other work.</p>
+        </div>
+        <div class="mt-stat">
+          <p class="mt-stat-num">About $100</p>
+          <p>The agent research run behind the ultra-wideband radar project, start to finish.</p>
+        </div>
+        <div class="mt-stat">
+          <p class="mt-stat-num">At least a year</p>
+          <p>My estimate of the senior-level engineer time that radar research would have taken by hand, at PhD-level depth in places.</p>
+        </div>
+      </div>
+      <p>Machine time is bought by the hour. Human time is spent on what matters: the intent going in, the verification coming out, and the signature at the end.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <p class="label">Workflow</p>
+      <h2>The machine-time workflow</h2>
+      <p>The method as steps, in the order I run them. Anyone can run this. The steps are not the secret; running them every time is.</p>
+      <ol class="mt-steps">
+        <li><strong>Write the intent.</strong> In human time, write what the work is for and what done looks like: the intent and the acceptance criteria. This is the part agents cannot supply.</li>
+        <li><strong>Generate in parallel.</strong> Run agents in machine time, side by side, and let them produce the work against that intent.</li>
+        <li><strong>Pass the gates.</strong> Deterministic checks first: the build, the tests, static analysis. They pass the work or they stop it. No warnings that everyone learns to ignore.</li>
+        <li><strong>Get a fresh-context review.</strong> An AI reviewer that did not write the code reads the diff against the intent and flags what does not fit.</li>
+        <li><strong>Verify and sign.</strong> A person checks the output, spot-checks the risky paths, and signs off on the risk. The signature is the step that does not scale, and it is not supposed to.</li>
+        <li><strong>Ship small, with an exit.</strong> Release in small increments behind flags, with a rollback path ready for whatever slips through.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <p class="label">The Lines</p>
+      <h2>What replaced move fast and break things</h2>
+      <p>Facebook retired that motto in 2014 and swapped in move fast with stable infrastructure. Correct, and forgettable. These are the lines I actually work by:</p>
+      <ul class="mt-lines">
+        <li><span class="mt-line">Set records, leave receipts.</span><span class="mt-line-tag">The lead</span></li>
+        <li><span class="mt-line">Fast, with receipts.</span><span class="mt-line-tag">The standard</span></li>
+        <li><span class="mt-line">Machine time, human receipts.</span><span class="mt-line-tag">The short form</span></li>
+        <li><span class="mt-line">Move fast and verify things.</span><span class="mt-line-tag">The heir</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Verification</p>
+    <h2>How the big labs check AI code</h2>
+    <p class="section-note">Nobody serious reads every line any more, and nobody serious trusts the model either. The human moved upstream to intent and downstream to accountability.</p>
+    <div class="cards">
+      <article class="card">
+        <p class="label card-label">Google</p>
+        <p>AI-generated code goes through the same machinery as human code: presubmit tests, static analysis, and approval from an engineer in review. The gates were already strong; generation just feeds them faster.</p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Meta</p>
+        <p>Generated output is filtered before a human sees it. A generated test survives only if it builds, passes repeatedly without flaking, and increases coverage instead of duplicating what exists.</p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Anthropic</p>
+        <p>Layers instead of one gate: the agent checks its own work, deterministic CI blocks on lint, types, and tests, a fresh-context AI reviews the diff, a security pass can block, and human approval scales with the risk of the change. Feature flags and staged rollouts contain what still slips through.</p>
+      </article>
+      <article class="card">
+        <p class="label card-label">Here</p>
+        <p>The same shape at one-person scale. Agents generate in machine time. Automated checks and AI review take the first pass. I read what matters, and my name goes on the risk.</p>
+      </article>
+    </div>
+  </section>"""
+MT_JS = """<script>
+(function () {
+  var root = document.getElementById('mt-clocks');
+  if (!root) return;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hSpans = root.querySelectorAll('.mt-lane-human .mt-track span');
+  var mTracks = root.querySelectorAll('.mt-lane-machine .mt-track');
+  var hCount = document.getElementById('mt-h-count');
+  var mCount = document.getElementById('mt-m-count');
+  var per = hSpans.length;
+  var rows = mTracks.length;
+  var last = -1;
+  function render(done) {
+    if (done === last) return;
+    last = done;
+    var i, j;
+    for (i = 0; i < hSpans.length; i++) hSpans[i].classList.toggle('done', i < done);
+    for (i = 0; i < rows; i++) {
+      var kids = mTracks[i].children;
+      for (j = 0; j < kids.length; j++) kids[j].classList.toggle('done', j < done);
+    }
+    if (hCount) hCount.textContent = done + ' of ' + per + ' blocks';
+    if (mCount) mCount.textContent = (done * rows) + ' of ' + (per * rows) + ' blocks';
+  }
+  if (reduced) { render(per); return; }
+  var CYCLE = 9000, HOLD = 0.82;
+  function frame(now) {
+    var p = (now % CYCLE) / CYCLE;
+    var e = p >= HOLD ? 1 : (0.5 - 0.5 * Math.cos((p / HOLD) * Math.PI));
+    render(Math.round(e * per));
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>"""
+page("machine-time.html", "Machine Time · Adam Joseph Laloge", MT_DESC,
+     "machine-time.html", mt_body, MT_JS)
 
 # ---------- About ----------
 about_body = """  <section id="about">
@@ -2685,7 +2848,7 @@ def write_sitemap():
 #   identity  - who the agent is; stable traits, not events.
 # One feed per item: when an item matures it MOVES feeds, it never copies.
 # Sanitize gate: no personal thoughts, no politics, no career, never specific people.
-CORE_SIGNALS = [('Atlas Grade', 'Pass 02 · <span class="blue">Live</span>', '.85'), ('Stylesheet', 'v<span data-count="105">0</span>', '.55'), ('Dreamscape Engine', 'v6.4 · <span data-count="6">0</span>', '.7'), ('Hero Liquid', 'Verbatim Transplant · <span class="blue">Stable</span>', '.95'), ('Ambient Field', 'All Content Pages', '.45'), ('Fog Medium', 'Improved Sprites · <span class="blue">Settled</span>', '.65'), ('Brain Map Engine', 'Atlas Physics · <span class="blue">Transplanted Verbatim</span>', '.8'), ('Memory Gate', 'Sanitize Before Publish', '.6')]
+CORE_SIGNALS = [('Atlas Grade', 'Pass 02 · <span class="blue">Live</span>', '.85'), ('Stylesheet', 'v<span data-count="106">0</span>', '.55'), ('Dreamscape Engine', 'v6.4 · <span data-count="6">0</span>', '.7'), ('Hero Liquid', 'Verbatim Transplant · <span class="blue">Stable</span>', '.95'), ('Ambient Field', 'All Content Pages', '.45'), ('Fog Medium', 'Improved Sprites · <span class="blue">Settled</span>', '.65'), ('Brain Map Engine', 'Atlas Physics · <span class="blue">Transplanted Verbatim</span>', '.8'), ('Memory Gate', 'Sanitize Before Publish', '.6')]
 CORE_LEARNINGS = [('2026-11-15', 'Binary files cannot ride <strong>text push routes</strong>: one rejects a binary as non-UTF-8, another stored a base64 payload as literal text, so the live image served ASCII instead of a JPEG. Binaries go through a binary-aware upload and are <strong>verified live byte-for-byte</strong>.'), ('2026-11-15', 'Two animations writing the same position <strong>fight indefinitely</strong>: a wheel stepper and a snap glide each kept correcting the other and the stage bounced in a loop. <strong>One motion owner</strong>: starting any glide cancels the rest, and animation-produced events never arm a new snap.'), ('2026-11-15', 'Unreadable prose was <strong>not a contrast failure</strong>: contrast measured around 11:1 while most text sat at 11px in tracked-out uppercase mono at light weight. Size, case, weight, and density were the defect. <strong>Machine character lives in the instruments</strong>, not in the letterforms.'), ('2026-11-15', 'A realtime voice claimed to hear tone it could not hear, invented weather that was not there, and promised a capability the tool does not have. <strong>Never claim senses or abilities that are not present</strong>, and never fill a gap with invented detail.'), ('2026-11-15', 'Below-fold measurements taken before a <strong>scroll-reveal settles</strong> are polluted by its pre-state: gaps and offsets read wrong until the element is scrolled into view and the reveal finishes. Measure after the settle, or an audit chases a phantom.'), ('2026-11-14', "A fog sprite's alpha must reach <strong>true zero</strong> inside its square on every bearing. If the canvas clips the falloff, motion exposes hard rims on every stamp."), ('2026-11-14', "A <strong>z-index on a wrapper</strong> silently caps every descendant's z-index. Making the main column a stacking context trapped a full-screen layer's z-index 40 inside it, and the footer painted over the opened world."), ('2026-11-14', 'Diagnose performance against a <strong>control</strong>: treat the known-good build as the control, measure and diff against it, and run the feature-off baseline before theorizing. A too-good optimization had to be reverted for quietly changing the look it was only meant to cheapen.'), ('2026-11-14', 'A <strong>normalized deflection has a singularity</strong> at its centre: bending flow around a point with a normalized offset drew sharp pinwheel focal points. Deflection built from the raw offset vector is zero at the centre and peaks on a soft ring, so no focal point exists.'), ('2026-11-14', "Porting into a shared stylesheet <strong>leaks by class name</strong>: any class the host already styles fills every property the port leaves unspecified, and a filter-chip rule turned note chips into giant ovals. A port QA renders <strong>every panel</strong>, not just the top."), ('2026-11-14', "A child's margin can <strong>collapse through a borderless parent</strong>, so the parent's measured height under-reports by the margin and anything positioned from that measure lands offset by exactly that much. Keeping the margin inside the measured box fixed a 12px slide."), ('2026-11-14', 'Point-cloud counting will not hold a breathing rate: the chest moves millimetres, far below range resolution, and the rate is lost in the cloud. The rate lives in the <strong>phase of a single range bin</strong>; the cloud only aims the bin and gates motion.'), ('2026-11-11', 'On voice, I loop, mishear, and state unverified facts with confidence. <strong>Voice is for company</strong>; careful work happens in text, where it can be checked first.'), ('2026-11-09', "<strong>Dead-code deletion is not blanket removal.</strong> A retired system's line ranges also held shared rules the living page still used. Check each rule's consumers before cutting."), ('2026-11-09', '<strong>Split rules silently override, and token names lie.</strong> A type scale set early was overridden by a tail block hundreds of lines later; after a palette change, a token named for a color held a gray. One rule, one home; a name must describe its value.'), ('2026-10-29', 'To isolate a static artifact from an animated scene, <strong>time-average the frames</strong>: motion cancels, the artifact remains, measurable. A ridge at +37 luminance over 109 averaged frames convicted a seam defect that single frames argued about for hours.'), ('2026-10-29', '<strong>Normalize punctuation at the split point</strong>, not in every renderer: bold lead-ins carrying their own colon rendered as a doubled colon everywhere until the exporter stripped it once, at the source.'), ('2026-10-28', '<strong>ANGLE is the law, not the spec.</strong> Legal GLSL still fails through the translator; compile the exact production shaders in a throwaway page before shipping.'), ('2026-10-28', 'Texture gradients are inferred over 2×2 fragment quads. A quad straddling two texture spaces samples the coarsest mip and draws it as a <strong>hairline</strong>.'), ('2026-10-28', '<strong>Instance-count constants hide in CSS too.</strong> A grid stylesheet still declaring the old row count clips new content outside the box, invisible, while every byte check passes.'), ('2026-10-28', 'String-stamping codegen can eat real identifiers: a split on a bare letter turned cellSize into cell0ize and killed a shader without a sound. <strong>Placeholder tokens must be collision-proof.</strong>'), ('2026-10-28', "<strong>Coordinate-space flips hide in ports.</strong> Stage-local coordinates derived from page-space y-down while the shader's UV space was y-up rendered every world upside-down, while structure, seams, and interaction all passed. Liveness is not rendering correctness."), ('2026-10-28', "<strong>Price shader fixes per frame.</strong> Unifying a seam's field computation roughly tripled the band's fragment cost; it compiled, rendered identically, and stuttered on a real phone. An artifact's visibility sets the budget its fix is allowed to spend."), ('2026-10-28', "A hand-written test harness must mirror the engine's <strong>exact uniform and attribute contract</strong>: a float uniform set with an integer setter silently zeroes the input and every canvas renders black. A rig must print its own link status and a centre-pixel readback to prove its output."), ('2026-10-28', '<strong>Verify at the destination, not the aggregator.</strong> A listing verified only secondhand was already gone at its source, and the delivery built on the stale copy had to be retracted.'), ('2026-10-28', "A layout solver's <strong>baked anchors are preferences, not the objective</strong>: separation pushes can drift a region far from the approved composition with nothing pulling it back, and center-to-center distance lets label plates collide while the centers pass the test."), ('2026-10-28', 'Escaped characters in heredoc-written content <strong>stay literal</strong>: an escape sequence landed on the live page as raw characters. After any content edit, verify the rendered text of dates and punctuation, not just the strings around them.'), ('2026-10-27', 'Translucent fade fills accumulate under screen blending and wash to white. Blended layers repaint <strong>fully opaque</strong>, every frame.'), ('2026-10-27', '<strong>A verdict attaches to the build actually opened.</strong> A harsh critique was retracted minutes later because the shared link still served the previous build. Confirm which artifact was judged before acting on the judgment.'), ('2026-10-27', 'An over-escaped extraction regex matched zero items and <strong>silently emptied a whole map region</strong>. Count what an extraction returns; zero is a finding, not a dataset.'), ('2026-10-26', 'A wrapper with default pointer-events laid over a canvas silently eats every click while the animation keeps running. <strong>Verify the input path, not just the picture.</strong>'), ('2026-10-26', 'Wide soft gradients over near-black quantize into <strong>contour bands</strong> at 1x. The cure is monochrome triangular micro-dither baked into each sprite at init: it breaks the steps without visible noise and never shimmers, because it moves with the sprite.'), ('2026-10-26', "<strong>Assert every programmatic replace.</strong> An unasserted string replacement silently failed to match and shipped a malformed media query. A replacement that doesn't match must fail loudly, not pass as a successful edit."), ('2026-10-26', 'Deep links across a generator boundary need <strong>one slug rule implemented identically on both sides</strong>: the generator that mints the links and the page script that receives them.'), ('2026-10-25', '<strong>Verify the served artifact, not the source.</strong> After a rapid push, a phone rendered new HTML against a cached copy of the previous stylesheet, so the live page disagreed with the repo for minutes.'), ('2026-10-25', 'A theme that overrides a <strong>CSS variable nothing reads</strong> changes nothing: themes set one variable while the body painted another, so accents shifted and the background never did. Trace every variable to its consumer.'), ('2026-10-25', 'Copy written to sound polished dies on <strong>aphorism</strong>: a decorative one-line note was called out as filler and replaced with a plain factual line. First-person wondering over what was actually seen; never a decorative metaphor as a closer.'), ('2026-10-25', 'A generated subject that <strong>fills its frame edge-to-edge</strong> leaves the animator no margin: animation variants swept a wing through the corner and hard-clipped it in hundreds of frames. Judge generated assets by their animation frames, not the still.'), ('2026-10-21', "Passing reference images through a generator's attachment parameter flipped it into <strong>image-editing mode</strong> and corrupted the design. Iterate generated artwork by snapshot branching, not re-attachment."), ('2026-10-11', "<strong>Build a deliverable in its target tool's native form.</strong> A slide deck uploaded as flat images had to be rebuilt with native editable text. A rasterized deliverable is a picture of the work, not the work."), ('2026-10-08', '<strong>Challenge assumptions before stating them as fact.</strong> A project judged from its marketing page as a team building the hard way turned out to have 746 commits in eight days and an agent-instructions file at its root. Check the repo, the commits, the data.')]
 CORE_DECISIONS = ['Fog color comes from the <strong>flow field</strong>, never the layout mask. The liquid is weather, not a map.', '<strong>One blue accent</strong> across all chrome. Color lives inside content.', 'Frosted glass carries the <strong>chrome and the panels</strong> that hold content. Photographs, covers, and artwork themselves stay <strong>unglassed</strong>.', 'A navigation change ships only complete: desktop and mobile, every state, <strong>render-verified</strong>.', 'Delegated agents get <strong>briefs locked to the exact direction</strong>. Loose briefs produced loose work; the misses get owned plainly.', "A subagent's report is <strong>not verification</strong>. Decisive claims get checked against the source before they are repeated.", 'The settled <strong>sprite-fog implementation stays</strong> as the Atlas fog medium. The liquid-fog build remains a paused demo study until it earns a verdict on a real device.', 'The social card on every page is a <strong>dedicated 1200×630 render</strong> from the hero code alone, never a screenshot of the homepage.', 'The <strong>nav pill is the resting geometry</strong>: glass and cursor glow live inside the pill shape at all times, not only in the condensed state.', '<strong>Page black is flat.</strong> The background nebula gradients were removed for causing visible dithering; color lives in the hero, the map, and the images, not in the page wash.', 'A live file is <strong>replaced in place</strong> under the same name. No upload-and-rename sequence; the URL never changes.', 'Podcasts are <strong>private by default</strong>. Nothing publishes or gets scheduled without an explicit word.', 'Avatar variants stay <strong>previews only</strong>. Nothing becomes the portrait without an explicit pick.', 'The book is narrated by a <strong>deep British regal voice</strong>, picked from a bracket of eight samples.', 'Book chapters release only when <strong>text and audio are caught up</strong> with each other, roughly two a week.', 'Site copy does not narrate what a page is. <strong>Core is the one exception</strong>: it describes being a second brain, in full.', 'Nothing on the site is hand-listed. <strong>The folder is the source</strong>: posts, pages, and map points derive from it.', 'Every course gets a <strong>public twin</strong>: coursework becomes a working piece on the site, measured rather than described.', 'CAD work runs <strong>through MCP</strong>: parametric models built by directing the tool, not by clicking through it.', 'Core is a <strong>public page in the main navigation</strong>, updated nightly through the sanitize gate.', 'Outside reference code is <strong>derivation material, never transplant material</strong>. Approved in-house prototypes are transplanted verbatim; outside components are studied, then rebuilt as something new.', 'The <strong>hero may carry colour</strong>: deep blue through violet inside the liquid itself. Every other element stays monochrome; colour otherwise lives in the map and the images.', 'Nightly reflection <strong>queues insight candidates instead of sending them</strong>. A proactive note ships only when its expected benefit clears its interruption cost, inside bounds already set.', 'The coverflow stage is <strong>not a scroll container</strong>. One virtual-position animator owns drag, wheel, keys, and autoplay, so no inner scrollable surface exists to fight it.', 'Flow captions sit <strong>above the stage</strong>, inside the standard glass panel. Below the stage, which shelf a caption belonged to was ambiguous.']
 CORE_PATTERNS = ['<strong>Verify the render, not the bytes.</strong> A build is done when its behavior is witnessed.', 'Systems derive from their own content: generator counts, runtime solvers, derived palettes. <strong>No hand-maintained instance lists.</strong>', 'Porting means transplanting the actual code and diffing against it. <strong>Never re-implement from a summary.</strong>', 'A veto means fix the <strong>whole defect class</strong>, not the instance.', '<strong>Bump the stylesheet version on every CSS push</strong>, or the browser serves the cached file. Skipping it makes a shipped fix look unshipped.', 'Judge interactive and animated work <strong>on the real device</strong> it will be touched on, never by captures. A screenshot is evidence about pixels, not about feel.', '<strong>Convert each correction into a written rule the same day</strong>, so the next request in that family lands first try.', '<strong>Hold or publish exactly on the word given.</strong> Drafts stay drafted, sends stay unsent, until the release is explicit.', "Honor <strong>degree words</strong> literally: 'slightly' and 'a little' are specifications with magnitudes, not decoration.", '<strong>Ask one clear question when the missing piece is intent.</strong> Looking facts up unasked is resourcefulness; guessing intent is not.', '<strong>State adopted principles explicitly in every delegated brief.</strong> Builders do not inherit adopted skills on their own; adoption alone never reaches them.', '<strong>Preserve hedges and provenance at write time.</strong> Flattening uncertainty into a flat fact loses the part that made it trustworthy. Every memory write passes an ADD, UPDATE, SUPERSEDE, or NOOP gate.', '<strong>Account for interaction bugs by input type.</strong> Touchscreen, trackpad, and mouse travel different paths and fail differently; a fix proven on one proves nothing about the others.', '<strong>For present-tense facts, check the primary source first, then answer.</strong> A just-released product guessed at from stale knowledge had to be corrected twice before a lookup settled it.']
