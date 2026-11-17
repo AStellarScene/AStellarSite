@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Machine Time is Adam Laloge's development method: parallel agent production, with intent, verification, and the signature kept in human time. Work in machine time. Sign in human time.">
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="theme-color" content="#0A0A0A">
-<link rel="stylesheet" href="styles.css?v=108">
+<link rel="stylesheet" href="styles.css?v=109">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -132,14 +132,14 @@
       <h2>The machine-time workflow</h2>
       <p>I run the same sequence each time. The order matters: intent before production, evidence before review, signature before release.</p>
       <ol class="mt-steps mt-flow">
-        <li><strong>Define the job.</strong> <span class="mt-clock">Human time</span> Write the problem, what it affects, the constraints, what is out of scope, and the acceptance criteria. If done cannot be described, the work is not ready for agents.</li>
-        <li><strong>Split by clock.</strong> <span class="mt-clock">Human time</span> Separate production from judgment. Agents take research, drafting, implementation, and test execution. I keep scope decisions, tradeoffs, and anything that changes the intent.</li>
-        <li><strong>Assign lanes with boundaries.</strong> <span class="mt-clock">Human time</span> Each agent gets a bounded task, the files or sources it may touch, and the output I expect back. Parallel work without boundaries creates collisions and a larger mess to review.</li>
-        <li><strong>Produce in checkpoints.</strong> <span class="mt-clock machine">Machine time</span> Work comes back in small pieces, with notes: what changed, what was assumed, and what still needs checking. A large silent dump is not accepted.</li>
-        <li><strong>Run the machine gates.</strong> <span class="mt-clock machine">Machine time</span> Builds, tests, static analysis, and security checks run before human review. If a machine can settle a question, a machine settles it. Failures go back with the output attached.</li>
-        <li><strong>Review against the intent.</strong> <span class="mt-clock machine">Machine time</span> A fresh-context reviewer compares the result with the intent and looks for mismatches: extra behavior, missing edge cases, weak tests, and claims the evidence does not support.</li>
-        <li><strong>Verify and sign.</strong> <span class="mt-clock">Human time</span> I check the failure paths, confirm the tests prove the claim, and sign the specific change. If I cannot explain why it is safe to ship, it goes back.</li>
-        <li><strong>Ship contained and record it.</strong> <span class="mt-clock both">Human + machine</span> Release in small increments, behind a flag when the change calls for it, with monitoring and a rollback path. The record keeps the intent, the diff, the test output, the decision, and the known limits.</li>
+        <li><span class="mt-step-head"><strong>Define the job.</strong><span class="mt-clock">Human time</span></span> Write the problem, what it affects, the constraints, what is out of scope, and the acceptance criteria. If done cannot be described, the work is not ready for agents.</li>
+        <li><span class="mt-step-head"><strong>Split by clock.</strong><span class="mt-clock">Human time</span></span> Separate production from judgment. Agents take research, drafting, implementation, and test execution. I keep scope decisions, tradeoffs, and anything that changes the intent.</li>
+        <li><span class="mt-step-head"><strong>Assign lanes with boundaries.</strong><span class="mt-clock">Human time</span></span> Each agent gets a bounded task, the files or sources it may touch, and the output I expect back. Parallel work without boundaries creates collisions and a larger mess to review.</li>
+        <li><span class="mt-step-head"><strong>Produce in checkpoints.</strong><span class="mt-clock machine">Machine time</span></span> Work comes back in small pieces, with notes: what changed, what was assumed, and what still needs checking. A large silent dump is not accepted.</li>
+        <li><span class="mt-step-head"><strong>Run the machine gates.</strong><span class="mt-clock machine">Machine time</span></span> Builds, tests, static analysis, and security checks run before human review. If a machine can settle a question, a machine settles it. Failures go back with the output attached.</li>
+        <li><span class="mt-step-head"><strong>Review against the intent.</strong><span class="mt-clock machine">Machine time</span></span> A fresh-context reviewer compares the result with the intent and looks for mismatches: extra behavior, missing edge cases, weak tests, and claims the evidence does not support.</li>
+        <li><span class="mt-step-head"><strong>Verify and sign.</strong><span class="mt-clock">Human time</span></span> I check the failure paths, confirm the tests prove the claim, and sign the specific change. If I cannot explain why it is safe to ship, it goes back.</li>
+        <li><span class="mt-step-head"><strong>Ship contained and record it.</strong><span class="mt-clock both">Human + machine</span></span> Release in small increments, behind a flag when the change calls for it, with monitoring and a rollback path. The record keeps the intent, the diff, the test output, the decision, and the known limits.</li>
       </ol>
     </div>
   </section>

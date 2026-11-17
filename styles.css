@@ -676,6 +676,18 @@ section.hero {
 .mt-clock.machine { color: var(--accent); border-color: rgba(77, 163, 255, 0.45); }
 .mt-clock.both { color: var(--heading); border-color: rgba(255, 255, 255, 0.30); }
 
+/* Step header row: title and clock chip sit in a fixed flex row, so
+   the description always starts on its own line at the same indent
+   instead of flowing inline after the chip wherever it happened to land. */
+.mt-step-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-bottom: 5px;
+}
+.mt-step-head .mt-clock { margin-left: 0; vertical-align: baseline; }
+
 /* Verification reads as gates instead: boxed step numbers, no rail. */
 .mt-checks li { padding-left: 64px; }
 .mt-checks li::before {
