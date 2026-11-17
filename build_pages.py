@@ -1044,22 +1044,11 @@ mt_body = """  <section>
       <li><strong>Demand the receipts first.</strong> No review starts until the change arrives with its evidence: the intent it was built against, the acceptance criteria, a plain summary of what changed and why, and the build and test output. Missing receipts end the review before it starts. Send it back.</li>
       <li><strong>Let machines take the first pass.</strong> Build, tests, static analysis, and security scans run automatically and block on failure. They are gates, not warnings. A human should never spend attention on a question a machine can settle.</li>
       <li><strong>Get an independent AI review.</strong> A reviewer with fresh context, one that did not write the code, reads the diff against the intent. Its job is mismatch hunting: behavior nobody asked for, edge cases nobody handled, tests that pass without testing anything.</li>
-      <li><strong>Sort by risk, not by size.</strong> A large generated change can be low risk, and a two-line change can be dangerous. The tier is set by what the change touches, not by how much of it there is and not by who or what wrote it.</li>
       <li><strong>Review in a fixed order.</strong> Intent first: is this the right thing, built the way the intent described? Then the risky paths, line by line. Then the tests: do they actually prove the claim, and did anything weaken them to get a pass? The generator never edits its own tests. Spot-check the rest, and do not pretend a skim is a read.</li>
       <li><strong>Sign one change, by name.</strong> An approval covers one specific change and belongs to a person. An agent's approval never counts as a person's. If you would not put your name on the failure, it does not ship.</li>
       <li><strong>Ship contained, then close the loop.</strong> Flags, staged rollout, monitoring, and a rollback path are the last layer of review, because some defects only show up in production. Every miss that gets through becomes a test, a gate, or a checklist item, so next time the process catches it instead of luck.</li>
     </ol>
-    <div class="cards">
-      <article class="card">
-        <p class="label card-label">Low risk</p>
-        <p>Documentation, tests, isolated styling, internal tools that touch no data. Green gates plus the independent AI review can be enough. The human spot-checks, and the change moves at machine speed.</p>
-      </article>
-      <article class="card">
-        <p class="label card-label">High risk</p>
-        <p>Anything touching data, money, authentication, safety paths, or a public interface. A person reads it line by line, a named owner signs, and it ships behind a flag with the rollback ready.</p>
-      </article>
-    </div>
-    <p>That is the whole trick to moving at machine time with a human in the loop: scrutiny scales with risk, not with volume. The machine produces the volume. The process decides where the human looks. The signature decides what ships.</p>
+    <p>That is the whole trick to moving at machine time with a human in the loop. The machine produces the volume. The process decides where the human looks. The signature decides what ships.</p>
   </section>"""
 MT_JS = """<script>
 (function () {
