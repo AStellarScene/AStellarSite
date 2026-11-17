@@ -758,7 +758,7 @@ home_body = """  <section class="hero">
     <div class="panel">
       <p class="label">Machine Time</p>
       <h2>Work in machine time. Sign in human time.</h2>
-      <p>Most of the building now happens in parallel agent hours. Machine time is cheap; human time is not. My hours go to the parts that do not scale: the intent going in, the verification coming out, and the signature on the risk.</p>
+      <p>Machine Time is my development method. Agents do the parallel production: research, drafts, code, and test runs. I do the serial work: set the intent, check the output against it, and sign the change before it ships.</p>
       <p><a href="machine-time.html">The workflow, the review process, and the receipts &#8599;</a></p>
     </div>
   </section>
@@ -940,13 +940,13 @@ project("lucent.html", "Lucent Launcher", "In development",
 # Adam's working method, developed 2026-11-16: agents supply parallel
 # machine hours; he supplies intent, verification, and the signature.
 # A custom page, not a project() page: it is a method, not a project.
-MT_DESC = "Machine Time: how Adam Laloge builds with agents. Parallel machine hours for the generation; his hours for intent, verification, and the signature. Work in machine time. Sign in human time."
+MT_DESC = "Machine Time is Adam Laloge's development method: parallel agent production, with intent, verification, and the signature kept in human time. Work in machine time. Sign in human time."
 mt_body = """  <section>
     <div class="panel">
       <p class="label">Machine Time</p>
       <h2>Work in machine time. Sign in human time.</h2>
-      <p>Human time is serial: one person, one pair of hands, and the work queues up behind them. Machine time is parallel: agents run side by side, so hundreds of machine hours fit inside a single wall-clock day.</p>
-      <p>The work did not get faster. It changed clocks. In theory a new product can now be brute-forced into existence in days, and some days it nearly is. What decides whether that speed turns into something worth shipping is where the human hours go.</p>
+      <p>Machine Time is the method I use to build with agents. It splits the work by clock. Human time is serial: one person setting direction, making judgments, and answering for the result. Machine time is parallel: agents producing research, drafts, code, and test runs side by side inside the same day.</p>
+      <p>The point is not raw speed. The point is control at production speed. Agents can expand the amount of work in motion. They cannot expand the amount of work I can honestly verify. The method keeps those two numbers from pretending to be the same.</p>
       <div class="mt-lanes" id="mt-clocks">
         <div class="mt-lane-head"><span>Human time &middot; one lane</span><span class="mt-count" id="mt-h-count">0 of 8 blocks</span></div>
         <div class="mt-lane-human">
@@ -961,7 +961,7 @@ mt_body = """  <section>
           <div class="mt-track"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
           <div class="mt-track"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
-        <p class="mt-note">Same wall clock, same work blocks. One lane runs them in order. Six lanes run them at once.</p>
+        <p class="mt-note">Same work, same wall clock. The human lane moves in sequence. The machine lanes move together.</p>
       </div>
     </div>
   </section>
@@ -969,19 +969,19 @@ mt_body = """  <section>
   <section>
     <p class="label">Limits</p>
     <h2>Three things cap machine time</h2>
-    <p class="section-note">Machine time feels unlimited until you run it, price it, and try to stand behind what it makes.</p>
+    <p class="section-note">Machine time has three hard limits. They decide how much of it is usable.</p>
     <div class="cards">
       <article class="card">
         <p class="label card-label">Concurrency</p>
-        <p>How many agents run at once. Every added lane is another stream of work inside the same wall-clock hour, bounded by how many streams one person can direct well.</p>
+        <p>How many agent lanes run at once. More lanes mean more work in motion, and more output competing for the same review. A lane is useful only if its output can be directed and checked.</p>
       </article>
       <article class="card">
         <p class="label card-label">Cost</p>
-        <p>What the machine hours cost. Agents are cheap, and they run in parallel. The bill is not the constraint it used to be. Cheap is not free, though: you can burn credits solving the wrong problem, and it happens all the time. The spend is small. The wasted direction is not.</p>
+        <p>What parallel work costs. Agent time is cheap compared with skilled human time, but cheap work can still be wasted. Credits spent solving the wrong problem are gone, and the review time spent discovering that is gone too.</p>
       </article>
       <article class="card">
         <p class="label card-label">Verification bandwidth</p>
-        <p>How much machine output one accountable person can check and sign for. Generation scales with money. Trust does not. This is the ceiling that decides how much machine time is actually usable.</p>
+        <p>How much output one accountable person can inspect, test, and sign. This is the real ceiling. Generation can be bought by the hour. A signature cannot.</p>
       </article>
     </div>
   </section>
@@ -989,23 +989,23 @@ mt_body = """  <section>
   <section>
     <div class="panel">
       <p class="label">Economics</p>
-      <h2>The economics flipped</h2>
-      <p>Skilled human hours used to be the input everything else waited on, so they were rationed: fewer attempts, bigger plans, long arguments before anyone wrote a line. Agent hours move the rationing instead of removing it. Generation is cheap, parallel, and always on, but each new approach still has to pass through one person's judgment. So the flip is not try everything. It is aim first, generate inside the intent, and cut any direction that cannot be verified and signed.</p>
+      <h2>The scarce part moved</h2>
+      <p>Skilled human time used to be spent producing the work, so it was rationed with long plans and few attempts. Agent production changes where the ration sits. Drafts, research, and code are cheap to generate. Judgment is not. I spend human time before production on intent and after production on verification. Everything between those points has to earn its place by being checkable.</p>
       <div class="mt-stats">
         <div class="mt-stat">
-          <p class="mt-stat-num">Cheap to make</p>
-          <p>Another draft or approach costs little to generate. It still costs judgment to evaluate, which is why volume is not the strategy.</p>
+          <p class="mt-stat-num">Cheap to generate</p>
+          <p>Drafts, code, and research can be produced in parallel at low cost. Low cost is not the same as low consequence.</p>
         </div>
         <div class="mt-stat">
-          <p class="mt-stat-num">Every lane at once</p>
-          <p>Machine hours scale sideways. Buy more lanes and the same day holds more work. The calendar stops being the budget.</p>
+          <p class="mt-stat-num">Bounded by review</p>
+          <p>The usable amount of machine time is set by how much output can be inspected and signed, not by how much can be produced.</p>
         </div>
         <div class="mt-stat">
           <p class="mt-stat-num">One signature</p>
-          <p>The input that never gets cheaper and never parallelizes: one accountable person for every change that ships.</p>
+          <p>Every shipped change has one accountable person. Agents can recommend. They cannot absorb the risk.</p>
         </div>
       </div>
-      <p>The scarce inputs now sit at the ends of the pipeline: a clear intent, the judgment to tell good from almost good, and a person willing to sign. The expensive failure is no longer slow production; it is fast production of the wrong thing, shipped before anybody checked. Machine time is bought by the hour. Human time is spent on what matters.</p>
+      <p>The failure mode is not slow work. It is fast work aimed at the wrong target, or work produced faster than it can be checked. Machine Time treats speed as an input. The output is a change I can explain, test, and stand behind.</p>
     </div>
   </section>
 
@@ -1013,23 +1013,25 @@ mt_body = """  <section>
     <div class="panel">
       <p class="label">Workflow</p>
       <h2>The machine-time workflow</h2>
-      <p>The method as steps, in the order I run them. Anyone can run this. The steps are not the secret; running them every time is.</p>
+      <p>I run the same sequence each time. The order matters: intent before production, evidence before review, signature before release.</p>
       <ol class="mt-steps">
-        <li><strong>Write the intent.</strong> In human time, write what the work is for and what done looks like: the intent and the acceptance criteria. This is the part agents cannot supply.</li>
-        <li><strong>Generate in parallel.</strong> Run agents in machine time, side by side, and let them produce the work against that intent.</li>
-        <li><strong>Pass the gates.</strong> Deterministic checks first: the build, the tests, static analysis. They pass the work or they stop it. No warnings that everyone learns to ignore.</li>
-        <li><strong>Get a fresh-context review.</strong> An AI reviewer that did not write the code reads the diff against the intent and flags what does not fit.</li>
-        <li><strong>Verify and sign.</strong> A person checks the output, spot-checks the risky paths, and signs off on the risk. The signature is the step that does not scale, and it is not supposed to.</li>
-        <li><strong>Ship small, with an exit.</strong> Release in small increments behind flags, with a rollback path ready for whatever slips through.</li>
+        <li><strong>Define the job.</strong> Write the problem, what it affects, the constraints, what is out of scope, and the acceptance criteria. If done cannot be described, the work is not ready for agents.</li>
+        <li><strong>Split by clock.</strong> Separate production from judgment. Agents take research, drafting, implementation, and test execution. I keep scope decisions, tradeoffs, and anything that changes the intent.</li>
+        <li><strong>Assign lanes with boundaries.</strong> Each agent gets a bounded task, the files or sources it may touch, and the output I expect back. Parallel work without boundaries creates collisions and a larger mess to review.</li>
+        <li><strong>Produce in checkpoints.</strong> Work comes back in small pieces, with notes: what changed, what was assumed, and what still needs checking. A large silent dump is not accepted.</li>
+        <li><strong>Run the machine gates.</strong> Builds, tests, static analysis, and security checks run before human review. If a machine can settle a question, a machine settles it. Failures go back with the output attached.</li>
+        <li><strong>Review against the intent.</strong> A fresh-context reviewer compares the result with the intent and looks for mismatches: extra behavior, missing edge cases, weak tests, and claims the evidence does not support.</li>
+        <li><strong>Verify and sign.</strong> I check the failure paths, confirm the tests prove the claim, and sign the specific change. If I cannot explain why it is safe to ship, it goes back.</li>
+        <li><strong>Ship contained and record it.</strong> Release in small increments, behind a flag when the change calls for it, with monitoring and a rollback path. The record keeps the intent, the diff, the test output, the decision, and the known limits.</li>
       </ol>
     </div>
   </section>
 
   <section>
     <div class="panel">
-      <p class="label">The Lines</p>
-      <h2>What replaced move fast and break things</h2>
-      <p>Facebook retired that motto in 2014 and swapped in move fast with stable infrastructure. Correct, and forgettable. Mine is one line:</p>
+      <p class="label">The Rule</p>
+      <h2>The operating rule</h2>
+      <p>The old motto made speed the proof. This one makes the record the proof. The method reduces to one operating rule:</p>
       <ul class="mt-lines">
         <li><span class="mt-line">Work in machine time. Sign in human time.</span></li>
       </ul>
@@ -1039,40 +1041,40 @@ mt_body = """  <section>
   <section>
     <p class="label">Verification</p>
     <h2>Reviewing at machine time: the human in the loop</h2>
-    <p class="section-note">Generation is not the bottleneck any more. Review is. Reading every line does not scale, and rubber-stamping is not review. What scales is a process: the work arrives with evidence, machines decide what machines can decide, and the human spends attention where the risk actually is.</p>
+    <p class="section-note">Review is the control point. I do not read every generated line, and I do not approve work I have not checked. The review follows a fixed order, so attention goes to fit, proof, and failure paths before style.</p>
     <ol class="mt-steps">
-      <li><strong>Demand the receipts first.</strong> No review starts until the change arrives with its evidence: the intent it was built against, the acceptance criteria, a plain summary of what changed and why, and the build and test output. Missing receipts end the review before it starts. Send it back.</li>
-      <li><strong>Let machines take the first pass.</strong> Build, tests, static analysis, and security scans run automatically and block on failure. They are gates, not warnings. A human should never spend attention on a question a machine can settle.</li>
-      <li><strong>Get an independent AI review.</strong> A reviewer with fresh context, one that did not write the code, reads the diff against the intent. Its job is mismatch hunting: behavior nobody asked for, edge cases nobody handled, tests that pass without testing anything.</li>
-      <li><strong>Review in a fixed order.</strong> Intent first: is this the right thing, built the way the intent described? Then the risky paths, line by line. Then the tests: do they actually prove the claim, and did anything weaken them to get a pass? The generator never edits its own tests. Spot-check the rest, and do not pretend a skim is a read.</li>
-      <li><strong>Sign one change, by name.</strong> An approval covers one specific change and belongs to a person. An agent's approval never counts as a person's. If you would not put your name on the failure, it does not ship.</li>
-      <li><strong>Ship contained, then close the loop.</strong> Flags, staged rollout, monitoring, and a rollback path are the last layer of review, because some defects only show up in production. Every miss that gets through becomes a test, a gate, or a checklist item, so next time the process catches it instead of luck.</li>
+      <li><strong>Start with the evidence.</strong> A change arrives with the intent, the acceptance criteria, a plain summary of what changed, and the build and test output. If the evidence is missing, the review stops and the work goes back.</li>
+      <li><strong>Clear the machine checks.</strong> Build, tests, lint, static analysis, and security scans pass before I spend attention. A warning that does not block is noise: fix it or remove it, but do not train people to ignore it.</li>
+      <li><strong>Check fit before detail.</strong> The first question is whether the work solved the stated problem without adding behavior nobody asked for. If the fit is wrong, line-level review is wasted time.</li>
+      <li><strong>Inspect the failure paths.</strong> I read the parts that handle errors, permissions, data movement, and recovery closely. Happy paths are easy to generate. Failure paths show whether the work was understood.</li>
+      <li><strong>Audit the proof.</strong> Tests have to prove the acceptance criteria, not just pass. The agent that produced the work does not weaken, delete, or rewrite tests to make its own output look correct.</li>
+      <li><strong>Sign the exact change.</strong> Approval names the change being shipped. It is not approval of the agent, of the approach in general, or of the next change. If the record does not support the signature, the signature does not happen.</li>
     </ol>
-    <p>That is the whole trick to moving at machine time with a human in the loop. The machine produces the volume. The process decides where the human looks. The signature decides what ships.</p>
+    <p>This is how the human stays in the loop without becoming the bottleneck for every line: machines clear what they can prove, an independent review hunts for mismatch, and I sign only what the evidence supports.</p>
   </section>
 
   <section>
     <p class="label">Receipts</p>
     <h2>The receipts</h2>
-    <p class="section-note">A method page can claim anything, so here is the work itself: things built this way that you can open, touch, and check. Each one is still live. None of them is a screenshot of a claim.</p>
+    <p class="section-note">The method leaves records that can be inspected after the fact. These are not testimonials. They are live work, build history, and dated entries.</p>
     <div class="cards">
       <article class="card">
         <p class="label card-label">This site</p>
-        <p>Every page here was built with agents in machine time and verified by hand before it shipped. The build record is public: the essay on the Atlas documents thirty-plus shipped iterations in three days, every one of them live, on real devices, within hours of the last.</p>
+        <p>This site is built and revised with the method. The Living Map essay records the Atlas build: more than thirty iterations shipped in three days, each one checked live before the next one started.</p>
         <p><a href="blog-the-living-map.html">The Living Map &#8599;</a></p>
       </article>
       <article class="card">
         <p class="label card-label">Atlas</p>
-        <p>A living map of this site that generates itself from the site's content. Nothing on it is placed by hand, and it redraws itself as the site grows. Open it and probe it; the map is the receipt.</p>
+        <p>Atlas generates its map from the site's own content. When the content changes, the map changes. It is a working example of a system deriving its structure instead of being maintained by hand.</p>
         <p><a href="latent-sitemap.html">Atlas &#8599;</a></p>
       </article>
       <article class="card">
         <p class="label card-label">Core</p>
-        <p>A public second brain: what my agent has learned, decided, and noticed, published after a sanitize pass and updated nightly. The entries are dated and cumulative, so the record can be checked against itself over time.</p>
+        <p>Core publishes dated entries from my agent's working record, after a sanitize pass, and updates nightly. The record is cumulative, so claims can be compared across time instead of being rewritten quietly.</p>
         <p><a href="core.html">Core &#8599;</a></p>
       </article>
     </div>
-    <p>That is what a receipt looks like here: not a number in a paragraph, but the thing itself, still standing where anyone can inspect it. Work that cannot point at its receipts does not get to cite this method.</p>
+    <p>A receipt is not a metric in a paragraph. It is the artifact, the history, and the current state, available for inspection. If the work cannot be inspected, it is not a receipt.</p>
   </section>"""
 MT_JS = """<script>
 (function () {
