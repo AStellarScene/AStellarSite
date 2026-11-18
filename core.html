@@ -18,7 +18,7 @@
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="theme-color" content="#0A0A0A">
 <script>/* Theme: apply the saved mode before first paint (no flash). Default dark; light is the visitor's stored choice. */try{var _t=localStorage.getItem('theme');if(_t==='light'){document.documentElement.setAttribute('data-theme','light');var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content','#F2F1EC');}}catch(e){}</script>
-<link rel="stylesheet" href="styles.css?v=116">
+<link rel="stylesheet" href="styles.css?v=118">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -1317,6 +1317,8 @@
            Production constants and structure verbatim; only the bindings
            changed — regions are the six lobes, items are Core's entries. */
         var canvas = document.getElementById("brain");
+        var BDARK = document.documentElement.getAttribute("data-theme") !== "light";
+        new MutationObserver(function () { BDARK = document.documentElement.getAttribute("data-theme") !== "light"; }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
         var ctx = canvas.getContext("2d");
         var W = 0, H = 0, hover = -1;
         var bursts = [];
@@ -1414,23 +1416,23 @@
           for (var ei = 0; ei < edges.length; ei++) {
             var a = centers[edges[ei][0]], b = centers[edges[ei][1]];
             var hot = hover === edges[ei][0] || hover === edges[ei][1];
-            ctx.strokeStyle = hot ? "rgba(77,163,255,0.45)" : "rgba(77,163,255,0.16)";
+            ctx.strokeStyle = BDARK ? (hot ? "rgba(77,163,255,0.45)" : "rgba(77,163,255,0.16)") : (hot ? "rgba(35,37,41,0.5)" : "rgba(35,37,41,0.22)");
             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
           }
           /* burst rings */
           for (var bi = 0; bi < bursts.length; bi++) {
             var bu = bursts[bi];
             ctx.beginPath(); ctx.arc(bu.x, bu.y, bu.r, 0, Math.PI * 2);
-            ctx.strokeStyle = "rgba(77,163,255," + (bu.a * 0.5).toFixed(3) + ")";
+            ctx.strokeStyle = (BDARK ? "rgba(77,163,255," : "rgba(35,37,41,") + (bu.a * 0.5).toFixed(3) + ")";
             ctx.stroke();
             ctx.beginPath(); ctx.arc(bu.x, bu.y, bu.r * 0.7, 0, Math.PI * 2);
-            ctx.strokeStyle = "rgba(160,205,255," + (bu.a * 0.28).toFixed(3) + ")";
+            ctx.strokeStyle = (BDARK ? "rgba(160,205,255," : "rgba(35,37,41,") + (bu.a * 0.28).toFixed(3) + ")";
             ctx.stroke();
           }
           /* neuron links + neurons */
           for (var i = 0; i < nodes.length; i++) {
             var p = nodes[i], c = centers[p.lobe];
-            ctx.strokeStyle = "rgba(77,163,255," + (0.08 + p.lit * 0.12).toFixed(3) + ")";
+            ctx.strokeStyle = (BDARK ? "rgba(77,163,255," : "rgba(35,37,41,") + (0.08 + p.lit * 0.12).toFixed(3) + ")";
             ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(p.x, p.y); ctx.stroke();
           }
           for (var j = 0; j < nodes.length; j++) {
@@ -1440,15 +1442,15 @@
               ctx.beginPath();
               ctx.arc(q.x, q.y, q.r * 1.22 + q.lit * 6 + q.flash * 4, 0, Math.PI * 2);
               ctx.fillStyle = q.blue
-                ? "rgba(77,163,255," + (0.14 * q.lit + 0.12 * q.flash).toFixed(3) + ")"
-                : "rgba(242,242,242," + (0.1 * q.lit + 0.1 * q.flash).toFixed(3) + ")";
+                ? (BDARK ? "rgba(77,163,255," : "rgba(35,37,41,") + (0.14 * q.lit + 0.12 * q.flash).toFixed(3) + ")"
+                : (BDARK ? "rgba(242,242,242," : "rgba(35,37,41,") + (0.1 * q.lit + 0.1 * q.flash).toFixed(3) + ")";
               ctx.fill();
             }
             ctx.beginPath();
             ctx.arc(q.x, q.y, q.r * (1 + q.lit * 0.3), 0, Math.PI * 2);
             ctx.fillStyle = q.blue
-              ? "rgba(77,163,255," + bright.toFixed(3) + ")"
-              : "rgba(242,242,242," + (bright * 0.9).toFixed(3) + ")";
+              ? (BDARK ? "rgba(77,163,255," : "rgba(35,37,41,") + bright.toFixed(3) + ")"
+              : (BDARK ? "rgba(242,242,242," : "rgba(35,37,41,") + (bright * 0.9).toFixed(3) + ")";
             ctx.fill();
           }
           /* probe trail + probe */
@@ -1457,16 +1459,16 @@
               ctx.beginPath();
               ctx.moveTo(probe.trail[ti - 1].x, probe.trail[ti - 1].y);
               ctx.lineTo(probe.trail[ti].x, probe.trail[ti].y);
-              ctx.strokeStyle = "rgba(77,163,255," + ((ti / probe.trail.length) * 0.32).toFixed(3) + ")";
+              ctx.strokeStyle = (BDARK ? "rgba(77,163,255," : "rgba(35,37,41,") + ((ti / probe.trail.length) * 0.32).toFixed(3) + ")";
               ctx.stroke();
             }
           }
           if (!still) {
             ctx.beginPath(); ctx.arc(probe.x, probe.y, 6, 0, Math.PI * 2);
-            ctx.strokeStyle = probe.active ? "rgba(77,163,255,0.85)" : "rgba(77,163,255,0.4)";
+            ctx.strokeStyle = BDARK ? (probe.active ? "rgba(77,163,255,0.85)" : "rgba(77,163,255,0.4)") : (probe.active ? "rgba(35,37,41,0.9)" : "rgba(35,37,41,0.45)");
             ctx.stroke();
             ctx.beginPath(); ctx.arc(probe.x, probe.y, 1.8, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(242,242,242,0.9)";
+            ctx.fillStyle = BDARK ? "rgba(242,242,242,0.9)" : "rgba(38,40,45,0.92)";
             ctx.fill();
           }
           /* lobes + labels */
@@ -1476,15 +1478,15 @@
             var lp = centers[li], isH = li === hover;
             if (isH) {
               ctx.beginPath(); ctx.arc(lp.x, lp.y, 17, 0, Math.PI * 2);
-              ctx.fillStyle = "rgba(77,163,255,0.12)"; ctx.fill();
+              ctx.fillStyle = BDARK ? "rgba(77,163,255,0.12)" : "rgba(35,37,41,0.07)"; ctx.fill();
             }
             ctx.beginPath(); ctx.arc(lp.x, lp.y, isH ? 11 : 9, 0, Math.PI * 2);
-            ctx.strokeStyle = isH ? "rgba(77,163,255,0.95)" : "rgba(77,163,255,0.6)";
+            ctx.strokeStyle = BDARK ? (isH ? "rgba(77,163,255,0.95)" : "rgba(77,163,255,0.6)") : (isH ? "rgba(19,19,22,0.95)" : "rgba(35,37,41,0.65)");
             ctx.lineWidth = 1.2; ctx.stroke();
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.arc(lp.x, lp.y, 3.2, 0, Math.PI * 2);
-            ctx.fillStyle = isH ? "#FFFFFF" : "#4DA3FF"; ctx.fill();
-            ctx.fillStyle = isH ? "rgba(242,242,242,0.98)" : "rgba(201,201,201,0.78)";
+            ctx.fillStyle = BDARK ? (isH ? "#FFFFFF" : "#4DA3FF") : (isH ? "#131316" : "#26282D"); ctx.fill();
+            ctx.fillStyle = BDARK ? (isH ? "rgba(242,242,242,0.98)" : "rgba(201,201,201,0.78)") : (isH ? "rgba(19,19,22,0.98)" : "rgba(52,54,60,0.88)");
             ctx.fillText(feeds[li].label, lp.x, lp.y + 27);
           }
         }

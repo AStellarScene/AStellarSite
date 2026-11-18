@@ -878,7 +878,7 @@ section.hero {
 .pd-arrow:hover, .fc-arrow:hover { border-color: var(--accent); color: var(--accent); }
 .fc-title { margin: 8px 0 0; font-size: 30px; font-weight: 600; line-height: 1.15; color: var(--heading); }
 .fc-meta { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); margin: 9px 0 0; }
-.fc-blurb { color: var(--dim); margin: 10px 0 0; max-width: 660px; }
+.fc-blurb { color: var(--dim); margin: 10px 0 0; max-width: 920px; }
 .fc-progress { height: 2px; background: rgba(255, 255, 255, 0.10); border-radius: 2px; margin-top: 18px; overflow: hidden; }
 .fc-bar { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.5s cubic-bezier(0.22, 0.8, 0.3, 1); }
 .flow-cap.swap .fc-title, .flow-cap.swap .fc-meta, .flow-cap.swap .fc-blurb { animation: capRise 0.5s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
@@ -2911,8 +2911,8 @@ html[data-theme="light"] {
   --heading: #131316;
   --body: #34363C;
   --dim: #6F7178;
-  --accent: #232529;
-  --status: #232529;
+  --accent: #4C5B94;
+  --status: #4C5B94;
   --hairline: rgba(19, 20, 26, 0.13);
   background: #F2F1EC;
 }
@@ -2927,7 +2927,7 @@ html[data-theme="light"] body {
   color: var(--body);
 }
 html[data-theme="light"] #ambient { display: none; }
-html[data-theme="light"] ::selection { background: #232529; color: #F2F1EC; }
+html[data-theme="light"] ::selection { background: #4C5B94; color: #F2F1EC; }
 
 /* Header chrome on paper */
 html[data-theme="light"] .header-inner {
@@ -3029,8 +3029,14 @@ html[data-theme="light"] section.hero .pill { background: rgba(255, 255, 255, 0.
      designed, and the feed-index buttons take graphite glass. */
 html[data-theme="light"] section.hero .hero-content { color: #C9C9C9; }
 html[data-theme="light"] .core-root .brainmap {
-  background: linear-gradient(180deg, #14151B, #0B0C10);
-  border-color: rgba(19, 20, 26, 0.45);
+  background:
+    linear-gradient(rgba(35, 37, 41, 0.050) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 37, 41, 0.050) 1px, transparent 1px),
+    linear-gradient(rgba(35, 37, 41, 0.085) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 37, 41, 0.085) 1px, transparent 1px),
+    #F2F1EC;
+  background-size: 26px 26px, 26px 26px, 130px 130px, 130px 130px;
+  border-color: rgba(19, 20, 26, 0.20);
 }
 html[data-theme="light"] .core-root .map-index button {
   background: rgba(19, 20, 26, 0.05);
@@ -3041,8 +3047,8 @@ html[data-theme="light"] .core-root .map-index button {
    white chip) inverts to white-on-white; use a graphite chip instead. */
 html[data-theme="light"] .chip.active {
   color: #F2F1EC;
-  background: #232529;
-  border-color: #232529;
+  background: #4C5B94;
+  border-color: #4C5B94;
 }
 
 /* Nav pill spacing (Adam, 2026-11-17, from his screenshot): the theme
@@ -3054,3 +3060,17 @@ html[data-theme="light"] .chip.active {
 @media (max-width: 760px) {
   .theme-toggle { width: 48px; height: 48px; }
 }
+
+/* Atlas list in light mode (Adam picked option A, 2026-11-17): the
+   glass layer that rises on scroll was still the dark scrim
+   (rgba(8,9,14,0.55) plus violet tints) and the list links were
+   hardcoded #C9C9C9 from the dark design -- white text over
+   half-darkened paper. The layer flips to a paper scrim, the tints
+   go, and the list text goes ink. */
+html[data-theme="light"] .latent-glass-layer {
+  background: rgba(242, 241, 236, 0.82);
+}
+html[data-theme="light"] .sitemap-list-sec h2,
+html[data-theme="light"] .sitemap-list-sec .section-note { text-shadow: none; }
+html[data-theme="light"] .map-group li a { color: #34363C; }
+html[data-theme="light"] .map-group li a:hover { color: #131316; }
