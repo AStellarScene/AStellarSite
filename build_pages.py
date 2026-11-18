@@ -52,7 +52,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#0A0A0A">
 <script>/* Theme: apply the saved mode before first paint (no flash). Default dark; light is the visitor's stored choice. */try{{var _t=localStorage.getItem('theme');if(_t==='light'){{document.documentElement.setAttribute('data-theme','light');var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content','#F2F1EC');}}}}catch(e){{}}</script>
-{schema}<link rel="stylesheet" href="styles.css?v=114">
+{schema}<link rel="stylesheet" href="styles.css?v=115">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -2373,6 +2373,10 @@ bookshelf_body = """  <section id="bookshelf">
   </section>""" % "\n".join(_flow_blocks)
 
 BOOKSHELF_JS = """<script>
+/* Scroll-era engine, restored 2026-11-17 at Adam's direction: the
+   track is a real scroll container again (the v103 virtual-position
+   engine was reverted for input inconsistency). The v105 design —
+   sizes, panels, captions — is unchanged. */
 (function () {
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll('.flow-block').forEach(function (block) {
@@ -2388,26 +2392,8 @@ BOOKSHELF_JS = """<script>
       cap: block.querySelector('.flow-cap')
     };
     var items = Array.prototype.slice.call(track.querySelectorAll('.cov'));
-    // The stage is not a scroll container. A virtual position (the pixel
-    // offset of the centered book along a virtual strip) drives every
-    // transform, and one animator eases it toward its goal, so drag,
-    // wheel, keys, arrows and clicks can never fight over the motion.
-    var centers = [], widths = [], maxPx = 0, stepPx = 0;
-    var posPx = 0, goalPx = null, raf = null, centered = -1, destIdx = -1;
+    var centered = -1;
 
-    function measure() {
-      var gap = parseFloat(getComputedStyle(track).getPropertyValue('--fgap')) || 30;
-      var acc = 0;
-      widths = items.map(function (it) { return it.offsetWidth; });
-      centers = widths.map(function (w) { var c = acc + w / 2; acc += w + gap; return c; });
-      maxPx = centers.length ? centers[centers.length - 1] : 0;
-      stepPx = centers.length > 1 ? centers[1] - centers[0] : 0;
-    }
-    function nearestIdx(px) {
-      var best = 0, bestD = Infinity;
-      centers.forEach(function (c, i) { var d = Math.abs(c - px); if (d < bestD) { bestD = d; best = i; } });
-      return best;
-    }
     function select(i) {
       if (i === centered) return;
       centered = i;
@@ -2424,153 +2410,134 @@ BOOKSHELF_JS = """<script>
       if (detail.bar) detail.bar.style.width = ((i + 1) / items.length * 100) + '%';
       if (detail.cap) { detail.cap.classList.remove('swap'); void detail.cap.offsetWidth; detail.cap.classList.add('swap'); }
     }
-    function render() {
-      var best = 0, bestD = Infinity;
+
+    function layout() {
+      var mid = track.scrollLeft + track.clientWidth / 2;
+      var best = 0, bestDist = Infinity;
       items.forEach(function (it, i) {
-        var dx = centers[i] - posPx;
-        var off = dx / widths[i]; // distance from center, in book widths
-        var aoff = Math.abs(off);
+        var c = it.offsetLeft + it.offsetWidth / 2;
+        var off = (c - mid) / it.offsetWidth; // distance from center, in book widths
         var rot = Math.max(-62, Math.min(62, off * -55));
-        var z = -Math.min(240, aoff * 75);
+        var z = -Math.min(240, Math.abs(off) * 75);
         var sc = 1 + 0.15 * (0.5 + 0.5 * Math.cos(Math.PI * Math.max(-1, Math.min(1, off))));
-        if (sc * widths[i] > track.clientWidth) sc = track.clientWidth / widths[i]; // the swell never pushes the centered book past the stage edges
         // Transform and z-index only: per-frame filter updates caused the jank.
-        it.style.transform = 'translateX(' + (dx - widths[i] / 2).toFixed(1) + 'px) rotateY(' + rot.toFixed(1) + 'deg) translateZ(' + z.toFixed(0) + 'px) scale(' + sc.toFixed(3) + ')';
-        it.style.zIndex = String(100 - Math.round(aoff * 10));
-        it.style.visibility = aoff > 4.5 ? 'hidden' : 'visible';
-        if (aoff < bestD) { bestD = aoff; best = i; }
+        it.style.transform = 'rotateY(' + rot.toFixed(1) + 'deg) translateZ(' + z.toFixed(0) + 'px) scale(' + sc.toFixed(3) + ')';
+        it.style.zIndex = String(100 - Math.round(Math.abs(off) * 10));
+        if (Math.abs(c - mid) < bestDist) { bestDist = Math.abs(c - mid); best = i; }
       });
       select(best);
     }
-    function tick() {
-      if (goalPx === null) { raf = null; return; }
-      var diff = goalPx - posPx;
-      if (Math.abs(diff) < 0.4) { posPx = goalPx; goalPx = null; render(); raf = null; return; }
-      posPx += diff * 0.16;
-      render();
-      raf = requestAnimationFrame(tick);
-    }
-    function glideToPx(px) {
-      goalPx = Math.max(0, Math.min(maxPx, px));
-      if (reduced) { posPx = goalPx; goalPx = null; render(); return; }
-      if (!raf) raf = requestAnimationFrame(tick);
-    }
-    function glideTo(i) { if (i >= 0 && i < items.length) { destIdx = i; glideToPx(centers[i]); } }
-    function setInstant(i) { goalPx = null; destIdx = i; posPx = centers[i]; render(); }
-    // overflow:hidden still leaves a programmatic scroll offset; if
-    // focus navigation ever sets one, zero it so the stage never shifts.
-    track.addEventListener('scroll', function () { if (track.scrollLeft !== 0) track.scrollLeft = 0; }, { passive: true });
 
-    // Drag: pointer handlers live on the window so a release outside the
-    // stage still lands; movement past a few px suppresses the click that
-    // would otherwise fire on release. A flick carries into the snap.
-    var drag = null, suppressClickUntil = 0;
-    track.addEventListener('pointerdown', function (e) {
-      if (e.button !== undefined && e.button > 0) return;
-      drag = { x: e.clientX, pos: posPx, moved: 0, lastX: e.clientX, lastT: performance.now(), vel: 0 };
-      goalPx = null; wheelGoal = null; destIdx = -1;
-    });
-    window.addEventListener('pointermove', function (e) {
-      if (!drag) return;
-      var dx = e.clientX - drag.x;
-      drag.moved = Math.max(drag.moved, Math.abs(dx));
-      var now = performance.now(), dt = now - drag.lastT;
-      if (dt > 0) drag.vel = 0.65 * drag.vel + 0.35 * ((e.clientX - drag.lastX) / dt);
-      drag.lastX = e.clientX; drag.lastT = now;
-      posPx = Math.max(-70, Math.min(maxPx + 70, drag.pos - dx));
-      render();
-    });
-    window.addEventListener('pointerup', function () {
-      if (!drag) return;
-      if (drag.moved > 6) suppressClickUntil = performance.now() + 150;
-      var flick = Math.max(-2 * stepPx, Math.min(2 * stepPx, -drag.vel * 160));
-      var target = posPx + flick;
-      drag = null;
-      glideTo(nearestIdx(target));
-    });
-    items.forEach(function (it, i) {
-      it.addEventListener('click', function () {
-        if (performance.now() < suppressClickUntil) return;
-        glideTo(i);
-      });
-    });
-    track.addEventListener('keydown', function (e) {
-      var cur = destIdx >= 0 ? destIdx : (centered < 0 ? nearestIdx(posPx) : centered);
-      if (e.key === 'ArrowRight') { glideTo(Math.min(items.length - 1, cur + 1)); e.preventDefault(); }
-      else if (e.key === 'ArrowLeft') { glideTo(Math.max(0, cur - 1)); e.preventDefault(); }
-    });
-    var prevBtn = block.querySelector('.bd-prev'), nextBtn = block.querySelector('.bd-next');
-    if (prevBtn) prevBtn.addEventListener('click', function () { var b = destIdx >= 0 ? destIdx : (centered < 0 ? 0 : centered); glideTo(b - 1); });
-    if (nextBtn) nextBtn.addEventListener('click', function () { var b = destIdx >= 0 ? destIdx : (centered < 0 ? 0 : centered); glideTo(b + 1); });
-
-    // Wheel routing — the gesture discipline from the scroll era, writing
-    // the virtual position instead of a scroll offset:
-    // - Trackpad sideways swipe: a continuous glide on deltaX, snapped to
-    //   the nearest book when the stream goes quiet.
+    var ticking = false, settleTimer = null;
+    track.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(function () { layout(); ticking = false; }); }
+      // Settle: once scrolling rests, glide the nearest book the last bit
+      // into center. CSS scroll-snap used to do this, but snap fought the
+      // scripted wheel glide (the gallery had the same bug and the same
+      // fix), so JS owns centering here too. Skipped while a wheel glide
+      // or a click glide is still moving the track.
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(function () {
+        if (wheelTarget !== null || centered < 0) return;
+        var it = items[centered];
+        var off = (it.offsetLeft + it.offsetWidth / 2) - (track.scrollLeft + track.clientWidth / 2);
+        if (Math.abs(off) > 3) centerItem(centered, true);
+      }, 150);
+    }, { passive: true });
+    // Wheel routing — each axis does its own job:
+    // - Trackpad sideways swipe: the flow glides on deltaX, and the events
+    //   are captured whole so the page never moves mid-gesture.
     // - Trackpad vertical scroll: never intercepted. The page scrolls and
-    //   the flow stays put, so diagonal drift can't wiggle it.
+    //   the flow is pinned, so diagonal drift can't wiggle it.
     // - Mouse wheel (line/page mode, or a coarse full-size first step):
-    //   notches step one book at a time.
+    //   vertical notches convert to a sideways glide — a wheel has no
+    //   sideways to give.
     // The axis is judged once per gesture from its first deltas and held
-    // until the stream goes quiet (~150ms); judging event-by-event
+    // until the stream goes quiet (~140ms); judging event-by-event
     // flip-flopped on diagonal trackpad input.
-    var wheelGoal = null, wheelBucket = 0;
+    var wheelTarget = null, wheelRaf = null;
     var gesture = null, gestureTimer = null;
+    function stopWheel() {
+      wheelTarget = null;
+      if (wheelRaf) { cancelAnimationFrame(wheelRaf); wheelRaf = null; }
+    }
+    function stepWheel() {
+      if (wheelTarget === null) { wheelRaf = null; return; }
+        var diff = wheelTarget - track.scrollLeft;
+      if (Math.abs(diff) < 0.6) {
+        track.scrollLeft = wheelTarget;
+        wheelTarget = null;
+        wheelRaf = null;
+        return;
+      }
+      track.scrollLeft += diff * 0.22;
+      wheelRaf = requestAnimationFrame(stepWheel);
+    }
     function armGesture() {
       clearTimeout(gestureTimer);
-      gestureTimer = setTimeout(function () {
-        gesture = null;
-        if (wheelGoal !== null) { var t = wheelGoal; wheelGoal = null; glideTo(nearestIdx(t)); }
-      }, 150);
+      gestureTimer = setTimeout(function () { gesture = null; }, 140);
     }
     track.addEventListener('wheel', function (e) {
-      if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
+        if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
       var dx = e.deltaX, dy = e.deltaY;
       if (e.deltaMode === 1) { dx *= 24; dy *= 24; }              // lines to px
       else if (e.deltaMode === 2) { dx *= track.clientWidth; dy *= track.clientWidth; }
       armGesture();
       if (!gesture) {
         gesture = { ax: 0, ay: 0, bx: 0, by: 0, axis: null,
-                    mouse: e.deltaMode !== 0 || Math.abs(e.deltaY) >= 50 || Math.abs(e.deltaX) >= 50 };
+                    mouse: e.deltaMode !== 0 || Math.abs(e.deltaY) >= 50 || Math.abs(e.deltaX) >= 50,
+                    left: track.scrollLeft };
       }
       var g = gesture;
       g.ax += Math.abs(dx); g.ay += Math.abs(dy); g.bx += dx; g.by += dy;
       if (!g.axis) {
         if (!g.mouse && Math.max(g.ax, g.ay) < 8) return;  // too small to judge yet
         g.axis = g.ax > g.ay ? 'x' : (g.mouse ? 'convert' : 'y');
+        if (g.axis === 'y') stopWheel();                   // a page scroll cancels any glide
         dx = g.bx; dy = g.by;                              // spend the buffered deltas whole
       }
-      if (g.axis === 'y') return;
-      e.preventDefault();
-      if (g.axis === 'x') {
-        var base = wheelGoal !== null ? wheelGoal : posPx;
-        wheelGoal = Math.max(0, Math.min(maxPx, base + dx));
-        destIdx = -1;
-        glideToPx(wheelGoal);
+      if (g.axis === 'y') {
+        if (track.scrollLeft !== g.left) track.scrollLeft = g.left;
         return;
       }
-      // convert: accumulate the notch stream, one book per ~110px
-      wheelBucket += dy;
-      var steps = 0;
-      while (wheelBucket >= 60) { steps++; wheelBucket -= 110; }
-      while (wheelBucket <= -60) { steps--; wheelBucket += 110; }
-      if (steps !== 0) {
-        var cur = nearestIdx(wheelGoal !== null ? wheelGoal : posPx);
-        wheelGoal = centers[Math.max(0, Math.min(items.length - 1, cur + steps))];
-        glideToPx(wheelGoal);
+      var d = g.axis === 'x' ? dx : dy;
+      if (!d) return;
+      var max = track.scrollWidth - track.clientWidth;
+      if (max <= 0) return;
+      var base = wheelTarget !== null ? wheelTarget : track.scrollLeft;
+      var target = Math.max(0, Math.min(max, base + d));
+      if (Math.abs(target - track.scrollLeft) < 1) { stopWheel(); return; }
+      e.preventDefault();
+        wheelTarget = target;
+      if (reduced) {
+        track.scrollLeft = wheelTarget;
+        wheelTarget = null;
+        return;
       }
+      if (!wheelRaf) wheelRaf = requestAnimationFrame(stepWheel);
     }, { passive: false });
-
-    window.addEventListener('resize', function () {
-      var cur = centered < 0 ? 0 : centered;
-      measure();
-      goalPx = null;
-      posPx = centers[cur];
-      render();
+    ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+      track.addEventListener(ev, stopWheel, { passive: true });
     });
+    window.addEventListener('resize', layout);
 
-    measure();
-    if (centers.length) { posPx = centers[0]; render(); }
+    function centerItem(i, smooth) {
+      stopWheel();
+      var it = items[i];
+      track.scrollTo({
+        left: it.offsetLeft - (track.clientWidth - it.offsetWidth) / 2,
+        behavior: smooth && !reduced ? 'smooth' : 'auto'
+      });
+    }
+    items.forEach(function (it, i) {
+      it.addEventListener('click', function () { centerItem(i, true); });
+    });
+    var prevBtn = block.querySelector('.bd-prev'), nextBtn = block.querySelector('.bd-next');
+    if (prevBtn) prevBtn.addEventListener('click', function () { if (centered > 0) centerItem(centered - 1, true); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { if (centered >= 0 && centered < items.length - 1) centerItem(centered + 1, true); });
+
+    centerItem(0, false);
+    layout();
     // Deep link (from Atlas): #book-<slug> brings that cover to the
     // front of its shelf instead of just landing on the page.
     (function () {
@@ -2582,7 +2549,8 @@ BOOKSHELF_JS = """<script>
         if (t === slug) found = i;
       });
       if (found < 0) return;
-      setInstant(found);
+      centerItem(found, false);
+      layout();
       block.scrollIntoView({ block: 'center' });
     })();
   });
@@ -3142,6 +3110,33 @@ LATENT_MAP_JS = r"""<script>
     projects: [[153, 81, 22], [226, 182, 92], [255, 242, 198]],
     writing: [[48, 34, 119], [150, 130, 255], [226, 218, 255]]
   };
+  // Ink mode (Adam, 2026-11-17): in the light theme the map is not a
+  // galaxy -- it is ink spilled on graph paper. One graphite ramp for
+  // every region (pale at the thin edges, deep ink at the dense core),
+  // a paper ground, and the grid showing through the dust lanes.
+  // DARK mirrors the visitor's theme; applyTheme() below swaps the
+  // sprite sets when the toggle flips it.
+  var PALS_INK = [[198, 199, 204], [105, 107, 114], [25, 26, 30]];
+  var INK_RGB = [35, 37, 41];
+  var INK_CSS = '#26282D';
+  var PAPER = '#F2F1EC';
+  var DARK = document.documentElement.getAttribute('data-theme') !== 'light';
+  function drawPaperGrid(g) {
+    g.save();
+    g.lineWidth = 1;
+    g.beginPath();
+    g.strokeStyle = 'rgba(35, 37, 41, 0.050)';
+    for (var gx = 13; gx < W; gx += 26) { g.moveTo(gx, 0); g.lineTo(gx, H); }
+    for (var gy = 13; gy < H; gy += 26) { g.moveTo(0, gy); g.lineTo(W, gy); }
+    g.stroke();
+    g.beginPath();
+    g.strokeStyle = 'rgba(35, 37, 41, 0.085)';
+    for (var mx = 65; mx < W; mx += 130) { g.moveTo(mx, 0); g.lineTo(mx, H); }
+    for (var my = 65; my < H; my += 130) { g.moveTo(0, my); g.lineTo(W, my); }
+    g.stroke();
+    g.restore();
+  }
+  var probeSpriteInk = makeGlow(INK_RGB);
   var fbmField = null, ridgeField = null, distArr = null, angBinArr = null;
   var improvedSprites = {}, filamentSprites = {}, dustFieldSprite = null, improvedReady = false;
   function makePeriodicNoise(freq, seed) {
@@ -3276,10 +3271,10 @@ LATENT_MAP_JS = r"""<script>
     buildFields(size); buildGeom(size);
     var t0 = performance.now();
     var probeSet = [];
-    for (var k = 0; k < 4; k++) probeSet.push(buildImprovedSprite(PALS.photography, 0.30, 0.44, k, size));
+    for (var k = 0; k < 4; k++) probeSet.push(buildImprovedSprite(DARK ? PALS.photography : PALS_INK, 0.30, 0.44, k, size));
     if ((performance.now() - t0) * 4.2 > 200) { size = 192; buildFields(size); buildGeom(size); probeSet = null; }
     Object.keys(DATA.regions).forEach(function (k) {
-      var r = DATA.regions[k], pal = PALS[k] || derivePal(r.rgb), a = [], f = [];
+      var r = DATA.regions[k], pal = DARK ? (PALS[k] || derivePal(r.rgb)) : PALS_INK, a = [], f = [];
       for (var i2 = 0; i2 < 4; i2++) a.push(probeSet && k === 'photography' ? probeSet[i2] : buildImprovedSprite(pal, r.fx, r.fy, i2, size));
       for (var j2 = 0; j2 < 2; j2++) f.push(buildFilamentSprite(pal, j2, size));
       improvedSprites[k] = a; filamentSprites[k] = f;
@@ -3385,7 +3380,7 @@ LATENT_MAP_JS = r"""<script>
     return {
       kind: d.kind, title: d.title, sub: d.sub, rgb: rgb, size: d.size,
       dx: d.dx, dy: d.dy, region: d.region, href: d.href,
-      sprite: makeGlow(rgb),
+      sprite: makeGlow(DARK ? rgb : INK_RGB),
       css: 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')',
       x: 0, y: 0, vx: 0, vy: 0, lit: 0, flash: 0, ph: Math.random() * Math.PI * 2
     };
@@ -3400,6 +3395,21 @@ LATENT_MAP_JS = r"""<script>
   });
   generateImproved();
   buildFogStamps();
+
+  // Theme flips rebuild the sprite sets in the other mode: coloured
+  // nebula sprites for dark, graphite ink sprites for light. The
+  // frame loop reads DARK for every colour decision, so a flip is
+  // just new sprites plus the flag.
+  function applyTheme() {
+    DARK = document.documentElement.getAttribute('data-theme') !== 'light';
+    generateImproved();
+    items.forEach(function (p) { p.sprite = makeGlow(DARK ? p.rgb : INK_RGB); });
+    filler.forEach(function (p) { p.sprite = makeGlow(DARK ? p.rgb : INK_RGB); });
+    sparks = [];
+    if (DARK) buildSparks();
+    comets.length = 0;
+  }
+  new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
   var filler = [];
   var seed = 987654321;
@@ -3575,11 +3585,11 @@ LATENT_MAP_JS = r"""<script>
     if (!fogC) { fogC = document.createElement('canvas'); fctx = fogC.getContext('2d'); }
     fogC.width = Math.max(2, Math.round(W * FOGRES)); fogC.height = Math.max(2, Math.round(H * FOGRES));
     layoutRegions();
-    if (!filler.length) { buildFiller(); buildSparks(); buildStars(); }
+    if (!filler.length) { buildFiller(); if (DARK) buildSparks(); buildStars(); }
     items.forEach(function (p) { if (!p.x) { var r = DATA.regions[p.region]; p.x = r.x + p.dx * W; p.y = r.y + p.dy * H; } });
     filler.forEach(function (p) { if (!p.x) { p.x = p.hx * W; p.y = p.hy * H; } });
     if (!probe.x) { probe.x = probe.tx = W * 0.5; probe.y = probe.ty = H * 0.45; }
-    ctx.fillStyle = '#030209'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = DARK ? '#030209' : PAPER; ctx.fillRect(0, 0, W, H);
     onScroll();
   }
   window.addEventListener('resize', resize);
@@ -3763,8 +3773,9 @@ LATENT_MAP_JS = r"""<script>
     // polyline, so nothing the map needs came from the residue.)
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
-    ctx.fillStyle = '#030209';
+    ctx.fillStyle = DARK ? '#030209' : PAPER;
     ctx.fillRect(0, 0, W, H);
+    if (!DARK) drawPaperGrid(ctx);
 
     regionKeys.forEach(function (k) {
       var r = DATA.regions[k];
@@ -3827,14 +3838,15 @@ LATENT_MAP_JS = r"""<script>
       ctx.setTransform(FOGRES, 0, 0, FOGRES, 0, 0);
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;
-      ctx.fillStyle = '#030209';
+      ctx.fillStyle = DARK ? '#030209' : PAPER;
       ctx.fillRect(0, 0, W, H);
+      if (!DARK) drawPaperGrid(ctx);
       var tt = t * 1000;
       var dtF = Math.min(0.05, Math.max(0.001, t - (stepFogStamps._lt === undefined ? t - 1 / 60 : stepFogStamps._lt)));
       stepFogStamps._lt = t;
       stepFogStamps(dtF, t);
       var minWH = Math.min(W, H), R = minWH * 0.60, regionSize = minWH * 0.52;
-      ctx.globalCompositeOperation = 'screen';
+      ctx.globalCompositeOperation = DARK ? 'screen' : 'source-over';
       regionKeys.forEach(function (k, ridx) {
         var r = DATA.regions[k], cx = r.cx, cy = r.cy;
         var arr = fogStamps[k] || [];
@@ -3860,12 +3872,12 @@ LATENT_MAP_JS = r"""<script>
           ctx.rotate(f * 1.7 + ridx + tt * 0.000015); ctx.scale(1, 0.42);
           ctx.drawImage(fs, -fsize / 2, -fsize / 2, fsize, fsize); ctx.restore();
         }
-        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalCompositeOperation = DARK ? 'lighter' : 'source-over';
         var core = improvedSprites[k][0];
         var cs = regionSize * 0.44 * (1 + 0.05 * Math.sin(tt * 0.0006 + ridx * 2));
         ctx.save(); ctx.globalAlpha = 0.34;
         ctx.translate(cx, cy); ctx.drawImage(core, -cs / 2, -cs / 2, cs, cs); ctx.restore();
-        ctx.globalCompositeOperation = 'screen';
+        ctx.globalCompositeOperation = DARK ? 'screen' : 'source-over';
       });
       ctx.globalCompositeOperation = 'destination-out';
       var lanes = [
@@ -3889,15 +3901,16 @@ LATENT_MAP_JS = r"""<script>
       ctx.drawImage(fogC, 0, 0, W, H);
     }
       // The probe's wake: light dragged through the gas, decaying
-      // along the trail the probe leaves behind it.
-      ctx.globalCompositeOperation = 'lighter';
+      // along the trail the probe leaves behind it. In ink mode the
+      // wake is a smear of graphite the probe drags across the paper.
+      ctx.globalCompositeOperation = DARK ? 'lighter' : 'source-over';
       for (var wi = trail.length - 1; wi >= 0; wi--) {
         var wpk = trail[wi];
         var wa = (1 - wi / trail.length) * (probe.active && now - probe.last < 3000 ? 0.11 : 0.04);
         if (wa < 0.012) continue;
         var wr = 130 - wi * 3.5;
-        ctx.globalAlpha = wa;
-        ctx.drawImage(probeSprite, wpk.x - wr, wpk.y - wr, wr * 2, wr * 2);
+        ctx.globalAlpha = DARK ? wa : wa * 1.6;
+        ctx.drawImage(DARK ? probeSprite : probeSpriteInk, wpk.x - wr, wpk.y - wr, wr * 2, wr * 2);
       }
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
@@ -3905,10 +3918,10 @@ LATENT_MAP_JS = r"""<script>
     for (si = 0; si < stars.length; si++) {
       st = stars[si];
       var sa = st.a * (0.72 + 0.28 * Math.sin(t * st.sp + st.ph));
-      ctx.fillStyle = 'rgba(' + st.tint + ',' + sa.toFixed(3) + ')';
+      ctx.fillStyle = DARK ? 'rgba(' + st.tint + ',' + sa.toFixed(3) + ')' : 'rgba(35, 37, 41,' + (sa * 0.38).toFixed(3) + ')';
       ctx.fillRect(st.hx * W, st.hy * H, st.s, st.s);
     }
-    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalCompositeOperation = DARK ? 'lighter' : 'source-over';
 
     var i, p;
     for (i = 0; i < filler.length; i++) {
@@ -3942,26 +3955,26 @@ LATENT_MAP_JS = r"""<script>
         ctx.drawImage(p.sprite, p.x - sz * 0.61, p.y - sz * 0.61, sz * 1.22, sz * 1.22);
         ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = Math.min(1, 0.72 + p.lit * 0.35 + p.flash * 0.4) * cf;
-        ctx.fillStyle = p.css;
+        ctx.fillStyle = DARK ? p.css : INK_CSS;
         ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1.9, sz * 0.185), 0, Math.PI * 2); ctx.fill();
-        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalCompositeOperation = DARK ? 'lighter' : 'source-over';
         if (isFix) {
           ctx.globalCompositeOperation = 'source-over';
           ctx.globalAlpha = (0.5 + 0.25 * Math.sin(t * 3)) * cf;
-          ctx.strokeStyle = p.css;
+          ctx.strokeStyle = DARK ? p.css : INK_CSS;
           ctx.lineWidth = 1;
           ctx.beginPath(); ctx.arc(p.x, p.y, sz * 1.25 + Math.sin(t * 3) * 3, 0, Math.PI * 2); ctx.stroke();
           ctx.globalAlpha = 1;
-          ctx.globalCompositeOperation = 'lighter';
+          ctx.globalCompositeOperation = DARK ? 'lighter' : 'source-over';
         }
         if (selected === p) {
           ctx.globalCompositeOperation = 'source-over';
           ctx.globalAlpha = (0.55 + 0.3 * Math.sin(t * 3.4)) * cf;
-          ctx.strokeStyle = p.css;
+          ctx.strokeStyle = DARK ? p.css : INK_CSS;
           ctx.lineWidth = 1.4;
           ctx.beginPath(); ctx.arc(p.x, p.y, sz * 1.3 + Math.sin(t * 3.4) * 3, 0, Math.PI * 2); ctx.stroke();
           ctx.globalAlpha = 1;
-          ctx.globalCompositeOperation = 'lighter';
+          ctx.globalCompositeOperation = DARK ? 'lighter' : 'source-over';
         }
       }
 
@@ -3970,21 +3983,21 @@ LATENT_MAP_JS = r"""<script>
       ctx.lineWidth = 1;
       for (var wpi = 0; wpi < webPairs.length; wpi++) {
         var wp = webPairs[wpi];
-        ctx.strokeStyle = 'rgba(' + wp[0].rgb[0] + ',' + wp[0].rgb[1] + ',' + wp[0].rgb[2] + ',' + (0.13 * cf).toFixed(3) + ')';
+        ctx.strokeStyle = DARK ? 'rgba(' + wp[0].rgb[0] + ',' + wp[0].rgb[1] + ',' + wp[0].rgb[2] + ',' + (0.13 * cf).toFixed(3) + ')' : 'rgba(35, 37, 41,' + (0.13 * cf).toFixed(3) + ')';
         ctx.beginPath(); ctx.moveTo(wp[0].x, wp[0].y); ctx.lineTo(wp[1].x, wp[1].y); ctx.stroke();
       }
-      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalCompositeOperation = DARK ? 'lighter' : 'source-over';
 
       ctx.lineWidth = 1.5;
       for (var j = 0; j < links.length; j++) {
         var lp = links[j];
-        ctx.strokeStyle = 'rgba(' + lp.rgb[0] + ',' + lp.rgb[1] + ',' + lp.rgb[2] + ',' + ((0.1 + lp.lit * 0.5) * cf).toFixed(3) + ')';
+        ctx.strokeStyle = DARK ? 'rgba(' + lp.rgb[0] + ',' + lp.rgb[1] + ',' + lp.rgb[2] + ',' + ((0.1 + lp.lit * 0.5) * cf).toFixed(3) + ')' : 'rgba(35, 37, 41,' + ((0.1 + lp.lit * 0.5) * cf).toFixed(3) + ')';
         ctx.beginPath(); ctx.moveTo(probe.x, probe.y); ctx.lineTo(lp.x, lp.y); ctx.stroke();
       }
 
       for (var s2 = trail.length - 1; s2 > 0; s2--) {
         var a2 = trail[s2], b2 = trail[s2 - 1];
-        ctx.strokeStyle = 'hsla(' + (213 + Math.round(Math.sin(t * 0.7 + s2 * 0.35) * 12)) + ', 95%, 71%, ' + (0.34 * (1 - s2 / trail.length) * cf).toFixed(3) + ')';
+        ctx.strokeStyle = DARK ? 'hsla(' + (213 + Math.round(Math.sin(t * 0.7 + s2 * 0.35) * 12)) + ', 95%, 71%, ' + (0.34 * (1 - s2 / trail.length) * cf).toFixed(3) + ')' : 'rgba(35, 37, 41,' + (0.30 * (1 - s2 / trail.length) * cf).toFixed(3) + ')';
         ctx.lineWidth = 2.2 - s2 * 0.07;
         ctx.beginPath(); ctx.moveTo(a2.x, a2.y); ctx.lineTo(b2.x, b2.y); ctx.stroke();
       }
@@ -4001,15 +4014,15 @@ LATENT_MAP_JS = r"""<script>
         });
         var rc = DATA.regions[nr].rgb;
         ctx.lineWidth = 1.6;
-        ctx.strokeStyle = 'rgba(147, 197, 253,' + (rb.a * 0.5 * cf).toFixed(3) + ')';
+        ctx.strokeStyle = DARK ? 'rgba(147, 197, 253,' + (rb.a * 0.5 * cf).toFixed(3) + ')' : 'rgba(35, 37, 41,' + (rb.a * 0.5 * cf).toFixed(3) + ')';
         ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r, 0, Math.PI * 2); ctx.stroke();
-        ctx.strokeStyle = 'rgba(77, 163, 255,' + (rb.a * 0.3 * cf).toFixed(3) + ')';
+        ctx.strokeStyle = DARK ? 'rgba(77, 163, 255,' + (rb.a * 0.3 * cf).toFixed(3) + ')' : 'rgba(35, 37, 41,' + (rb.a * 0.3 * cf).toFixed(3) + ')';
         ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r * 0.72, 0, Math.PI * 2); ctx.stroke();
-        ctx.strokeStyle = 'rgba(' + rc[0] + ',' + rc[1] + ',' + rc[2] + ',' + (rb.a * 0.4 * cf).toFixed(3) + ')';
+        ctx.strokeStyle = DARK ? 'rgba(' + rc[0] + ',' + rc[1] + ',' + rc[2] + ',' + (rb.a * 0.4 * cf).toFixed(3) + ')' : 'rgba(35, 37, 41,' + (rb.a * 0.4 * cf).toFixed(3) + ')';
         ctx.beginPath(); ctx.arc(rb.x, rb.y, rb.r * 0.45, 0, Math.PI * 2); ctx.stroke();
       }
 
-      if (now > nextComet) {
+      if (DARK && now > nextComet) {
         var ang2 = Math.random() * Math.PI * 2;
         comets.push({ x: Math.random() * W, y: Math.random() * H * 0.7, vx: Math.cos(ang2) * 7 + 4, vy: Math.sin(ang2) * 3 + 2, life: 1 });
         nextComet = now + 5000 + Math.random() * 6000;
@@ -4040,14 +4053,14 @@ LATENT_MAP_JS = r"""<script>
         var chipW = wtxt + 30, chipH = 19, chipX = r.cx - chipW / 2, chipY = r.cy - H * 0.16 - 8;
         ctx.beginPath();
         if (ctx.roundRect) ctx.roundRect(chipX, chipY, chipW, chipH, 9.5); else ctx.rect(chipX, chipY, chipW, chipH);
-        ctx.fillStyle = 'rgba(10, 12, 18, 0.55)';
+        ctx.fillStyle = DARK ? 'rgba(10, 12, 18, 0.55)' : 'rgba(255, 255, 255, 0.72)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+        ctx.strokeStyle = DARK ? 'rgba(255, 255, 255, 0.14)' : 'rgba(20, 20, 25, 0.20)';
         ctx.lineWidth = 1;
         ctx.stroke();
-        ctx.fillStyle = 'rgb(' + r.rgb[0] + ',' + r.rgb[1] + ',' + r.rgb[2] + ')';
+        ctx.fillStyle = DARK ? 'rgb(' + r.rgb[0] + ',' + r.rgb[1] + ',' + r.rgb[2] + ')' : INK_CSS;
         ctx.beginPath(); ctx.arc(chipX + 11, chipY + chipH / 2, 2.4, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = 'rgba(237, 242, 248, 0.92)';
+        ctx.fillStyle = DARK ? 'rgba(237, 242, 248, 0.92)' : '#26282D';
         ctx.fillText(r.label, chipX + 19, chipY + 13.5);
       });
       try { ctx.letterSpacing = '0px'; } catch (e) {}
@@ -4067,35 +4080,35 @@ LATENT_MAP_JS = r"""<script>
         if (ly < 22) ly = showItem.y + showItem.size + 30;
         ctx.beginPath();
         if (ctx.roundRect) ctx.roundRect(lx - 6, ly - 13, w2 + 12, 21, 10.5); else ctx.rect(lx - 6, ly - 13, w2 + 12, 21);
-        ctx.fillStyle = 'rgba(8, 10, 16, 0.82)';
+        ctx.fillStyle = DARK ? 'rgba(8, 10, 16, 0.82)' : 'rgba(255, 255, 255, 0.88)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+        ctx.strokeStyle = DARK ? 'rgba(255, 255, 255, 0.16)' : 'rgba(20, 20, 25, 0.18)';
         ctx.lineWidth = 1;
         ctx.stroke();
-        ctx.fillStyle = 'rgb(' + showItem.rgb[0] + ',' + showItem.rgb[1] + ',' + showItem.rgb[2] + ')';
+        ctx.fillStyle = DARK ? 'rgb(' + showItem.rgb[0] + ',' + showItem.rgb[1] + ',' + showItem.rgb[2] + ')' : INK_CSS;
         ctx.beginPath(); ctx.arc(lx + 3, ly - 2.5, 2.4, 0, Math.PI * 2); ctx.fill();
         ctx.textAlign = 'left';
         ctx.font = '600 12px "Titillium Web", sans-serif';
-        ctx.fillStyle = '#F4F7FB';
+        ctx.fillStyle = DARK ? '#F4F7FB' : '#1D1E22';
         ctx.fillText(showItem.title, lx + 10, ly + 2);
         ctx.font = '10px "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
-        ctx.fillStyle = 'rgba(159, 180, 200, 0.95)';
+        ctx.fillStyle = DARK ? 'rgba(159, 180, 200, 0.95)' : 'rgba(90, 92, 100, 0.95)';
         ctx.fillText('  ·  ' + showItem.sub, lx + 10 + wT, ly + 2);
         ctx.textAlign = 'center';
       }
       ctx.globalAlpha = 1;
 
-      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalCompositeOperation = DARK ? 'lighter' : 'source-over';
       ctx.globalAlpha = cf;
       var pr = 23 + Math.sin(t * 2.4) * 3;
-      ctx.drawImage(probeSprite, probe.x - pr, probe.y - pr, pr * 2, pr * 2);
+      ctx.drawImage(DARK ? probeSprite : probeSpriteInk, probe.x - pr, probe.y - pr, pr * 2, pr * 2);
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = cf;
-      ctx.strokeStyle = 'rgba(77,163,255,0.9)';
+      ctx.strokeStyle = DARK ? 'rgba(77,163,255,0.9)' : 'rgba(35, 37, 41, 0.85)';
       ctx.lineWidth = 1.2;
       ctx.beginPath(); ctx.arc(probe.x, probe.y, 14 + Math.sin(t * 2.4) * 1.6, 0, Math.PI * 2); ctx.stroke();
-      ctx.fillStyle = '#4DA3FF';
+      ctx.fillStyle = DARK ? '#4DA3FF' : INK_CSS;
       ctx.beginPath(); ctx.arc(probe.x, probe.y, 2.4, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
       var wantCursor = (nearItem && nearItemD < 54 * 54) ? 'pointer' : '';
@@ -4128,7 +4141,7 @@ LATENT_MAP_JS = r"""<script>
     // The frost's depth: as the glass rises, a dark veil settles over
     // the canvas itself, so the nebula reads as behind something.
     if (glassCur > 0.01) {
-      ctx.fillStyle = 'rgba(3, 4, 10,' + (glassCur * 0.38).toFixed(3) + ')';
+      ctx.fillStyle = DARK ? 'rgba(3, 4, 10,' + (glassCur * 0.38).toFixed(3) + ')' : 'rgba(242, 241, 236,' + (glassCur * 0.38).toFixed(3) + ')';
       ctx.fillRect(0, 0, W, H);
     }
     if (!reduced && grainTiles.length) {

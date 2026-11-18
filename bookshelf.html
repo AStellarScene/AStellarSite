@@ -18,7 +18,7 @@
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="theme-color" content="#0A0A0A">
 <script>/* Theme: apply the saved mode before first paint (no flash). Default dark; light is the visitor's stored choice. */try{var _t=localStorage.getItem('theme');if(_t==='light'){document.documentElement.setAttribute('data-theme','light');var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content','#F2F1EC');}}catch(e){}</script>
-<link rel="stylesheet" href="styles.css?v=114">
+<link rel="stylesheet" href="styles.css?v=115">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -227,6 +227,10 @@
   </div>
 </footer>
 <script>
+/* Scroll-era engine, restored 2026-11-17 at Adam's direction: the
+   track is a real scroll container again (the v103 virtual-position
+   engine was reverted for input inconsistency). The v105 design —
+   sizes, panels, captions — is unchanged. */
 (function () {
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll('.flow-block').forEach(function (block) {
@@ -242,26 +246,8 @@
       cap: block.querySelector('.flow-cap')
     };
     var items = Array.prototype.slice.call(track.querySelectorAll('.cov'));
-    // The stage is not a scroll container. A virtual position (the pixel
-    // offset of the centered book along a virtual strip) drives every
-    // transform, and one animator eases it toward its goal, so drag,
-    // wheel, keys, arrows and clicks can never fight over the motion.
-    var centers = [], widths = [], maxPx = 0, stepPx = 0;
-    var posPx = 0, goalPx = null, raf = null, centered = -1, destIdx = -1;
+    var centered = -1;
 
-    function measure() {
-      var gap = parseFloat(getComputedStyle(track).getPropertyValue('--fgap')) || 30;
-      var acc = 0;
-      widths = items.map(function (it) { return it.offsetWidth; });
-      centers = widths.map(function (w) { var c = acc + w / 2; acc += w + gap; return c; });
-      maxPx = centers.length ? centers[centers.length - 1] : 0;
-      stepPx = centers.length > 1 ? centers[1] - centers[0] : 0;
-    }
-    function nearestIdx(px) {
-      var best = 0, bestD = Infinity;
-      centers.forEach(function (c, i) { var d = Math.abs(c - px); if (d < bestD) { bestD = d; best = i; } });
-      return best;
-    }
     function select(i) {
       if (i === centered) return;
       centered = i;
@@ -278,153 +264,134 @@
       if (detail.bar) detail.bar.style.width = ((i + 1) / items.length * 100) + '%';
       if (detail.cap) { detail.cap.classList.remove('swap'); void detail.cap.offsetWidth; detail.cap.classList.add('swap'); }
     }
-    function render() {
-      var best = 0, bestD = Infinity;
+
+    function layout() {
+      var mid = track.scrollLeft + track.clientWidth / 2;
+      var best = 0, bestDist = Infinity;
       items.forEach(function (it, i) {
-        var dx = centers[i] - posPx;
-        var off = dx / widths[i]; // distance from center, in book widths
-        var aoff = Math.abs(off);
+        var c = it.offsetLeft + it.offsetWidth / 2;
+        var off = (c - mid) / it.offsetWidth; // distance from center, in book widths
         var rot = Math.max(-62, Math.min(62, off * -55));
-        var z = -Math.min(240, aoff * 75);
+        var z = -Math.min(240, Math.abs(off) * 75);
         var sc = 1 + 0.15 * (0.5 + 0.5 * Math.cos(Math.PI * Math.max(-1, Math.min(1, off))));
-        if (sc * widths[i] > track.clientWidth) sc = track.clientWidth / widths[i]; // the swell never pushes the centered book past the stage edges
         // Transform and z-index only: per-frame filter updates caused the jank.
-        it.style.transform = 'translateX(' + (dx - widths[i] / 2).toFixed(1) + 'px) rotateY(' + rot.toFixed(1) + 'deg) translateZ(' + z.toFixed(0) + 'px) scale(' + sc.toFixed(3) + ')';
-        it.style.zIndex = String(100 - Math.round(aoff * 10));
-        it.style.visibility = aoff > 4.5 ? 'hidden' : 'visible';
-        if (aoff < bestD) { bestD = aoff; best = i; }
+        it.style.transform = 'rotateY(' + rot.toFixed(1) + 'deg) translateZ(' + z.toFixed(0) + 'px) scale(' + sc.toFixed(3) + ')';
+        it.style.zIndex = String(100 - Math.round(Math.abs(off) * 10));
+        if (Math.abs(c - mid) < bestDist) { bestDist = Math.abs(c - mid); best = i; }
       });
       select(best);
     }
-    function tick() {
-      if (goalPx === null) { raf = null; return; }
-      var diff = goalPx - posPx;
-      if (Math.abs(diff) < 0.4) { posPx = goalPx; goalPx = null; render(); raf = null; return; }
-      posPx += diff * 0.16;
-      render();
-      raf = requestAnimationFrame(tick);
-    }
-    function glideToPx(px) {
-      goalPx = Math.max(0, Math.min(maxPx, px));
-      if (reduced) { posPx = goalPx; goalPx = null; render(); return; }
-      if (!raf) raf = requestAnimationFrame(tick);
-    }
-    function glideTo(i) { if (i >= 0 && i < items.length) { destIdx = i; glideToPx(centers[i]); } }
-    function setInstant(i) { goalPx = null; destIdx = i; posPx = centers[i]; render(); }
-    // overflow:hidden still leaves a programmatic scroll offset; if
-    // focus navigation ever sets one, zero it so the stage never shifts.
-    track.addEventListener('scroll', function () { if (track.scrollLeft !== 0) track.scrollLeft = 0; }, { passive: true });
 
-    // Drag: pointer handlers live on the window so a release outside the
-    // stage still lands; movement past a few px suppresses the click that
-    // would otherwise fire on release. A flick carries into the snap.
-    var drag = null, suppressClickUntil = 0;
-    track.addEventListener('pointerdown', function (e) {
-      if (e.button !== undefined && e.button > 0) return;
-      drag = { x: e.clientX, pos: posPx, moved: 0, lastX: e.clientX, lastT: performance.now(), vel: 0 };
-      goalPx = null; wheelGoal = null; destIdx = -1;
-    });
-    window.addEventListener('pointermove', function (e) {
-      if (!drag) return;
-      var dx = e.clientX - drag.x;
-      drag.moved = Math.max(drag.moved, Math.abs(dx));
-      var now = performance.now(), dt = now - drag.lastT;
-      if (dt > 0) drag.vel = 0.65 * drag.vel + 0.35 * ((e.clientX - drag.lastX) / dt);
-      drag.lastX = e.clientX; drag.lastT = now;
-      posPx = Math.max(-70, Math.min(maxPx + 70, drag.pos - dx));
-      render();
-    });
-    window.addEventListener('pointerup', function () {
-      if (!drag) return;
-      if (drag.moved > 6) suppressClickUntil = performance.now() + 150;
-      var flick = Math.max(-2 * stepPx, Math.min(2 * stepPx, -drag.vel * 160));
-      var target = posPx + flick;
-      drag = null;
-      glideTo(nearestIdx(target));
-    });
-    items.forEach(function (it, i) {
-      it.addEventListener('click', function () {
-        if (performance.now() < suppressClickUntil) return;
-        glideTo(i);
-      });
-    });
-    track.addEventListener('keydown', function (e) {
-      var cur = destIdx >= 0 ? destIdx : (centered < 0 ? nearestIdx(posPx) : centered);
-      if (e.key === 'ArrowRight') { glideTo(Math.min(items.length - 1, cur + 1)); e.preventDefault(); }
-      else if (e.key === 'ArrowLeft') { glideTo(Math.max(0, cur - 1)); e.preventDefault(); }
-    });
-    var prevBtn = block.querySelector('.bd-prev'), nextBtn = block.querySelector('.bd-next');
-    if (prevBtn) prevBtn.addEventListener('click', function () { var b = destIdx >= 0 ? destIdx : (centered < 0 ? 0 : centered); glideTo(b - 1); });
-    if (nextBtn) nextBtn.addEventListener('click', function () { var b = destIdx >= 0 ? destIdx : (centered < 0 ? 0 : centered); glideTo(b + 1); });
-
-    // Wheel routing — the gesture discipline from the scroll era, writing
-    // the virtual position instead of a scroll offset:
-    // - Trackpad sideways swipe: a continuous glide on deltaX, snapped to
-    //   the nearest book when the stream goes quiet.
+    var ticking = false, settleTimer = null;
+    track.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(function () { layout(); ticking = false; }); }
+      // Settle: once scrolling rests, glide the nearest book the last bit
+      // into center. CSS scroll-snap used to do this, but snap fought the
+      // scripted wheel glide (the gallery had the same bug and the same
+      // fix), so JS owns centering here too. Skipped while a wheel glide
+      // or a click glide is still moving the track.
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(function () {
+        if (wheelTarget !== null || centered < 0) return;
+        var it = items[centered];
+        var off = (it.offsetLeft + it.offsetWidth / 2) - (track.scrollLeft + track.clientWidth / 2);
+        if (Math.abs(off) > 3) centerItem(centered, true);
+      }, 150);
+    }, { passive: true });
+    // Wheel routing — each axis does its own job:
+    // - Trackpad sideways swipe: the flow glides on deltaX, and the events
+    //   are captured whole so the page never moves mid-gesture.
     // - Trackpad vertical scroll: never intercepted. The page scrolls and
-    //   the flow stays put, so diagonal drift can't wiggle it.
+    //   the flow is pinned, so diagonal drift can't wiggle it.
     // - Mouse wheel (line/page mode, or a coarse full-size first step):
-    //   notches step one book at a time.
+    //   vertical notches convert to a sideways glide — a wheel has no
+    //   sideways to give.
     // The axis is judged once per gesture from its first deltas and held
-    // until the stream goes quiet (~150ms); judging event-by-event
+    // until the stream goes quiet (~140ms); judging event-by-event
     // flip-flopped on diagonal trackpad input.
-    var wheelGoal = null, wheelBucket = 0;
+    var wheelTarget = null, wheelRaf = null;
     var gesture = null, gestureTimer = null;
+    function stopWheel() {
+      wheelTarget = null;
+      if (wheelRaf) { cancelAnimationFrame(wheelRaf); wheelRaf = null; }
+    }
+    function stepWheel() {
+      if (wheelTarget === null) { wheelRaf = null; return; }
+        var diff = wheelTarget - track.scrollLeft;
+      if (Math.abs(diff) < 0.6) {
+        track.scrollLeft = wheelTarget;
+        wheelTarget = null;
+        wheelRaf = null;
+        return;
+      }
+      track.scrollLeft += diff * 0.22;
+      wheelRaf = requestAnimationFrame(stepWheel);
+    }
     function armGesture() {
       clearTimeout(gestureTimer);
-      gestureTimer = setTimeout(function () {
-        gesture = null;
-        if (wheelGoal !== null) { var t = wheelGoal; wheelGoal = null; glideTo(nearestIdx(t)); }
-      }, 150);
+      gestureTimer = setTimeout(function () { gesture = null; }, 140);
     }
     track.addEventListener('wheel', function (e) {
-      if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
+        if (e.ctrlKey) return; // trackpad pinch-zoom: not ours to take
       var dx = e.deltaX, dy = e.deltaY;
       if (e.deltaMode === 1) { dx *= 24; dy *= 24; }              // lines to px
       else if (e.deltaMode === 2) { dx *= track.clientWidth; dy *= track.clientWidth; }
       armGesture();
       if (!gesture) {
         gesture = { ax: 0, ay: 0, bx: 0, by: 0, axis: null,
-                    mouse: e.deltaMode !== 0 || Math.abs(e.deltaY) >= 50 || Math.abs(e.deltaX) >= 50 };
+                    mouse: e.deltaMode !== 0 || Math.abs(e.deltaY) >= 50 || Math.abs(e.deltaX) >= 50,
+                    left: track.scrollLeft };
       }
       var g = gesture;
       g.ax += Math.abs(dx); g.ay += Math.abs(dy); g.bx += dx; g.by += dy;
       if (!g.axis) {
         if (!g.mouse && Math.max(g.ax, g.ay) < 8) return;  // too small to judge yet
         g.axis = g.ax > g.ay ? 'x' : (g.mouse ? 'convert' : 'y');
+        if (g.axis === 'y') stopWheel();                   // a page scroll cancels any glide
         dx = g.bx; dy = g.by;                              // spend the buffered deltas whole
       }
-      if (g.axis === 'y') return;
-      e.preventDefault();
-      if (g.axis === 'x') {
-        var base = wheelGoal !== null ? wheelGoal : posPx;
-        wheelGoal = Math.max(0, Math.min(maxPx, base + dx));
-        destIdx = -1;
-        glideToPx(wheelGoal);
+      if (g.axis === 'y') {
+        if (track.scrollLeft !== g.left) track.scrollLeft = g.left;
         return;
       }
-      // convert: accumulate the notch stream, one book per ~110px
-      wheelBucket += dy;
-      var steps = 0;
-      while (wheelBucket >= 60) { steps++; wheelBucket -= 110; }
-      while (wheelBucket <= -60) { steps--; wheelBucket += 110; }
-      if (steps !== 0) {
-        var cur = nearestIdx(wheelGoal !== null ? wheelGoal : posPx);
-        wheelGoal = centers[Math.max(0, Math.min(items.length - 1, cur + steps))];
-        glideToPx(wheelGoal);
+      var d = g.axis === 'x' ? dx : dy;
+      if (!d) return;
+      var max = track.scrollWidth - track.clientWidth;
+      if (max <= 0) return;
+      var base = wheelTarget !== null ? wheelTarget : track.scrollLeft;
+      var target = Math.max(0, Math.min(max, base + d));
+      if (Math.abs(target - track.scrollLeft) < 1) { stopWheel(); return; }
+      e.preventDefault();
+        wheelTarget = target;
+      if (reduced) {
+        track.scrollLeft = wheelTarget;
+        wheelTarget = null;
+        return;
       }
+      if (!wheelRaf) wheelRaf = requestAnimationFrame(stepWheel);
     }, { passive: false });
-
-    window.addEventListener('resize', function () {
-      var cur = centered < 0 ? 0 : centered;
-      measure();
-      goalPx = null;
-      posPx = centers[cur];
-      render();
+    ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+      track.addEventListener(ev, stopWheel, { passive: true });
     });
+    window.addEventListener('resize', layout);
 
-    measure();
-    if (centers.length) { posPx = centers[0]; render(); }
+    function centerItem(i, smooth) {
+      stopWheel();
+      var it = items[i];
+      track.scrollTo({
+        left: it.offsetLeft - (track.clientWidth - it.offsetWidth) / 2,
+        behavior: smooth && !reduced ? 'smooth' : 'auto'
+      });
+    }
+    items.forEach(function (it, i) {
+      it.addEventListener('click', function () { centerItem(i, true); });
+    });
+    var prevBtn = block.querySelector('.bd-prev'), nextBtn = block.querySelector('.bd-next');
+    if (prevBtn) prevBtn.addEventListener('click', function () { if (centered > 0) centerItem(centered - 1, true); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { if (centered >= 0 && centered < items.length - 1) centerItem(centered + 1, true); });
+
+    centerItem(0, false);
+    layout();
     // Deep link (from Atlas): #book-<slug> brings that cover to the
     // front of its shelf instead of just landing on the page.
     (function () {
@@ -436,7 +403,8 @@
         if (t === slug) found = i;
       });
       if (found < 0) return;
-      setInstant(found);
+      centerItem(found, false);
+      layout();
       block.scrollIntoView({ block: 'center' });
     })();
   });

@@ -801,24 +801,26 @@ section.hero {
   pointer-events: none;
   background: radial-gradient(58% 92% at 50% 100%, rgba(165, 198, 255, 0.075), transparent 70%);
 }
+/* Scroll-era track mechanics, restored 2026-11-17 (Adam: revert the
+   virtual-position scrolling, keep the design). The track is a real
+   scroll container; stage heights are reproduced by the paddings so
+   the v105 design proportions are unchanged. */
 .pflow-track {
   position: relative;
-  height: 698px;
-  overflow: hidden;
-  perspective: 1300px;
-  --fgap: 26px;
-  cursor: grab;
-  touch-action: pan-y;
-  user-select: none;
-  -webkit-user-select: none;
-  outline: none;
+  display: flex;
+  gap: 26px;
+  overflow-x: auto;
+  padding: 34px calc(50% - 220px) 224px;
+  perspective: 1400px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
-.pflow-track:active { cursor: grabbing; }
-.pflow-track:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.pflow-track::-webkit-scrollbar { display: none; }
+.pflow-track:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--r-md); }
 .pcov {
-  position: absolute;
-  left: 50%;
-  top: 26px;
+  position: relative;
+  flex: 0 0 auto;
   height: 440px;
   aspect-ratio: var(--ar);
   padding: 0;
@@ -884,8 +886,8 @@ section.hero {
   .fc-bar { transition: none; }
 }
 @media (max-width: 760px) {
-  .pcov { height: 232px; top: 20px; }
-  .pflow-track { height: 380px; --fgap: 18px; }
+  .pcov { height: 232px; }
+  .pflow-track { gap: 18px; padding: 24px calc(50% - 116px) 120px; }
   .fc-title { font-size: 24px; }
 }
 
@@ -990,22 +992,20 @@ section.hero {
 .flow-label { margin: 0 0 2px; }
 .flow-track {
   position: relative;
-  height: 424px;
-  overflow: hidden;
-  perspective: 1200px;
-  --fgap: 30px;
-  cursor: grab;
-  touch-action: pan-y;
-  user-select: none;
-  -webkit-user-select: none;
-  outline: none;
+  display: flex;
+  gap: 30px;
+  overflow-x: auto;
+  padding: 34px calc(50% - 84px) 132px;
+  perspective: 1400px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
-.flow-track:active { cursor: grabbing; }
-.flow-track:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.flow-track::-webkit-scrollbar { display: none; }
+.flow-track:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--r-md); }
 .cov {
-  position: absolute;
-  left: 50%;
-  top: 34px;
+  position: relative;
+  flex: 0 0 auto;
   width: 168px;
   height: 252px;
   padding: 0;
@@ -1155,8 +1155,7 @@ section.hero {
 @media (max-width: 760px) {
   .cov { width: 132px; height: 198px; }
   .cov-title { font-size: 16px; }
-  .flow-track { height: 335px; --fgap: 22px; }
-  .cov { top: 26px; }
+  .flow-track { gap: 22px; padding: 24px calc(50% - 66px) 100px; }
 }
 
 /* Resume */
@@ -3040,4 +3039,14 @@ html[data-theme="light"] .chip.active {
   color: #F2F1EC;
   background: #232529;
   border-color: #232529;
+}
+
+/* Nav pill spacing (Adam, 2026-11-17, from his screenshot): the theme
+   toggle landed at 38px next to a 48px hamburger with no gap, so the
+   pill's right cluster read cramped against the brand's clean inset.
+   Both buttons now share one diameter and a real gap. */
+.theme-toggle { width: 40px; height: 40px; }
+.nav-toggle { margin-left: 8px; }
+@media (max-width: 760px) {
+  .theme-toggle { width: 48px; height: 48px; }
 }
