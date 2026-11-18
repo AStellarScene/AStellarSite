@@ -17,10 +17,11 @@
 <meta name="twitter:description" content="The personal site of Adam Laloge, design engineer: projects built in the open, photography, and notes.">
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="theme-color" content="#0A0A0A">
+<script>/* Theme: apply the saved mode before first paint (no flash). Default dark; light is the visitor's stored choice. */try{var _t=localStorage.getItem('theme');if(_t==='light'){document.documentElement.setAttribute('data-theme','light');var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content','#F2F1EC');}}catch(e){}</script>
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "Person", "name": "Adam Laloge", "url": "https://adamlaloge.com/", "image": "https://adamlaloge.com/art/hero-card.jpg", "email": "mailto:hello@adamlaloge.com", "jobTitle": "Engineering Test Technician", "worksFor": {"@type": "Organization", "name": "Baxter International"}, "sameAs": ["https://github.com/AStellarScene"]}
 </script>
-<link rel="stylesheet" href="styles.css?v=113">
+<link rel="stylesheet" href="styles.css?v=114">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -28,6 +29,7 @@
 <header class="site-header">
   <div class="wrap header-inner">
     <a class="brand" href="index.html">Adam Joseph Laloge</a>
+    <button class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false"><svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><circle cx="10" cy="10" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.8a7.2 7.2 0 0 1 0 14.4z" fill="currentColor"/></svg></button>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu"><span class="nt-icon" aria-hidden="true"></span></button>
     <nav id="site-nav" aria-label="Site">
       <a href="resume.html">Resume</a>
@@ -743,6 +745,36 @@
   } else {
     counters.forEach(runCount);
   }
+})();
+</script>
+<script>
+/* Light/dark toggle: flips data-theme on <html>, persists the choice.
+   Dark is the default; the head script applies a stored light choice
+   before first paint. */
+(function () {
+  var btn = document.querySelector('.theme-toggle');
+  if (!btn) return;
+  var root = document.documentElement;
+  function sync() {
+    var light = root.getAttribute('data-theme') === 'light';
+    btn.setAttribute('aria-pressed', light ? 'true' : 'false');
+    btn.setAttribute('aria-label', light ? 'Switch to dark mode' : 'Switch to light mode');
+  }
+  btn.addEventListener('click', function () {
+    var light = root.getAttribute('data-theme') === 'light';
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (light) {
+      root.removeAttribute('data-theme');
+      try { localStorage.removeItem('theme'); } catch (e) {}
+      if (m) m.setAttribute('content', '#0A0A0A');
+    } else {
+      root.setAttribute('data-theme', 'light');
+      try { localStorage.setItem('theme', 'light'); } catch (e) {}
+      if (m) m.setAttribute('content', '#F2F1EC');
+    }
+    sync();
+  });
+  sync();
 })();
 </script>
 
