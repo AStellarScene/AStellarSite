@@ -52,7 +52,7 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:image" content="{og_image}">
 <meta name="theme-color" content="#0A0A0A">
 <script>/* Theme: apply the saved mode before first paint (no flash). Default dark; light is the visitor's stored choice. */try{{var _t=localStorage.getItem('theme');if(_t==='light'){{document.documentElement.setAttribute('data-theme','light');var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content','#F2F1EC');}}}}catch(e){{}}</script>
-{schema}<link rel="stylesheet" href="styles.css?v=115">
+{schema}<link rel="stylesheet" href="styles.css?v=116">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -2420,6 +2420,7 @@ BOOKSHELF_JS = """<script>
         var rot = Math.max(-62, Math.min(62, off * -55));
         var z = -Math.min(240, Math.abs(off) * 75);
         var sc = 1 + 0.15 * (0.5 + 0.5 * Math.cos(Math.PI * Math.max(-1, Math.min(1, off))));
+        if (sc * it.offsetWidth > track.clientWidth) sc = track.clientWidth / it.offsetWidth; // the swell never pushes the centered book past the stage edges
         // Transform and z-index only: per-frame filter updates caused the jank.
         it.style.transform = 'rotateY(' + rot.toFixed(1) + 'deg) translateZ(' + z.toFixed(0) + 'px) scale(' + sc.toFixed(3) + ')';
         it.style.zIndex = String(100 - Math.round(Math.abs(off) * 10));
@@ -2430,6 +2431,7 @@ BOOKSHELF_JS = """<script>
 
     var ticking = false, settleTimer = null;
     track.addEventListener('scroll', function () {
+      if (track.scrollTop !== 0) track.scrollTop = 0; // the stage never scrolls vertically; reflections overflow downward and focus jumps must not shift the row
       if (!ticking) { ticking = true; requestAnimationFrame(function () { layout(); ticking = false; }); }
       // Settle: once scrolling rests, glide the nearest book the last bit
       // into center. CSS scroll-snap used to do this, but snap fought the

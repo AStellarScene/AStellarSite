@@ -808,9 +808,11 @@ section.hero {
 .pflow-track {
   position: relative;
   display: flex;
+  align-items: flex-start;
   gap: 26px;
   overflow-x: auto;
-  padding: 34px calc(50% - 220px) 224px;
+  overflow-y: hidden;
+  padding: 46px calc(50% - 220px) 212px;
   perspective: 1400px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -887,7 +889,7 @@ section.hero {
 }
 @media (max-width: 760px) {
   .pcov { height: 232px; }
-  .pflow-track { gap: 18px; padding: 24px calc(50% - 116px) 120px; }
+  .pflow-track { gap: 18px; padding: 30px calc(50% - 116px) 118px; }
   .fc-title { font-size: 24px; }
 }
 
@@ -993,9 +995,11 @@ section.hero {
 .flow-track {
   position: relative;
   display: flex;
+  align-items: flex-start;
   gap: 30px;
   overflow-x: auto;
-  padding: 34px calc(50% - 84px) 132px;
+  overflow-y: hidden;
+  padding: 40px calc(50% - 84px) 132px;
   perspective: 1400px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -1155,7 +1159,7 @@ section.hero {
 @media (max-width: 760px) {
   .cov { width: 132px; height: 198px; }
   .cov-title { font-size: 16px; }
-  .flow-track { gap: 22px; padding: 24px calc(50% - 66px) 100px; }
+  .flow-track { gap: 22px; padding: 28px calc(50% - 66px) 109px; }
 }
 
 /* Resume */
