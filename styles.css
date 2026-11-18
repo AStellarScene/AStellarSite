@@ -12,7 +12,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: 
    Stack-glass direction (Adam, 2026-11-14): chrome and content panels
    share one frosted-glass treatment over a living ambient (a breathing
    beam and drifting specks), so the glass always has light to blur.
-   Base #0A0A0A, text #F2F2F2 / #C9C9C9, one violet accent #785CFF.
+   Base #0A0A0A, text #F2F2F2 / #C9C9C9, one hero-hue accent #5C72FF.
    Content itself (photos, covers, Atlas fog, Dreamscape worlds) stays
    unglassed and keeps its own color.
    Tokens: --accent = labels/links/focus. --status = status lines only. */
@@ -24,7 +24,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: 
   --heading: #F2F2F2;
   --body: #C9C9C9;
   --dim: #9C9C9C;
-  --accent: #785CFF;
+  --accent: #5C72FF;
   --status: #D9D9D9;
   --hairline: rgba(255, 255, 255, 0.105);
   /* Corner scale, industrial sci-fi: machined and stepped.
@@ -530,12 +530,12 @@ section.hero {
 .segbar { display: flex; gap: 5px; margin: 22px 0 14px; }
 .segbar span { flex: 1 1 0; height: 8px; border-radius: var(--r-xs); background: rgba(255, 255, 255, 0.10); }
 .segbar span.filled { background: linear-gradient(180deg, #EDEDED, #B4B4B4); }
-.segbar span.current { background: var(--accent); box-shadow: 0 0 14px rgba(120, 92, 255, 0.55); animation: seg-pulse 2.6s ease-in-out infinite; }
+.segbar span.current { background: var(--accent); box-shadow: 0 0 14px rgba(92, 114, 255, 0.55); animation: seg-pulse 2.6s ease-in-out infinite; }
 /* The current segment breathes like a machine light: a slight glow
    swell and fade on a steady sine rhythm, never fully dark. */
 @keyframes seg-pulse {
-  0%, 100% { box-shadow: 0 0 5px rgba(120, 92, 255, 0.22); filter: brightness(0.85); }
-  50% { box-shadow: 0 0 16px rgba(120, 92, 255, 0.62); filter: brightness(1.12); }
+  0%, 100% { box-shadow: 0 0 5px rgba(92, 114, 255, 0.22); filter: brightness(0.85); }
+  50% { box-shadow: 0 0 16px rgba(92, 114, 255, 0.62); filter: brightness(1.12); }
 }
 .degree-meta {
   display: flex;
@@ -583,7 +583,7 @@ section.hero {
   background: rgba(255, 255, 255, 0.10);
 }
 .mt-track span.done { background: linear-gradient(180deg, #EDEDED, #B4B4B4); }
-.mt-lane-machine .mt-track span.done { background: var(--accent); box-shadow: 0 0 8px rgba(120, 92, 255, 0.35); }
+.mt-lane-machine .mt-track span.done { background: var(--accent); box-shadow: 0 0 8px rgba(92, 114, 255, 0.35); }
 .mt-note { color: var(--dim); margin: 14px 0 0; }
 
 .mt-stats {
@@ -643,7 +643,7 @@ section.hero {
   top: 10px;
   bottom: 10px;
   width: 1px;
-  background: linear-gradient(180deg, rgba(120, 92, 255, 0.55), rgba(255, 255, 255, 0.10));
+  background: linear-gradient(180deg, rgba(92, 114, 255, 0.55), rgba(255, 255, 255, 0.10));
 }
 .mt-flow li { border-top: none; padding: 11px 0 11px 58px; }
 .mt-flow li::before { left: 32px; top: 12px; }
@@ -673,7 +673,7 @@ section.hero {
   padding: 3px 8px 2px;
   white-space: nowrap;
 }
-.mt-clock.machine { color: var(--accent); border-color: rgba(120, 92, 255, 0.45); }
+.mt-clock.machine { color: var(--accent); border-color: rgba(92, 114, 255, 0.45); }
 .mt-clock.both { color: var(--heading); border-color: rgba(255, 255, 255, 0.30); }
 
 /* Step header row: title and clock chip sit in a fixed flex row, so
@@ -1929,7 +1929,7 @@ body[data-view="content"] #latent-hit { pointer-events: none; }
   opacity: 0;
   visibility: hidden;
   background:
-    radial-gradient(58% 46% at 26% 30%, rgba(120, 92, 255, 0.13), rgba(120, 92, 255, 0) 70%),
+    radial-gradient(58% 46% at 26% 30%, rgba(92, 114, 255, 0.13), rgba(92, 114, 255, 0) 70%),
     radial-gradient(50% 42% at 78% 78%, rgba(124, 92, 255, 0.09), rgba(124, 92, 255, 0) 70%),
     rgba(8, 9, 14, 0.55);
 }

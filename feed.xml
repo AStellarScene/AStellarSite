@@ -37,35 +37,35 @@
       <link>https://adamlaloge.com/blog-the-prototype-is-the-new-sticky-note.html</link>
       <guid isPermaLink="true">https://adamlaloge.com/blog-the-prototype-is-the-new-sticky-note.html</guid>
       <pubDate>Thu, 29 Oct 2026 12:00:00 +0000</pubDate>
-      <description>I&#x27;m learning the design sprint from Google&#x27;s UX design course — a five-day method built for a world where prototypes were expensive. The tools I&#x27;ve adopted deleted that scarcity, and the sprint&#x27;s bottleneck moved: from building the thing to knowing whether it&#x27;s true.</description>
+      <description>I&#x27;m learning the design sprint from Google&#x27;s UX design course, a five-day method built for a world where prototypes were expensive. The tools I&#x27;ve adopted deleted that scarcity, and the sprint&#x27;s bottleneck moved: from building the thing to knowing whether it&#x27;s true.</description>
     </item>
     <item>
       <title>Anything Is Possible</title>
       <link>https://adamlaloge.com/blog-anything-is-possible.html</link>
       <guid isPermaLink="true">https://adamlaloge.com/blog-anything-is-possible.html</guid>
       <pubDate>Wed, 28 Oct 2026 12:00:00 +0000</pubDate>
-      <description>This site did not exist four days ago. It was built in the open, with AI, at a pace that would have been absurd a few years ago — and that pace changes what learning means, what one person can achieve, and what I believe is possible.</description>
+      <description>This site did not exist four days ago. It was built in the open, with AI, at a pace that would have been absurd a few years ago, and that pace changes what learning means, what one person can achieve, and what I believe is possible.</description>
     </item>
     <item>
       <title>The Liquid Seam</title>
       <link>https://adamlaloge.com/blog-the-liquid-seam.html</link>
       <guid isPermaLink="true">https://adamlaloge.com/blog-the-liquid-seam.html</guid>
       <pubDate>Wed, 28 Oct 2026 12:00:00 +0000</pubDate>
-      <description>The Dreamscape&#x27;s worlds melt into each other along living seams. This is the full technical story — the concept, the dead ends, two silent shader deaths, and the bisection that hunted a one-pixel line.</description>
+      <description>The Dreamscape&#x27;s worlds melt into each other along living seams. This is the full technical story: the concept, the dead ends, two silent shader deaths, and the bisection that hunted a one-pixel line.</description>
     </item>
     <item>
       <title>The Living Map</title>
       <link>https://adamlaloge.com/blog-the-living-map.html</link>
       <guid isPermaLink="true">https://adamlaloge.com/blog-the-living-map.html</guid>
       <pubDate>Wed, 28 Oct 2026 12:00:00 +0000</pubDate>
-      <description>The Atlas is this site&#x27;s sitemap drawn as a latent space — alive, breathing, and spaced by an algorithm. The full technical story: the questions that started it, thirty iterations in three days, the fog wars, and the solver that places the pieces.</description>
+      <description>The Atlas is this site&#x27;s sitemap drawn as a latent space, alive, breathing, and spaced by an algorithm. The full technical story: the questions that started it, thirty iterations in three days, the fog wars, and the solver that places the pieces.</description>
     </item>
     <item>
       <title>This site is generated</title>
       <link>https://adamlaloge.com/blog-this-site-is-generated.html</link>
       <guid isPermaLink="true">https://adamlaloge.com/blog-this-site-is-generated.html</guid>
       <pubDate>Wed, 28 Oct 2026 12:00:00 +0000</pubDate>
-      <description>Every page on this site comes out of a single Python program. As of today the blog does too — this post is the proof and the explanation.</description>
+      <description>Every page on this site comes out of a single Python program. As of today the blog does too. This post is the proof and the explanation.</description>
     </item>
   </channel>
 </rss>
