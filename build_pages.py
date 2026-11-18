@@ -2868,7 +2868,8 @@ def write_sitemap():
 # ================= CORE data — Marlowe's public second brain ========
 # Sanitized before it ever lands here: no people, no personal thoughts,
 # no politics, no career. The Core page, its counts, its brain map, and
-# the Atlas core region all derive from these lists.
+# the Atlas core region all derive from these lists. (Atlas region
+# removed 2026-11-17 at Adam's direction; Core lives on its own page.)
 # CORE FEED TAXONOMY (settled 2026-11-14 with Adam):
 #   learning  - something evidence taught; an event settled it. Dated.
 #   decision  - a fork that was settled; stands until explicitly reversed.
@@ -2934,27 +2935,9 @@ def latent_map_data():
                       "rgb": _lighten([150, 130, 255], 0.1 + (h % 30) / 100.0), "size": 18,
                       "dx": round(math.cos(ang) * 0.075, 4), "dy": round(math.sin(ang) * 0.055, 4),
                       "region": "writing", "href": p["fname"]})
-    for title, sub, anchor_href in CORE_SECTIONS:
-        h = zlib.crc32(title.encode())
-        ang = math.radians(h % 360)
-        items.append({"kind": "core", "title": title, "sub": sub,
-                      "rgb": _lighten([77, 163, 255], 0.12 + (h % 30) / 100.0), "size": 22,
-                      "dx": round(math.cos(ang) * 0.085, 4), "dy": round(math.sin(ang) * 0.06, 4),
-                      "region": "core", "href": "core.html" + anchor_href})
-    _seen = {}
-    for date, text in CORE_LEARNINGS:
-        _seen[date] = _seen.get(date, 0) + 1
-        plain = re.sub(r"<[^>]+>", "", text)
-        title = plain.split(". ")[0]
-        if len(title) > 42:
-            title = title[:42].rsplit(" ", 1)[0] + "\u2026"
-        h = zlib.crc32(plain.encode())
-        ang = math.radians(h % 360)
-        rad = 0.10 + (h % 50) / 100.0 * 0.07
-        items.append({"kind": "learning", "title": title, "sub": "Learning \u00b7 " + date,
-                      "rgb": _lighten([77, 163, 255], 0.05 + (h % 35) / 100.0), "size": 15,
-                      "dx": round(math.cos(ang) * rad, 4), "dy": round(math.sin(ang) * rad * 0.75, 4),
-                      "region": "core", "href": f"core.html#learn-{date}-{_seen[date]}"})
+    # Core is NOT on the Atlas: Adam removed all Core listings from
+    # the map on 2026-11-17. The Core page keeps its own brain map;
+    # nothing from CORE_* is added to the Atlas items or regions.
     # Clusters breathe a tad: each region's offsets scale out from
     # their own centroid, then a deterministic relaxation enforces a
     # minimum separation so no two points sit on top of each other.
@@ -2998,7 +2981,6 @@ def latent_map_data():
         "worlds": {"label": "DREAMSCAPE", "fx": 0.24, "fy": 0.80, "rgb": [228, 96, 52]},
         "projects": {"label": "PROJECTS", "fx": 0.74, "fy": 0.79, "rgb": [226, 182, 92]},
         "writing": {"label": "WRITING", "fx": 0.50, "fy": 0.32, "rgb": [150, 130, 255]},
-        "core": {"label": "CORE", "fx": 0.50, "fy": 0.58, "rgb": [77, 163, 255]},
     }
     return {"regions": regions, "items": items}
 
@@ -3115,8 +3097,7 @@ LATENT_MAP_JS = r"""<script>
     bookshelf: [[103, 42, 144], [216, 96, 158], [255, 198, 226]],
     worlds: [[118, 22, 32], [228, 96, 52], [255, 216, 148]],
     projects: [[153, 81, 22], [226, 182, 92], [255, 242, 198]],
-    writing: [[48, 34, 119], [150, 130, 255], [226, 218, 255]],
-core: [[16, 36, 102], [77, 163, 255], [214, 236, 255]]
+    writing: [[48, 34, 119], [150, 130, 255], [226, 218, 255]]
   };
   var fbmField = null, ridgeField = null, distArr = null, angBinArr = null;
   var improvedSprites = {}, filamentSprites = {}, dustFieldSprite = null, improvedReady = false;
@@ -3173,11 +3154,19 @@ core: [[16, 36, 102], [77, 163, 255], [214, 236, 255]]
         var rd = ridgeField[rowBase + colIdx2[x]];
         var fall = smoothstepF(edge[angBinArr[i]], edge[angBinArr[i]] - 0.55, distArr[i]);
         if (fall <= 0.001) { d[pi + 3] = 0; continue; }
-        var dens = smoothstepF(0.46, 0.84, v);
+        // Fog tuning (Adam, 2026-11-17): cutoff band raised and
+        // narrowed from 0.46-0.84 to 0.50-0.80 -- slightly less fog
+        // overall, slightly more contrast between body and depths.
+        var dens = smoothstepF(0.50, 0.80, v);
         var alpha = clampF(dens * 1.15 - 0.08, 0, 1) * fall;
         var fil = smoothstepF(0.72, 0.95, rd) * fall;
         var t = clampF(dens + 0.35 * fil, 0, 1);
         var col = paletteAt(pal, t);
+        // Slight saturation lift (Adam, 2026-11-17): push each channel
+        // 18% away from the pixel's own mean so the fog carries more
+        // color at the same brightness.
+        var avgC = (col[0] + col[1] + col[2]) / 3;
+        col = [clampF(avgC + (col[0] - avgC) * 1.18, 0, 255), clampF(avgC + (col[1] - avgC) * 1.18, 0, 255), clampF(avgC + (col[2] - avgC) * 1.18, 0, 255)];
         alpha = clampF(alpha + fil * 0.25, 0, 1);
         // The rim rule: alpha must reach TRUE ZERO well inside the
         // sprite's square, on every bearing. The angular edge table
