@@ -1043,7 +1043,7 @@ mt_body = """  <section>
     <div class="panel">
       <p class="label">The Rule</p>
       <h2>The operating rule</h2>
-      <p>The old motto made speed the proof. This one makes the record the proof. The method reduces to one operating rule:</p>
+      <p>Everything above reduces to one operating rule:</p>
       <ul class="mt-lines">
         <li><span class="mt-line">Work in machine time. Sign in human time.</span></li>
       </ul>
