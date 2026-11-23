@@ -28,7 +28,7 @@ I hold both ends of this in my own working life, which is probably why I believe
 
 The code for this site is public, all of it. Someone could take the generator tomorrow and have every page I have. What they would not have is a single decision behind it. They would get a sitemap that derives itself and no idea which of the ten ways it broke on a phone taught it to do that.
 
-The platform I built at work is the opposite arrangement. Twenty thousand lines of Python, built from scratch, and I cannot share a line of it. That code is safekept properly, by an employer, behind real walls. And the same fact shows through from this side. If I left, the company keeps every line. What walks out the door is the person who knows why the lines are shaped the way they are, which failure made which check exist. And I could not take the code with me, but give me the behavior and the standards and I could grow it again. I know, because growing it the first time is what I did.
+The platform I built at work is the opposite arrangement. Twenty thousand lines of Python, built from scratch, and I cannot share a line of it. That code is safekept properly, by an employer, behind real walls. And the same fact shows through from this side. The company owns every line, as it should. What the lines themselves cannot hold is the reasoning behind them: which failure made which check exist, why the pieces are shaped the way they are. That lives in the people who built it. A repository stores text. It does not store judgment.
 
 Locked or published, the text turns out to be the part that matters least in both directions. That is not a theory I read. It is the shape of my own week.
 
