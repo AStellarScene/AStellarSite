@@ -15,6 +15,8 @@
     "HMI design for complex technical systems",
     "wireframes, user flows, and prototypes in Figma, Illustrator, Affinity, and Miro",
     "functional coded prototypes",
+    "animated UI and motion research",
+    "stakeholder review and feedback sessions",
     "graphic design and visual composition",
     "heuristic evaluation and calibration procedure UX",
     "accessible design, ADA and Section 508 compliance"
@@ -26,7 +28,7 @@
     "AI agent workspace design",
     "agent team orchestration",
     "agentic coding with Muse, Copilot, and Claude",
-    "retrieval-augmented generation (RAG) and MCP tool integration, including CAD driven through MCP",
+    "retrieval-augmented generation (RAG) and MCP tool integration, including CAD driven through MCP and MCP integration for automated test harnesses",
     "AI output evaluation and validation",
     "natural language workflow automation"
    ]
@@ -35,10 +37,12 @@
    "category": "Software Development",
    "items": [
     "Python, C#/.NET, C++, JavaScript, Node.js, and Rust",
-    "HTML/CSS and responsive web development",
+    "HTML/CSS, SvelteKit, and responsive web development",
     "WordPress (degree coursework)",
     "SQL and database design",
-    "embedded microcontrollers and sensor integration",
+    "MQTT broker development",
+    "embedded firmware development, microcontrollers, and sensor integration",
+    "embedded networking research (Thread, Bluetooth channel sounding, UWB radar)",
     "Git/GitHub, Docker, Linux, and WebSockets",
     "parametric CAD modeling"
    ]
@@ -137,6 +141,15 @@
     {
      "text": "Project page: adamlaloge.com/benchlab.html",
      "web_only": true
+    }
+   ]
+  },
+  {
+   "title": "**Wireless Sensing Research** | Personal research project | In development",
+   "lines": [
+    {
+     "text": "Independent research into contactless presence and vitals sensing with ultra-wideband (UWB) radar: firmware development on NXP hardware, Bluetooth channel sounding, and Thread embedded networking.",
+     "web_only": false
     }
    ]
   },
