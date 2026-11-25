@@ -5,16 +5,18 @@
  "email": "hello@adamlaloge.com",
  "web": "adamlaloge.com",
  "github": "github.com/AStellarScene",
- "summary": "Design engineer and UI/UX software engineer building human-centered AI systems in regulated medical-device environments. Researches users, designs the interface, and writes the code behind it: HMI interfaces, backend services, AI agent workspaces, and embedded test hardware. Moderates usability sessions with end users, translates findings into formal, traceable system specifications, and validates the full stack against them.",
+ "summary": "Design engineer and UI/UX software engineer building human-centered AI systems in regulated medical-device environments. Researches users, designs the interface, and writes the code behind it: HMI interfaces, backend services, AI agent workspaces, and embedded test hardware. Moderates usability sessions, translates findings into traceable system specifications, and validates the full stack against them.",
  "skills": [
   {
    "category": "UX Research and HMI Design",
    "items": [
     "Moderated usability testing with end users",
     "user research, requirements, personas, and journey maps",
+    "workflow design for adoption",
     "HMI design for complex technical systems",
     "wireframes, user flows, and prototypes in Figma, Illustrator, Affinity, and Miro",
     "functional coded prototypes",
+    "design systems and reusable component patterns",
     "animated UI and motion research",
     "stakeholder review and feedback sessions",
     "graphic design and visual composition",
@@ -76,7 +78,7 @@
     },
     {
      "lead": "AI systems development",
-     "text": "Deliver end to end software development from user interface design through backend implementation. Build specialized AI agent workspaces that support automated testing and software development. Includes natural language protocol ingestion and automated traceability reporting.",
+     "text": "Deliver end to end software development from user interface design through backend implementation. Build specialized AI agent workspaces that support automated testing and software development. Includes natural language protocol ingestion and automated traceability reporting. Turn usability and stakeholder feedback into shipped changes in real time, without a design-to-engineering handoff.",
      "web_only": false
     },
     {
@@ -86,7 +88,7 @@
     },
     {
      "lead": "Medical device verification",
-     "text": "Perform verification testing of medical devices to rigorous compliance standards. Maintain requirements traceability throughout.",
+     "text": "Perform verification testing of medical devices to rigorous compliance standards, maintaining requirements traceability throughout.",
      "web_only": false
     },
     {
@@ -135,7 +137,7 @@
    "title": "**BenchLab** | Testing simulator | In planning",
    "lines": [
     {
-     "text": "Created from scratch, modeled on an automated test platform I built professionally: an internal codebase of 20,000+ lines of Python that cannot be shared publicly. Visual test builder, in-browser simulated device, auto-generated traceability reporting, and an agent layer that converts plain-English protocols into executable test steps.",
+     "text": "Created from scratch, modeled on an automated test platform I built professionally (20,000+ lines of Python, not publicly shareable). Visual test builder, in-browser simulated device, auto-generated traceability reporting, and an agent layer that converts plain-English protocols into executable test steps.",
      "web_only": false
     },
     {
@@ -157,7 +159,7 @@
    "title": "**Lucent Launcher** | Native Minecraft launcher in Rust | In development",
    "lines": [
     {
-     "text": "Native launcher built with Rust, GTK4, and Libadwaita. Launcher core builds clean with 38 passing tests; features resource-pack management, Flatpak packaging, and a readiness-aware launch flow. github.com/AStellarScene/lucent-launcher",
+     "text": "Native launcher in Rust, GTK4, and Libadwaita: resource-pack management, Flatpak packaging, and a readiness-aware launch flow; core builds clean with 38 passing tests. github.com/AStellarScene/lucent-launcher",
      "web_only": false
     },
     {
@@ -196,7 +198,7 @@
    "title": "**Google UX Design Certificate** | Google | In Progress (Expected 2027)",
    "lines": [
     {
-     "text": "UX research, wireframing, and prototyping fundamentals, completed through the WGU B.S. UX Design program.",
+     "text": "UX research, wireframing, and prototyping fundamentals, through the WGU B.S. UX Design program.",
      "web_only": false
     }
    ]
