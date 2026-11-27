@@ -4,21 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Caregiver Demo — Adam Joseph Laloge</title>
-<meta name="description" content="Caregiver Demo, by Adam Laloge: a software demo that consolidates scattered information into one glanceable interface to improve caregiver outcomes.">
+<meta name="description" content="A progressive disclosure UI system by Adam Laloge that consolidates medical device information, built to make it easier to care for patients.">
 <link rel="canonical" href="https://adamlaloge.com/caregiver-demo.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Adam Joseph Laloge">
 <meta property="og:title" content="Caregiver Demo — Adam Joseph Laloge">
-<meta property="og:description" content="Caregiver Demo, by Adam Laloge: a software demo that consolidates scattered information into one glanceable interface to improve caregiver outcomes.">
+<meta property="og:description" content="A progressive disclosure UI system by Adam Laloge that consolidates medical device information, built to make it easier to care for patients.">
 <meta property="og:url" content="https://adamlaloge.com/caregiver-demo.html">
 <meta property="og:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Caregiver Demo — Adam Joseph Laloge">
-<meta name="twitter:description" content="Caregiver Demo, by Adam Laloge: a software demo that consolidates scattered information into one glanceable interface to improve caregiver outcomes.">
+<meta name="twitter:description" content="A progressive disclosure UI system by Adam Laloge that consolidates medical device information, built to make it easier to care for patients.">
 <meta name="twitter:image" content="https://adamlaloge.com/art/hero-card.jpg">
 <meta name="theme-color" content="#0A0A0A">
 <script>/* Theme: apply the saved mode before first paint (no flash). Default dark; light is the visitor's stored choice. */try{var _t=localStorage.getItem('theme');if(_t==='light'){document.documentElement.setAttribute('data-theme','light');var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content','#F2F1EC');}}catch(e){}</script>
-<link rel="stylesheet" href="styles.css?v=120">
+<link rel="stylesheet" href="styles.css?v=121">
 <link rel="alternate" type="application/rss+xml" title="Adam Joseph Laloge - Blog" href="https://adamlaloge.com/feed.xml">
 </head>
 <body>
@@ -52,15 +52,15 @@
     <p class="label">Projects</p>
     <h2>Caregiver Demo</h2>
     <p class="status">Now: Complete</p>
-    <p>A software demo built to improve caregiver outcomes. The information a caregiver needs was scattered across systems; the demo consolidates it into one interface that can be read at a glance, under time pressure.</p>
+    <p>A progressive disclosure UI system for medical device information. The information was scattered across systems; this consolidates it into one interface organized by what care needs first: the essentials sit on the surface, readable at a glance under time pressure, and the depth sits one layer down, reachable without hunting. The point of the layering is simple: make it easier to care for patients.</p>
     <p>I built it from the ground up: the research, the interface, and the code behind it. It was also built to survive a live room. When the connection dropped during a demonstration, it recovered on its own in seconds, because recovery was designed in rather than improvised.</p>
     <p>Where it stands: complete. It was demonstrated live to company leadership, and the people who used it found it easy to use.</p>
     <h3>What it does</h3>
     <ul>
-      <li>Scattered information consolidated into one glanceable interface</li>
+      <li>Medical device information consolidated into one system</li>
+      <li>Progressive disclosure: glance first, depth one layer down</li>
       <li>Designed and built end to end, research through code</li>
       <li>Self-recovering connection, designed in</li>
-      <li>Demonstrated live to executive leadership</li>
     </ul>
     <p><a href="work.html">&#8592; All projects</a></p>
     </div>
@@ -83,12 +83,12 @@
   var DPR = Math.min(window.devicePixelRatio || 1, 1.25);
   var W = 0, H = 0, specks = [], raf = 0, running = true;
   function seed() {
-    var n = Math.round(Math.min(90, Math.max(36, W * H / 26000)));
+    var n = Math.round(Math.min(64, Math.max(28, W * H / 34000)));
     specks = [];
     for (var i = 0; i < n; i++) {
       specks.push({
         x: Math.random() * W, y: Math.random() * H,
-        r: Math.random() * 1.4 + 0.4, s: Math.random() * 0.14 + 0.05,
+        r: Math.random() * 1.1 + 0.4, s: Math.random() * 0.14 + 0.05,
         p: Math.random() * Math.PI * 2
       });
     }
@@ -106,10 +106,12 @@
        on a slow sine and wandering a few percent of the width. */
     var breath = 0.5 + 0.5 * Math.sin(t * 0.00013);
     var bx = W * 0.30 + Math.sin(t * 0.00007) * W * 0.05;
-    var grad = ctx.createLinearGradient(bx - W * 0.34, 0, bx + W * 0.34, H * 0.9);
-    var a = 0.045 + breath * 0.05;
+    var grad = ctx.createLinearGradient(bx - W * 0.44, 0, bx + W * 0.44, H * 0.9);
+    var a = 0.034 + breath * 0.034;
     grad.addColorStop(0, 'rgba(190, 215, 255, 0)');
+    grad.addColorStop(0.3, 'rgba(190, 215, 255, ' + (a * 0.62).toFixed(3) + ')');
     grad.addColorStop(0.5, 'rgba(190, 215, 255, ' + a.toFixed(3) + ')');
+    grad.addColorStop(0.7, 'rgba(190, 215, 255, ' + (a * 0.62).toFixed(3) + ')');
     grad.addColorStop(1, 'rgba(190, 215, 255, 0)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
@@ -122,7 +124,7 @@
       var tw = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(t * 0.001 + s.p));
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, 6.2832);
-      ctx.fillStyle = 'rgba(220, 232, 255, ' + (tw * 0.5).toFixed(3) + ')';
+      ctx.fillStyle = 'rgba(220, 232, 255, ' + (tw * 0.34).toFixed(3) + ')';
       ctx.fill();
     }
     if (!reduce && running) raf = requestAnimationFrame(frame);
