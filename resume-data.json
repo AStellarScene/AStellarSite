@@ -135,36 +135,40 @@
  ],
  "projects": [
   {
-   "title": "**BenchLab** | Testing simulator | In planning",
+   "title": "**UWB Radar Research** | Ultra-wideband sensing on NXP hardware | In research",
    "lines": [
     {
-     "text": "Created from scratch, modeled on an automated test platform I built professionally (20,000+ lines of Python, not publicly shareable). Visual test builder, in-browser simulated device, auto-generated traceability reporting, and an agent layer that converts plain-English protocols into executable test steps.",
+     "text": "Ultra-wideband radar sensing built on an NXP FRDM-RW612 host with an SR250 shield. The vendor ships on-chip presence detection and raw channel impulse response data; everything above that layer is designed and built from the raw channel data up. The targets are presence detection, fall detection, and contactless vitals.",
      "web_only": false
     },
     {
-     "text": "Project page: adamlaloge.com/benchlab.html",
+     "text": "Project page: adamlaloge.com/radar.html",
      "web_only": true
     }
    ]
   },
   {
-   "title": "**Wireless Sensing Research** | Personal research project | In development",
+   "title": "**Progressive Disclosure UI System** | Medical device information interface | Complete",
    "lines": [
     {
-     "text": "Independent research into contactless presence and vitals sensing with ultra-wideband (UWB) radar: firmware development on NXP hardware, Bluetooth channel sounding, and Thread embedded networking.",
+     "text": "A progressive disclosure UI system that consolidates medical device information scattered across systems into one interface: the essentials on the surface, readable at a glance under time pressure, and the depth one layer down. Designed and built end to end, from research through code, and demonstrated live to executive leadership.",
      "web_only": false
+    },
+    {
+     "text": "Project page: adamlaloge.com/caregiver-demo.html",
+     "web_only": true
     }
    ]
   },
   {
-   "title": "**Lucent Launcher** | Native Minecraft launcher in Rust | In development",
+   "title": "**Atlas** | The site as a living map | Complete",
    "lines": [
     {
-     "text": "Native launcher in Rust, GTK4, and Libadwaita: resource-pack management, Flatpak packaging, and a readiness-aware launch flow; core builds clean with 38 passing tests. github.com/AStellarScene/lucent-launcher",
+     "text": "My site drawn as a galaxy instead of listed as pages: every project, photo, book, and post is a point of light set near the things it belongs with, and points connect when you probe them. Nothing is placed by hand; the map generates itself from the site's content and redraws as the site grows.",
      "web_only": false
     },
     {
-     "text": "Project page: adamlaloge.com/lucent.html",
+     "text": "Project page: adamlaloge.com/latent-sitemap.html",
      "web_only": true
     }
    ]
