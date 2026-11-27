@@ -28,11 +28,12 @@
    "category": "AI Systems Design",
    "items": [
     "AI agent workspace design",
-    "agent team orchestration",
-    "agentic coding with Muse, Copilot, and Claude",
-    "retrieval-augmented generation (RAG) and MCP tool integration, including CAD driven through MCP and MCP integration for automated test harnesses",
+    "multi-agent team orchestration with gated review and human sign-off",
+    "agentic software development with Muse, Copilot, and Claude",
+    "retrieval-augmented generation (RAG) and MCP tool integration, including CAD and automated test harnesses",
     "AI output evaluation and validation",
-    "natural language workflow automation"
+    "natural language workflow automation",
+    "stakeholder and user feedback turned into design changes in real time"
    ]
   },
   {
